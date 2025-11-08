@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1052740789853975288}
   - component: {fileID: -3498438272190909761}
   - component: {fileID: 6660115427873180034}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: FlagPickUp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 2493461861565345273}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.34571, y: 1.4, z: 4.5}
+  m_LocalPosition: {x: -1.191938, y: 1.0213197, z: 4.9871807}
   m_LocalScale: {x: 7.791518, y: 7.791518, z: 7.791518}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -114,11 +114,11 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 1
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!65 &-3498438272190909761
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -152,4 +152,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 812618f92e07c1c4c8b4bfacc83526dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FlagPickup
-  offset: {x: 0, y: 2, z: 0}
+  offset: {x: 0, y: 1.5, z: 0}
+  floatAmplitude: 0.2
+  floatSpeed: 2
+  rotationSpeed: 45
+  shrinkScale: 1
+  shrinkSpeed: 10
+  edgePaddingPercent: 0.1
+  spawnLift: 0.8
