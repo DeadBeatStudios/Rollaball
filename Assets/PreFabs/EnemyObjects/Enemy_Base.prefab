@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2140974172907915449}
   - component: {fileID: 3750483631110764137}
   - component: {fileID: 8609381514511259401}
-  - component: {fileID: 3116139032957038976}
+  - component: {fileID: -1892484579140901611}
   m_Layer: 0
   m_Name: Enemy_Base
   m_TagString: Untagged
@@ -174,22 +174,16 @@ MonoBehaviour:
   edgeAvoidStrength: 100
   predictionTime: 0.01
   closeBrakeDistance: 3
---- !u!114 &3116139032957038976
+--- !u!114 &-1892484579140901611
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5267770077472934122}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 425845bf677b55e439b60c5d279ba02d, type: 3}
+  m_Script: {fileID: 11500000, guid: e9e7aa5f44f64c047975831cb37d8968, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerRespawn
-  spawnPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  fallThreshold: -10
-  respawnDelay: 1.5
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyFallDetector
+  fallThresholdY: -10
