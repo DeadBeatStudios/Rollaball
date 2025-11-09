@@ -9,8 +9,8 @@ public class EnemyPhysicsController : MonoBehaviour
     [Header("Movement")]
     public float moveForce = 45f;
     public float maxSpeed = 14f;
-    public float turnSharpness = 10f;      // higher = quicker direction change
-    public float steerResponsiveness = 8f; // how fast we realign velocity
+    public float turnSharpness = 10f;
+    public float steerResponsiveness = 8f;
 
     [Header("Physics")]
     public float mass = 3f;
@@ -27,15 +27,21 @@ public class EnemyPhysicsController : MonoBehaviour
     public float obstacleAvoidStrength = 35f;
 
     [Header("Edge Detection")]
-    public float edgeCheckDistance = 3.5f;
-    public float edgeAvoidStrength = 50f;
+    public float edgeCheckDistance = 1.75f;   // base distance
+    public float edgeBrakeForce = 5f;
+    public float safeTurnForce = 20f;
 
     [Header("AI Tuning")]
     public float predictionTime = 0.35f;
     public float closeBrakeDistance = 2.5f;
 
+    // --- Private State ---
     private Rigidbody rb;
     private Vector3 desiredDirection;
+    private bool avoidingEdge = false;
+    private bool _groundDetected = true;
+    private Vector3 lastSafeDirection = Vector3.forward;
+    private Vector3 edgeOrigin;
 
     private void Awake()
     {
@@ -62,6 +68,60 @@ public class EnemyPhysicsController : MonoBehaviour
         float distance = toTarget.magnitude;
         Vector3 seekDir = toTarget.normalized;
 
+        // --- Helmet-Cam Edge Detection (velocity-based, world-downward tilt) ---
+        float speed = rb.linearVelocity.magnitude;
+        if (speed < 0.1f) speed = 0.1f;
+
+        float speedRatio = Mathf.Clamp01(speed / maxSpeed);
+        float lookDistance = Mathf.Lerp(edgeCheckDistance, edgeCheckDistance * 3f, speedRatio);
+
+        // Origin slightly above enemy
+        Vector3 headHeightOffset = Vector3.up * (radius + 0.75f);
+        Vector3 origin = transform.position + headHeightOffset;
+
+        // Movement direction (not rotation)
+        Vector3 moveDir = rb.linearVelocity.sqrMagnitude > 0.01f
+            ? rb.linearVelocity.normalized
+            : transform.forward;
+
+        // Always tilt slightly downward toward ground in world space
+        Vector3 forwardDown = (moveDir + Vector3.down * 0.5f).normalized;
+        Vector3 leftDown = (Quaternion.Euler(0, -25f, 0) * moveDir + Vector3.down * 0.5f).normalized;
+        Vector3 rightDown = (Quaternion.Euler(0, 25f, 0) * moveDir + Vector3.down * 0.5f).normalized;
+
+        // Perform raycasts
+        bool centerHit = Physics.Raycast(origin, forwardDown, out RaycastHit hitC, lookDistance, groundMask);
+        bool leftHit = Physics.Raycast(origin, leftDown, out RaycastHit hitL, lookDistance, groundMask);
+        bool rightHit = Physics.Raycast(origin, rightDown, out RaycastHit hitR, lookDistance, groundMask);
+
+        // Combine
+        _groundDetected = centerHit || leftHit || rightHit;
+
+        // Debug visualize
+        Color rayColor = _groundDetected ? Color.green : Color.red;
+        Debug.DrawRay(origin, forwardDown * lookDistance, rayColor);
+        Debug.DrawRay(origin, leftDown * lookDistance, rayColor);
+        Debug.DrawRay(origin, rightDown * lookDistance, rayColor);
+
+        // Reaction
+        if (!_groundDetected)
+        {
+            avoidingEdge = true;
+
+            // Brake proportional to speed
+            float brakeStrength = Mathf.Lerp(edgeBrakeForce, edgeBrakeForce * 2f, speedRatio);
+            rb.AddForce(-rb.linearVelocity * brakeStrength * Time.fixedDeltaTime, ForceMode.Acceleration);
+
+            // Turn back toward last safe direction
+            Vector3 avoidDir = Vector3.Lerp(-moveDir, lastSafeDirection, 0.6f);
+            desiredDirection = Vector3.Lerp(desiredDirection, avoidDir, 0.8f);
+        }
+        else
+        {
+            avoidingEdge = false;
+            lastSafeDirection = moveDir;
+        }
+
         // --- Obstacle Avoidance ---
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit obstacleHit, obstacleCheckDistance, obstacleMask))
         {
@@ -69,39 +129,28 @@ public class EnemyPhysicsController : MonoBehaviour
             seekDir = Vector3.Lerp(seekDir, avoidDir, 0.9f);
         }
 
-        // --- Edge Detection (no upward push) ---
-        Vector3 edgeOrigin = transform.position + transform.forward * 1.2f;
-        bool hasGroundAhead = Physics.Raycast(edgeOrigin, Vector3.down, edgeCheckDistance, groundMask);
-        if (!hasGroundAhead)
-        {
-            // steer hard away from edge, not upward
-            seekDir = Vector3.Lerp(seekDir, -transform.forward, 0.9f);
-        }
-
-        // --- Smooth Steering Vector ---
+        // --- Smooth Steering ---
         desiredDirection = Vector3.Lerp(desiredDirection, seekDir, Time.fixedDeltaTime * turnSharpness);
-
-        // keep motion planar
         desiredDirection.y = 0f;
         desiredDirection.Normalize();
 
-        // --- Calculate velocity-based steering ---
+        // --- Steering Force ---
         Vector3 horizontalVel = rb.linearVelocity;
-        horizontalVel.y = 0f; // remove vertical
-
+        horizontalVel.y = 0f;
         Vector3 steering = (desiredDirection - horizontalVel.normalized) * steerResponsiveness;
-        steering.y = 0f; // keep it planar
+        steering.y = 0f;
 
-        // --- Main Movement Force ---
+        // --- Movement Force ---
+        float speedMultiplier = avoidingEdge ? 0.6f : 1f;
         float currentSpeed = horizontalVel.magnitude;
         if (currentSpeed < maxSpeed)
-            rb.AddForce((desiredDirection * moveForce + steering) * Time.fixedDeltaTime, ForceMode.VelocityChange);
+            rb.AddForce((desiredDirection * moveForce * speedMultiplier + steering) * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
-        // --- Braking Near Target ---
+        // --- Brake when close to target ---
         if (distance < closeBrakeDistance)
             rb.linearVelocity *= 0.97f;
 
-        // --- Clamp small upward velocity (safety net) ---
+        // --- Clamp vertical drift ---
         Vector3 vel = rb.linearVelocity;
         if (vel.y > 0.05f)
             vel.y = Mathf.Lerp(vel.y, 0f, 0.5f);
@@ -110,9 +159,11 @@ public class EnemyPhysicsController : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, transform.position + transform.forward * obstacleCheckDistance);
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(transform.position + transform.forward, transform.position + transform.forward + Vector3.down * edgeCheckDistance);
+        if (Application.isPlaying)
+        {
+            Color rayColor = _groundDetected ? Color.green : Color.red;
+            Gizmos.color = rayColor;
+            Gizmos.DrawSphere(transform.position + Vector3.up * (radius + 0.75f), 0.1f);
+        }
     }
 }
