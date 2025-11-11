@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: -1892484579140901611}
   m_Layer: 0
   m_Name: Enemy_Base
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -154,6 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPhysicsController
   target: {fileID: 0}
+  flag: {fileID: 0}
   moveForce: 50
   maxSpeed: 25
   turnSharpness: 50
@@ -170,8 +171,10 @@ MonoBehaviour:
     m_Bits: 0
   obstacleCheckDistance: 5
   obstacleAvoidStrength: 40
-  edgeCheckDistance: 5
-  edgeAvoidStrength: 100
+  edgeCheckDistance: 20
+  edgeBrakeForce: 20
+  safeTurnForce: 30
+  edgeRecoveryDelay: 1.5
   predictionTime: 0.01
   closeBrakeDistance: 3
 --- !u!114 &-1892484579140901611

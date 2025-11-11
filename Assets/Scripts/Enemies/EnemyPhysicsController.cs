@@ -5,6 +5,7 @@ public class EnemyPhysicsController : MonoBehaviour
 {
     [Header("Targeting")]
     public Transform target;
+    public FlagPickup flag; // reference to FlagPickup in scene
 
     [Header("Movement")]
     public float moveForce = 45f;
@@ -27,9 +28,10 @@ public class EnemyPhysicsController : MonoBehaviour
     public float obstacleAvoidStrength = 35f;
 
     [Header("Edge Detection")]
-    public float edgeCheckDistance = 1.75f;   // base distance
-    public float edgeBrakeForce = 5f;
-    public float safeTurnForce = 20f;
+    public float edgeCheckDistance = 3.5f;
+    public float edgeBrakeForce = 8f;
+    public float safeTurnForce = 25f;
+    public float edgeRecoveryDelay = 1.5f; // seconds to wait before chasing again
 
     [Header("AI Tuning")]
     public float predictionTime = 0.35f;
@@ -41,7 +43,7 @@ public class EnemyPhysicsController : MonoBehaviour
     private bool avoidingEdge = false;
     private bool _groundDetected = true;
     private Vector3 lastSafeDirection = Vector3.forward;
-    private Vector3 edgeOrigin;
+    private float edgeTimer = 0f;
 
     private void Awake()
     {
@@ -52,10 +54,49 @@ public class EnemyPhysicsController : MonoBehaviour
         rb.angularDamping = angularDamping;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+        // Auto-find the flag if not assigned
+        if (flag == null)
+        {
+            FlagPickup foundFlag = Object.FindAnyObjectByType<FlagPickup>();
+            if (foundFlag != null)
+            {
+                flag = foundFlag;
+                Debug.Log($"{name}: Found flag automatically ({flag.name})");
+            }
+            else
+            {
+                Debug.LogWarning($"{name}: No FlagPickup found in scene!");
+            }
+        }
     }
 
     private void FixedUpdate()
     {
+        // --- Dynamic Target Selection ---
+        if (flag != null)
+        {
+            if (!flag.IsHeld)
+            {
+                // Flag is free on the ground
+                target = flag.transform;
+            }
+            else
+            {
+                Transform holder = flag.CurrentHolder;
+                if (holder != null && holder != transform)
+                {
+                    // Chase whoever has the flag
+                    target = holder;
+                }
+                else
+                {
+                    // We are holding the flag, stop chasing
+                    target = null;
+                }
+            }
+        }
+
         if (!target) return;
 
         // --- Predictive Targeting ---
@@ -68,15 +109,15 @@ public class EnemyPhysicsController : MonoBehaviour
         float distance = toTarget.magnitude;
         Vector3 seekDir = toTarget.normalized;
 
-        // --- Helmet-Cam Edge Detection (velocity-based, world-downward tilt) ---
+        // --- Helmet-Cam Edge Detection (velocity-based, slight upward tilt) ---
         float speed = rb.linearVelocity.magnitude;
         if (speed < 0.1f) speed = 0.1f;
 
         float speedRatio = Mathf.Clamp01(speed / maxSpeed);
         float lookDistance = Mathf.Lerp(edgeCheckDistance, edgeCheckDistance * 3f, speedRatio);
 
-        // Origin slightly above enemy
-        Vector3 headHeightOffset = Vector3.up * (radius + 0.75f);
+        // Raise origin slightly higher
+        Vector3 headHeightOffset = Vector3.up * (radius + 1.0f);
         Vector3 origin = transform.position + headHeightOffset;
 
         // Movement direction (not rotation)
@@ -84,10 +125,11 @@ public class EnemyPhysicsController : MonoBehaviour
             ? rb.linearVelocity.normalized
             : transform.forward;
 
-        // Always tilt slightly downward toward ground in world space
-        Vector3 forwardDown = (moveDir + Vector3.down * 0.5f).normalized;
-        Vector3 leftDown = (Quaternion.Euler(0, -25f, 0) * moveDir + Vector3.down * 0.5f).normalized;
-        Vector3 rightDown = (Quaternion.Euler(0, 25f, 0) * moveDir + Vector3.down * 0.5f).normalized;
+        // Slightly upward angled rays
+        float verticalTilt = -0.25f;
+        Vector3 forwardDown = (moveDir + Vector3.up * verticalTilt).normalized;
+        Vector3 leftDown = (Quaternion.Euler(0, -25f, 0) * moveDir + Vector3.up * verticalTilt).normalized;
+        Vector3 rightDown = (Quaternion.Euler(0, 25f, 0) * moveDir + Vector3.up * verticalTilt).normalized;
 
         // Perform raycasts
         bool centerHit = Physics.Raycast(origin, forwardDown, out RaycastHit hitC, lookDistance, groundMask);
@@ -103,12 +145,17 @@ public class EnemyPhysicsController : MonoBehaviour
         Debug.DrawRay(origin, leftDown * lookDistance, rayColor);
         Debug.DrawRay(origin, rightDown * lookDistance, rayColor);
 
-        // Reaction
+        // --- Edge Detection Logic ---
         if (!_groundDetected)
         {
-            avoidingEdge = true;
+            if (!avoidingEdge)
+            {
+                avoidingEdge = true;
+                edgeTimer = edgeRecoveryDelay;
+                Debug.Log($"{name}: ⚠️ Avoiding edge!");
+            }
 
-            // Brake proportional to speed
+            // Brake hard proportional to speed
             float brakeStrength = Mathf.Lerp(edgeBrakeForce, edgeBrakeForce * 2f, speedRatio);
             rb.AddForce(-rb.linearVelocity * brakeStrength * Time.fixedDeltaTime, ForceMode.Acceleration);
 
@@ -118,7 +165,16 @@ public class EnemyPhysicsController : MonoBehaviour
         }
         else
         {
-            avoidingEdge = false;
+            if (avoidingEdge)
+            {
+                edgeTimer -= Time.fixedDeltaTime;
+                if (edgeTimer <= 0f)
+                {
+                    avoidingEdge = false;
+                    Debug.Log($"{name}: ✅ Back to chase mode!");
+                }
+            }
+
             lastSafeDirection = moveDir;
         }
 
@@ -130,7 +186,8 @@ public class EnemyPhysicsController : MonoBehaviour
         }
 
         // --- Smooth Steering ---
-        desiredDirection = Vector3.Lerp(desiredDirection, seekDir, Time.fixedDeltaTime * turnSharpness);
+        float turnRate = avoidingEdge ? turnSharpness * 0.4f : turnSharpness;
+        desiredDirection = Vector3.Lerp(desiredDirection, seekDir, Time.fixedDeltaTime * turnRate);
         desiredDirection.y = 0f;
         desiredDirection.Normalize();
 
@@ -141,7 +198,7 @@ public class EnemyPhysicsController : MonoBehaviour
         steering.y = 0f;
 
         // --- Movement Force ---
-        float speedMultiplier = avoidingEdge ? 0.6f : 1f;
+        float speedMultiplier = avoidingEdge ? 0.2f : 1f;
         float currentSpeed = horizontalVel.magnitude;
         if (currentSpeed < maxSpeed)
             rb.AddForce((desiredDirection * moveForce * speedMultiplier + steering) * Time.fixedDeltaTime, ForceMode.VelocityChange);
@@ -163,7 +220,7 @@ public class EnemyPhysicsController : MonoBehaviour
         {
             Color rayColor = _groundDetected ? Color.green : Color.red;
             Gizmos.color = rayColor;
-            Gizmos.DrawSphere(transform.position + Vector3.up * (radius + 0.75f), 0.1f);
+            Gizmos.DrawSphere(transform.position + Vector3.up * (radius + 1.0f), 0.1f);
         }
     }
 }

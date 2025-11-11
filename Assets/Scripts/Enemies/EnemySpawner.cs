@@ -15,8 +15,8 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField, Range(0.01f, 0.5f)]
     private float edgePaddingPercent = 0.05f;
 
-    [Header("Target")]
-    [SerializeField] private Transform playerTarget;
+    ///[Header("Target")]
+    ///[SerializeField] private Transform playerTarget;
 
     [Header("Layers")]
     [SerializeField] private LayerMask groundMask;
@@ -57,8 +57,8 @@ public class EnemySpawner : MonoBehaviour
         Vector3 spawnPos = SnapToGround(position) + Vector3.up * spawnLift;
         GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
 
-        if (enemy.TryGetComponent(out EnemyPhysicsController enemyAI) && playerTarget)
-            enemyAI.target = playerTarget;
+        //if (enemy.TryGetComponent(out EnemyPhysicsController enemyAI) && playerTarget)
+           // enemyAI.target = playerTarget;
 
         activeEnemies.Add(enemy);
     }
@@ -90,8 +90,8 @@ public class EnemySpawner : MonoBehaviour
         Vector3 spawnPos = SnapToGround(respawnPosition) + Vector3.up * spawnLift;
         GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
 
-        if (newEnemy.TryGetComponent(out EnemyPhysicsController enemyAI) && playerTarget)
-            enemyAI.target = playerTarget;
+        //if (newEnemy.TryGetComponent(out EnemyPhysicsController enemyAI) && playerTarget)
+            //enemyAI.target = playerTarget;
 
         activeEnemies.Insert(index, newEnemy); // reassign same slot for future respawns
     }

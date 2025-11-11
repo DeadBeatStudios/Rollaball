@@ -2,9 +2,6 @@
 
 public class FlagPickup : MonoBehaviour
 {
-    // ---------------------------
-    //   ENUM: Reason for drop
-    // ---------------------------
     public enum FlagDropCause
     {
         KilledByEnemy,
@@ -13,29 +10,28 @@ public class FlagPickup : MonoBehaviour
         Unknown
     }
 
-    [Header("Flag Visual Settings")]
-    [SerializeField] private Vector3 offset = new Vector3(0f, 2f, 0f);
-    [SerializeField] private float floatAmplitude = 0.2f;
-    [SerializeField] private float floatSpeed = 2f;
-    [SerializeField] private float rotationSpeed = 45f;
-    [SerializeField, Range(0.1f, 1f)] private float shrinkScale = 0.5f;
-    [SerializeField] private float shrinkSpeed = 6f;
+    [Header("Attachment Settings")]
+    [Tooltip("Vertical offset above holder’s pivot when attached.")]
+    [SerializeField] private float attachHeightOffset = 1.5f;
 
     [Header("Respawn Settings")]
-    [SerializeField] private float edgePaddingPercent = 0.05f;   // inset from PhysicsFloor edges
-    [SerializeField] private float spawnLift = 0.3f;             // lift above ground surface
+    [Tooltip("How far above the ground the flag respawns.")]
+    [SerializeField] private float respawnHeightOffset = 0.5f;
+    [SerializeField] private float edgePaddingPercent = 0.05f;
+
+    [Header("Safety")]
+    [Tooltip("If the holder falls below this Y value, the flag will auto-drop and respawn.")]
+    [SerializeField] private float autoDropY = -5f;
 
     private Transform holder;
     private bool collected = false;
-    private Vector3 originalScale;
-    private Vector3 targetScale;
+    private Quaternion initialWorldRotation;
 
     private void Start()
     {
-        originalScale = transform.localScale;
-        targetScale = originalScale;
+        initialWorldRotation = transform.rotation;
 
-        // Keep the flag static in the world (no gravity)
+        // Particle flag: static until collected
         if (TryGetComponent(out Rigidbody rb))
         {
             rb.isKinematic = true;
@@ -45,53 +41,61 @@ public class FlagPickup : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        // Only players or enemies can pick up
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
+
+        if (collected) return; // already held
 
         holder = other.transform;
         collected = true;
 
+        // Disable collider while held
         if (TryGetComponent(out Collider col))
             col.enabled = false;
 
-        // Shrink while held
-        targetScale = originalScale * shrinkScale;
-        Debug.Log($"Flag collected by: {holder.name}");
+        // Attach to holder’s center (offset upward)
+        transform.SetParent(holder, worldPositionStays: true);
+        transform.position = holder.position + Vector3.up * attachHeightOffset;
+
+        // Keep upright
+        transform.rotation = initialWorldRotation;
+
+        Debug.Log($"🏁 Flag collected by: {holder.name}");
     }
 
     private void LateUpdate()
     {
-        if (collected && holder != null)
+        if (!collected) return;
+
+        // If holder destroyed or disabled -> respawn
+        if (holder == null || !holder.gameObject.activeInHierarchy)
         {
-            // Shrink and follow
-            transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * shrinkSpeed);
-            float bobOffset = Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
-            Vector3 desiredPos = holder.position + offset + new Vector3(0f, bobOffset, 0f);
-            transform.position = desiredPos;
-            transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
+            DropAndRespawn(FlagDropCause.Unknown);
+            return;
         }
-        else
+
+        // Follow holder with offset, stay upright
+        transform.position = holder.position + Vector3.up * attachHeightOffset;
+        transform.rotation = initialWorldRotation;
+
+        // Fell off map? -> auto drop & respawn
+        if (holder.position.y < autoDropY)
         {
-            // Not held → ensure full size
-            if (transform.localScale != originalScale)
-                transform.localScale = originalScale;
+            DropAndRespawn(FlagDropCause.FellOffMap);
         }
     }
 
-    // 🔹 Called externally when the holder dies
     public void DropAndRespawn(FlagDropCause cause, Transform killer = null, Vector3? deathPosition = null)
     {
-        // Reset ownership
-        holder = null;
+        transform.SetParent(null);
         collected = false;
-        transform.localScale = originalScale;
-        targetScale = originalScale;
 
         // Re-enable collider
         if (TryGetComponent(out Collider col))
             col.enabled = true;
 
-        // Flag is static
+        // Keep kinematic
         if (TryGetComponent(out Rigidbody rb))
         {
             rb.linearVelocity = Vector3.zero;
@@ -100,6 +104,8 @@ public class FlagPickup : MonoBehaviour
             rb.useGravity = false;
         }
 
+        transform.rotation = initialWorldRotation;
+
         Vector3 spawnPos;
 
         switch (cause)
@@ -107,11 +113,15 @@ public class FlagPickup : MonoBehaviour
             case FlagDropCause.KilledByEnemy:
                 if (killer != null)
                 {
-                    // Instant transfer to killer
+                    // Transfer instantly to killer
                     holder = killer;
                     collected = true;
-                    targetScale = originalScale * shrinkScale;
-                    Debug.Log($"Flag transferred to {killer.name} (kill reward)");
+
+                    transform.SetParent(killer, worldPositionStays: true);
+                    transform.position = killer.position + Vector3.up * attachHeightOffset;
+                    transform.rotation = initialWorldRotation;
+
+                    Debug.Log($"🏁 Flag transferred to {killer.name}");
                     return;
                 }
                 spawnPos = GetRandomSpawn();
@@ -120,21 +130,19 @@ public class FlagPickup : MonoBehaviour
             case FlagDropCause.SelfDestruct:
             case FlagDropCause.FellOffMap:
             case FlagDropCause.Unknown:
-                // Random safe respawn
-                spawnPos = GetRandomSpawn();
+                spawnPos = deathPosition ?? GetRandomSpawn();
                 break;
 
             default:
-                // Drop at death position
                 spawnPos = deathPosition ?? GetRandomSpawn();
                 break;
         }
 
-        transform.position = spawnPos + Vector3.up * spawnLift;
+        // ✅ Ensure flag spawns slightly above ground
+        transform.position = spawnPos + Vector3.up * respawnHeightOffset;
         Debug.Log($"Flag respawned at {transform.position} due to {cause}");
     }
 
-    // 🔹 Generates a safe random position on the PhysicsFloor
     private Vector3 GetRandomSpawn()
     {
         Bounds floorBounds = GetPhysicsFloorBounds();
@@ -145,10 +153,10 @@ public class FlagPickup : MonoBehaviour
         float rz = Random.Range(floorBounds.min.z + padZ, floorBounds.max.z - padZ);
         float rayStartY = floorBounds.max.y + 5f;
 
+        // Detect ground height
         if (Physics.Raycast(new Vector3(rx, rayStartY, rz), Vector3.down, out RaycastHit hit, 10f, LayerMask.GetMask("Ground")))
             return hit.point;
 
-        // Fallback
         return new Vector3(rx, floorBounds.max.y, rz);
     }
 
@@ -161,8 +169,9 @@ public class FlagPickup : MonoBehaviour
         Debug.LogWarning("PhysicsFloor not found — using fallback bounds.");
         return new Bounds(Vector3.zero, new Vector3(10f, 1f, 8f));
     }
-    public bool IsHeldBy(Transform player)
-    {
-        return (holder != null && holder == player);
-    }
+
+    // Helper accessors
+    public bool IsHeldBy(Transform t) => holder != null && holder == t;
+    public Transform CurrentHolder => holder;
+    public bool IsHeld => holder != null;
 }
