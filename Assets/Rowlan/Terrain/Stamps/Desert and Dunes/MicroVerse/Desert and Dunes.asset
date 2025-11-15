@@ -1,0 +1,120 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10ede25ccd6fd4e8e98a828e1f7c552d, type: 3}
+  m_Name: Desert and Dunes
+  m_EditorClassIdentifier: 
+  contentType: 0
+  author: Rowlan
+  packName: Desert and Dunes
+  id: https://assetstore.unity.com/packages/slug/219815
+  previewGradient: {fileID: 0}
+  contents:
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: ecae91d67c161f6458cb6133cdcd5e7a
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: b76e48f5c19a08449a9109e0cb96b126
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 268a9f33d8774bc4eac89f3fafc81a60
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: eafc5017ea3a8e043a2e7a6449af281e
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: c77d6d9ec0272714a80eccbde01080b4
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: badbb8d169e57a542810cbb6c241cc47
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 364d8536861091c41b5512d894a5b5b2
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: e470678d9563a0547b0300ae07f18a24
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 0e1e7c85255baac42ab851d512ae9262
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 1818e8c4f4580d74b86b2e427ec98485
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 8e71736381adbb9489e483ccc0708d6d
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: d9f37a7f0409a424381477298d4e374a
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 3713acb9bba1e564f84ea9566a8e4971
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 0b40114517231b747aa4bb8c526dd2f9
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 0ae81501b171c9646b29293ce5d8f67a
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 79a46c48e6bffc74caf92e4894a3ced5
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: ff54435322e026842822f9e431e8568e
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: 81e625c19c9c85440b99af271014dcee
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: fbfc2ec9b840b1a4985c2c8164a63075
+    previewGradient: {fileID: 0}
+  - prefab: {fileID: 0}
+    previewImage: {fileID: 0}
+    previewAsset: {fileID: 0}
+    stamp: e16110e05ff07644b9cf29a248abfd19
+    previewGradient: {fileID: 0}
