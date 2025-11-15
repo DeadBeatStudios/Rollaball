@@ -11,6 +11,24 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TestCore.unity
     guid: 29390fae542303a4791601be6f1dbe05
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 27d522ff43b00654d9ad1f32f997968b
+  - enabled: 1
+    path: Assets/Scenes/LevelSelect.unity
+    guid: f399fbbabc78a1748996746b11bbf60e
+  - enabled: 1
+    path: Assets/Scenes/Air_SkyCitadelLevel.unity
+    guid: d441bc81b466e2a41a859de9ac1ccd8c
+  - enabled: 1
+    path: Assets/Scenes/Earth_DesertLevel.unity
+    guid: 8481ea6ffe7524b47b795663afdcb3ce
+  - enabled: 1
+    path: Assets/Scenes/Fire_AshenPeaksLevel.unity
+    guid: 054804fe2d462e34d908645e5051e3ed
+  - enabled: 1
+    path: Assets/Scenes/Water_DrownedRuinsLevel.unity
+    guid: c1e69d42983852b45ad954a76ceafc9c
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: e4631032779d0924e8e1116a02b04ae8, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: d965d6b6f579f82479b15d94bd03b7e6, type: 3}
