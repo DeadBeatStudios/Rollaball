@@ -8,9 +8,6 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 0
-    path: Assets/Scenes/TestCore.unity
-    guid: 29390fae542303a4791601be6f1dbe05
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: 27d522ff43b00654d9ad1f32f997968b
@@ -29,6 +26,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Water_DrownedRuinsLevel.unity
     guid: c1e69d42983852b45ad954a76ceafc9c
+  - enabled: 1
+    path: Assets/Scenes/TestCore.unity
+    guid: 29390fae542303a4791601be6f1dbe05
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: e4631032779d0924e8e1116a02b04ae8, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: d965d6b6f579f82479b15d94bd03b7e6, type: 3}
