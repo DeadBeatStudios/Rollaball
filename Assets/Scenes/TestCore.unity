@@ -2077,6 +2077,58 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_NotificationBehavior
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[0].m_ActionId
+      value: d91bf022-a875-4c0a-9a21-5ce7816ecb93
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[1].m_ActionId
+      value: d4b4da6d-00c2-47e8-a5a3-fef33e1b9af1
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_ActionId
+      value: 261c5c2a-753a-4be3-9090-91789021e7e4
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[3].m_ActionId
+      value: 5ae764c7-38b3-45bb-8af4-04166f8e5ba3
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[4].m_ActionId
+      value: 92b2f016-0c70-4d44-bdbb-d5ef6c7f43f9
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[0].m_ActionName
+      value: 'Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[1].m_ActionName
+      value: 'Player/Jump[/Keyboard/space]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[2].m_ActionName
+      value: 'Player/Look[/Mouse/delta]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[3].m_ActionName
+      value: 'Player/RotateCamera[/Mouse/rightButton]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[4].m_ActionName
+      value: 'Player/Zoom[/Mouse/scroll/y]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 653937564492447153, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5919138668250432695, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
       propertyPath: m_Name
       value: Player
