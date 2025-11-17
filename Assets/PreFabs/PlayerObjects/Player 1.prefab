@@ -524,6 +524,7 @@ MonoBehaviour:
   - {fileID: 0}
   fallThreshold: -5
   respawnDelay: 0.5
+  explosionSpawner: {fileID: 0}
 --- !u!114 &3787373116209747972
 MonoBehaviour:
   m_ObjectHideFlags: 0

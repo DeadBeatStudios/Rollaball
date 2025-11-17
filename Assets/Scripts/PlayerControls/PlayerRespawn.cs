@@ -9,6 +9,10 @@ public class PlayerRespawn : MonoBehaviour
     public float fallThreshold = -10f;     // Y height that triggers death
     public float respawnDelay = 1.5f;      // Delay before respawn
 
+    [Header("Death Effects")]
+    [Tooltip("Spawns chunk explosion & swaps player model")]
+    [SerializeField] private ChunkExplosionSpawner explosionSpawner;
+
     private Rigidbody rb;
     private bool isRespawning = false;
 
@@ -38,6 +42,10 @@ public class PlayerRespawn : MonoBehaviour
     {
         if (isRespawning) return;
 
+        // 🔥 Spawn chunk explosion prefab and hide player model
+        if (explosionSpawner != null)
+            explosionSpawner.SpawnChunkExplosion();
+
         StartCoroutine(RespawnSequence(cause, killer));
     }
 
@@ -54,7 +62,7 @@ public class PlayerRespawn : MonoBehaviour
         FlagPickup flag = Object.FindAnyObjectByType<FlagPickup>();
         if (flag != null)
         {
-            // ✅ Only the flag holder triggers a drop
+            // Only the flag holder triggers a drop
             if (flag.IsHeldBy(transform))
             {
                 flag.DropAndRespawn(cause, killer, transform.position);
@@ -93,6 +101,10 @@ public class PlayerRespawn : MonoBehaviour
 
         transform.position = safePosition;
         transform.rotation = spawn.rotation;
+
+        // ✔ Restore player model after death explosion
+        if (explosionSpawner != null)
+            explosionSpawner.RestorePlayerModel();
 
         Debug.Log($"{gameObject.name} respawned at {spawn.position}.");
 
