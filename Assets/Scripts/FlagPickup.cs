@@ -11,23 +11,29 @@ public class FlagPickup : MonoBehaviour
     }
 
     [Header("Attachment Settings")]
+    [Tooltip("Vertical offset above holder's pivot when attached.")]
     [SerializeField] private float attachHeightOffset = 1.5f;
 
     [Header("Respawn Settings")]
+    [Tooltip("How far above the ground the flag respawns.")]
     [SerializeField] private float respawnHeightOffset = 0.5f;
-    [SerializeField] private float edgePaddingPercent = 0.05f;
+
+    [Tooltip("Percent of arena bounds to avoid near edges when random spawning.")]
+    [SerializeField, Range(0f, 0.5f)] private float edgePaddingPercent = 0.05f;
 
     [Header("Safety")]
+    [Tooltip("If the holder falls below this Y value, the flag will auto-drop and respawn.")]
     [SerializeField] private float autoDropY = -5f;
 
     private Transform holder;
-    private bool collected = false;
+    private bool isHeld = false;
     private Quaternion initialWorldRotation;
 
     private void Start()
     {
         initialWorldRotation = transform.rotation;
 
+        // Ensure the flag behaves like a VFX object, not a physics projectile.
         if (TryGetComponent(out Rigidbody rb))
         {
             rb.isKinematic = true;
@@ -41,18 +47,20 @@ public class FlagPickup : MonoBehaviour
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
 
-        if (collected) return;
+        if (isHeld) return; // already attached to someone
 
-        // Attach to visual model if present
+        // Prefer a child "VisualModel" if present, otherwise use root
         Transform visualRoot = other.transform.Find("VisualModel");
         holder = visualRoot != null ? visualRoot : other.transform;
 
-        collected = true;
+        isHeld = true;
 
+        // Disable our own collider while held
         if (TryGetComponent(out Collider col))
             col.enabled = false;
 
-        transform.SetParent(holder, true);
+        // ⭐ CRITICAL FIX: DO NOT parent the flag - just follow it manually
+        // This prevents the flag from becoming inactive when VisualModel is hidden
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
 
@@ -61,48 +69,71 @@ public class FlagPickup : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!collected) return;
+        if (!isHeld) return;
 
-        // Drop if holder is null or dead
-        if (holder == null || IsHolderDead())
+        // If holder is gone or considered dead → drop + respawn.
+        if (HolderMissingOrDead())
         {
-            DropAndRespawn(FlagDropCause.Unknown);
+            RespawnAtRandom();
             return;
         }
 
-        // Follow holder
+        // Follow holder, stay upright
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
 
-        // If holder falls off map
+        // If holder falls below threshold → drop + respawn
         if (holder.position.y < autoDropY)
         {
-            DropAndRespawn(FlagDropCause.FellOffMap);
+            RespawnAtRandom();
         }
     }
 
-    private bool IsHolderDead()
+    private bool HolderMissingOrDead()
     {
-        // PLAYER CHECK
-        var player = holder.GetComponentInParent<PlayerRespawn>();
-        if (player != null)
-            return player.IsDead;
+        if (holder == null)
+            return true;
 
-        // ENEMY CHECK — enemy dies by disabling GameObject
+        // If this holder belongs to a player, consult PlayerRespawn
+        PlayerRespawn player = holder.GetComponentInParent<PlayerRespawn>();
+        if (player != null)
+        {
+            if (player.IsDead)
+                return true;
+        }
+
+        // For enemies or other entities, treat inactive hierarchy as dead
         if (!holder.gameObject.activeInHierarchy)
             return true;
 
         return false;
     }
 
-    public void DropAndRespawn(FlagDropCause cause, Transform killer = null, Vector3? deathPosition = null)
+    /// <summary>
+    /// Public API kept for compatibility.
+    /// Internally we now always do a clean random respawn.
+    /// </summary>
+    public void DropAndRespawn(
+        FlagDropCause cause = FlagDropCause.Unknown,
+        Transform killer = null,
+        Vector3? deathPosition = null)
     {
-        transform.SetParent(null);
-        collected = false;
+        // Ignore killer / deathPosition for now – keep behavior simple and robust.
+        RespawnAtRandom();
+    }
 
+    private void RespawnAtRandom()
+    {
+        // ⭐ CRITICAL FIX: Ensure parent is cleared (in case it was set elsewhere)
+        transform.SetParent(null);
+        holder = null;
+        isHeld = false;
+
+        // Re-enable collider so it can be picked up again
         if (TryGetComponent(out Collider col))
             col.enabled = true;
 
+        // Keep rigidbody safe & kinematic
         if (TryGetComponent(out Rigidbody rb))
         {
             rb.linearVelocity = Vector3.zero;
@@ -111,52 +142,12 @@ public class FlagPickup : MonoBehaviour
             rb.useGravity = false;
         }
 
+        // Pick a safe ground position
+        Vector3 groundPos = GetRandomSpawn();
+        transform.position = groundPos + Vector3.up * respawnHeightOffset;
         transform.rotation = initialWorldRotation;
 
-        Vector3 spawnPos;
-
-        // Determine if the holder was a player
-        bool holderIsPlayer = holder != null && holder.CompareTag("Player");
-
-        switch (cause)
-        {
-            case FlagDropCause.KilledByEnemy:
-                if (killer != null)
-                {
-                    // Transfer instantly to killer
-                    Transform killerVisual = killer.Find("VisualModel");
-                    holder = killerVisual != null ? killerVisual : killer;
-
-                    collected = true;
-
-                    transform.SetParent(holder, true);
-                    transform.position = holder.position + Vector3.up * attachHeightOffset;
-                    transform.rotation = initialWorldRotation;
-
-                    Debug.Log($"🏁 Flag transferred to {holder.name}");
-                    return;
-                }
-                spawnPos = GetRandomSpawn();
-                break;
-
-            case FlagDropCause.FellOffMap:
-                // Player falling off map -> ALWAYS use safe random spawn
-                spawnPos = GetRandomSpawn();
-                break;
-
-            case FlagDropCause.SelfDestruct:
-            case FlagDropCause.Unknown:
-                // Debug kill or unknown -> ALWAYS safe ground spawn
-                spawnPos = GetRandomSpawn();
-                break;
-
-            default:
-                spawnPos = GetRandomSpawn();
-                break;
-        }
-
-        transform.position = spawnPos + Vector3.up * respawnHeightOffset;
-        Debug.Log($"Flag respawned at {transform.position} due to {cause}");
+        Debug.Log($"🏁 Flag respawned at {transform.position}");
     }
 
     private Vector3 GetRandomSpawn()
@@ -169,9 +160,12 @@ public class FlagPickup : MonoBehaviour
         float rz = Random.Range(floorBounds.min.z + padZ, floorBounds.max.z - padZ);
         float rayStartY = floorBounds.max.y + 5f;
 
-        if (Physics.Raycast(new Vector3(rx, rayStartY, rz), Vector3.down, out RaycastHit hit, 10f, LayerMask.GetMask("Ground")))
+        Vector3 rayOrigin = new Vector3(rx, rayStartY, rz);
+
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 10f, LayerMask.GetMask("Ground")))
             return hit.point;
 
+        // Fallback if raycast misses
         return new Vector3(rx, floorBounds.max.y, rz);
     }
 
@@ -181,10 +175,20 @@ public class FlagPickup : MonoBehaviour
         if (floor != null && floor.TryGetComponent(out BoxCollider col))
             return col.bounds;
 
+        Debug.LogWarning("FlagPickup: PhysicsFloor not found — using fallback bounds.");
         return new Bounds(Vector3.zero, new Vector3(10f, 1f, 8f));
     }
 
-    public bool IsHeldBy(Transform t) => holder != null && holder == t;
+    // Helper accessors
+    public bool IsHeldBy(Transform t)
+    {
+        if (!isHeld || holder == null || t == null)
+            return false;
+
+        // True if the holder is this transform or a child of it
+        return holder == t || holder.IsChildOf(t);
+    }
+
     public Transform CurrentHolder => holder;
-    public bool IsHeld => holder != null;
+    public bool IsHeld => isHeld;
 }

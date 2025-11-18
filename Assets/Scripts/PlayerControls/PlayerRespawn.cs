@@ -60,21 +60,6 @@ public class PlayerRespawn : MonoBehaviour
 
         Debug.Log($"{gameObject.name} has died (cause: {cause}).");
 
-        // Flag handling
-        FlagPickup flag = Object.FindAnyObjectByType<FlagPickup>();
-        if (flag != null)
-        {
-            if (flag.IsHeldBy(transform))
-            {
-                flag.DropAndRespawn(cause, killer, transform.position);
-                Debug.Log($"Flag dropped by {gameObject.name} due to {cause}");
-            }
-            else
-            {
-                Debug.Log($"{gameObject.name} died, but they weren’t holding the flag.");
-            }
-        }
-
         yield return new WaitForSeconds(respawnDelay);
         Respawn();
     }
