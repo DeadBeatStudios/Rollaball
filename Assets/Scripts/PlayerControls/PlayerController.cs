@@ -19,25 +19,23 @@ public class PlayerController : MonoBehaviour
     private bool isCursorLocked = false;
 
     [Header("Ground Check")]
-    public float groundCheckDistance = 0.2f; // ray length below player
-    public LayerMask groundLayer;            // set this to "Ground" in Inspector
-    private bool isGrounded;                 // runtime state
+    public float groundCheckDistance = 0.2f;
+    public LayerMask groundLayer;
+    private bool isGrounded;
 
-    // NEW: prevents rapid double-jumps caused by brief post-takeoff grounding
     [Header("Jump Timing")]
-    public float jumpCooldownSeconds = 1f;   // tweak 0.15–0.25
+    public float jumpCooldownSeconds = 1f;
     private float jumpCooldownTimer = 0f;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
 
-        // Recommended Rigidbody setup for rolling
         rb.useGravity = true;
         rb.isKinematic = false;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.constraints = RigidbodyConstraints.None; // allow rotation
+        rb.constraints = RigidbodyConstraints.None;
     }
 
     private void Start()
@@ -46,13 +44,11 @@ public class PlayerController : MonoBehaviour
             LockCursor(true);
     }
 
-    // Helper with a unique name to avoid clashes with any property named "IsGrounded"
     private bool CheckGrounded()
     {
-        // For a (1,1,1) sphere, collider radius ~0.5
-        float sphereRadius = 0.45f;                   // slightly smaller than collider
-        float castDistance = groundCheckDistance + 0.05f; // tight reach
-        Vector3 origin = transform.position;          // from sphere center
+        float sphereRadius = 0.45f;
+        float castDistance = groundCheckDistance + 0.05f;
+        Vector3 origin = transform.position;
 
         bool hit = Physics.SphereCast(
             origin,
@@ -70,14 +66,14 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // --- GROUND CHECK ---
+        // Ground check
         isGrounded = CheckGrounded();
 
-        // --- decrement timers ---
+        // Cooldowns
         if (jumpCooldownTimer > 0f)
             jumpCooldownTimer -= Time.fixedDeltaTime;
 
-        // --- CAMERA-ALIGNED MOVEMENT ---
+        // Movement (Camera aligned)
         if (cameraTransform != null)
         {
             Vector3 camForward = cameraTransform.forward;
@@ -97,51 +93,46 @@ public class PlayerController : MonoBehaviour
                 if (horizontalVelocity.magnitude > 0.1f)
                     alignment = Vector3.Dot(horizontalVelocity.normalized, moveDirection);
 
-                // Apply extra grip when turning sharply (alignment < 0.8)
                 if (alignment < 0.8f)
-                    rb.AddForce(-horizontalVelocity * 0.5f, ForceMode.Force); // counter-slide
+                    rb.AddForce(-horizontalVelocity * 0.5f, ForceMode.Force);
 
-                // Limit lateral slip
                 Vector3 right = Vector3.Cross(Vector3.up, moveDirection);
                 float lateralSpeed = Vector3.Dot(rb.linearVelocity, right);
                 rb.AddForce(-right * lateralSpeed * 2f, ForceMode.Force);
 
-                // Main movement force
                 if (rb.linearVelocity.magnitude < maxSpeed)
                     rb.AddForce(moveDirection * moveForce, ForceMode.Force);
 
-                // Rolling torque boost
                 Vector3 torqueDir = new Vector3(moveDirection.z, 0f, -moveDirection.x);
                 rb.AddTorque(torqueDir * moveForce * 0.5f, ForceMode.Force);
             }
         }
 
-        // --- JUMP (gated by grounded + cooldown) ---
+        // Jump
         if (jumpRequested && isGrounded && jumpCooldownTimer <= 0f)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-
-            // lock out rapid re-jumps while ground check is still momentarily true
             jumpCooldownTimer = jumpCooldownSeconds;
-
-            // optional: force airborne for this frame to be extra safe
             isGrounded = false;
         }
 
-        jumpRequested = false; // always clear request
+        jumpRequested = false;
     }
 
-    // Input System (PlayerInput Behavior = Send Messages)
-    public void OnMove(InputValue value)
+    // ================================
+    // NEW INPUT METHODS (Unity Events)
+    // ================================
+    public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
-        moveInput = value.Get<Vector2>();
+        moveInput = ctx.ReadValue<Vector2>();
     }
 
-    public void OnJump(InputValue value)
+    public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
-        if (value.isPressed)
+        if (ctx.performed)
             jumpRequested = true;
     }
+    // ================================
 
     private void LockCursor(bool locked)
     {
@@ -161,7 +152,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // Allow toggling the cursor lock with ESC key
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             LockCursor(!isCursorLocked);

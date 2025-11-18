@@ -38,7 +38,7 @@ public class PlayerRespawn : MonoBehaviour
         }
     }
 
-    private void HandleDeath(FlagPickup.FlagDropCause cause = FlagPickup.FlagDropCause.Unknown, Transform killer = null)
+    public void HandleDeath(FlagPickup.FlagDropCause cause = FlagPickup.FlagDropCause.Unknown, Transform killer = null)
     {
         if (isRespawning) return;
 

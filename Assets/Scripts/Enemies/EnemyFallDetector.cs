@@ -30,6 +30,31 @@ public class EnemyFallDetector : MonoBehaviour
         }
     }
 
+    public void ForceKillDEBUG()
+    {
+        if (hasTriggered) return;
+
+        hasTriggered = true;
+
+        if (explosionSpawner != null)
+            explosionSpawner.SpawnChunkExplosion();
+
+        StartCoroutine(DisableAndNotify());
+    }
+
+    public void ForceKill()
+    {
+        if (hasTriggered) return;
+        hasTriggered = true;
+
+        // Spawn explosion
+        if (explosionSpawner != null)
+            explosionSpawner.SpawnChunkExplosion();
+
+        // Mirror fall-death behavior
+        StartCoroutine(DisableAndNotify());
+    }
+
     private System.Collections.IEnumerator DisableAndNotify()
     {
         yield return null; // wait 1 frame

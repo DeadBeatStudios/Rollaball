@@ -136,4 +136,22 @@ public class EnemySpawner : MonoBehaviour
         Debug.LogWarning("EnemySpawner: PhysicsFloor not found — using fallback bounds.");
         return new Bounds(Vector3.zero, new Vector3(10f, 1f, 8f));
     }
+    public void RespawnAllEnemiesDEBUG()
+    {
+        // Destroy all currently active enemies
+        foreach (var enemy in activeEnemies)
+        {
+            if (enemy != null)
+                Destroy(enemy);
+        }
+
+        activeEnemies.Clear();
+        originalSpawnPositions.Clear();
+
+        // Spawn the original amount of enemies
+        SpawnInitialEnemies();
+
+        Debug.Log("DEBUG: Respawned all enemies immediately.");
+    }
+
 }

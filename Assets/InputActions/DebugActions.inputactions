@@ -1,0 +1,115 @@
+{
+    "version": 1,
+    "name": "DebugActions",
+    "maps": [
+        {
+            "name": "DebugActions",
+            "id": "c1b9077f-f251-43ef-83d3-9f70b2066cd5",
+            "actions": [
+                {
+                    "name": "KillPlayer",
+                    "type": "Button",
+                    "id": "6bb89253-0b62-4b33-9c20-208f9dea9bbb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "KillEnemies",
+                    "type": "Button",
+                    "id": "f4a4dc59-5de9-49bb-8cc6-9b721da2e40d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ForceFlagDrop",
+                    "type": "Button",
+                    "id": "ef46dd58-a4b9-41ff-99d8-7cf416425fc3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TeleportPlayer",
+                    "type": "Button",
+                    "id": "eaed3592-c250-47f5-b4a7-ed69855892db",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RespawnEnemies",
+                    "type": "Button",
+                    "id": "eda952c4-f61e-4b9d-9ef5-37b24f612fcf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "31125dc1-63f4-4325-9e9b-de7d57ee87a1",
+                    "path": "<Keyboard>/f1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "KillPlayer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cd3c6b69-7096-4435-91ce-85f84f6809ba",
+                    "path": "<Keyboard>/f2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "KillEnemies",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "693323ea-ff73-4104-9289-dd320189c0b6",
+                    "path": "<Keyboard>/f3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ForceFlagDrop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e8a1b736-e6c7-4372-a7a8-e01f4e2b2f59",
+                    "path": "<Keyboard>/f4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TeleportPlayer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "201093ac-2bf1-467f-be55-2b044df62a9e",
+                    "path": "<Keyboard>/f5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RespawnEnemies",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
