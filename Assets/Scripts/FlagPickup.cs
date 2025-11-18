@@ -11,16 +11,13 @@ public class FlagPickup : MonoBehaviour
     }
 
     [Header("Attachment Settings")]
-    [Tooltip("Vertical offset above holder’s pivot when attached.")]
     [SerializeField] private float attachHeightOffset = 1.5f;
 
     [Header("Respawn Settings")]
-    [Tooltip("How far above the ground the flag respawns.")]
     [SerializeField] private float respawnHeightOffset = 0.5f;
     [SerializeField] private float edgePaddingPercent = 0.05f;
 
     [Header("Safety")]
-    [Tooltip("If the holder falls below this Y value, the flag will auto-drop and respawn.")]
     [SerializeField] private float autoDropY = -5f;
 
     private Transform holder;
@@ -31,7 +28,6 @@ public class FlagPickup : MonoBehaviour
     {
         initialWorldRotation = transform.rotation;
 
-        // Particle flag: static until collected
         if (TryGetComponent(out Rigidbody rb))
         {
             rb.isKinematic = true;
@@ -45,20 +41,19 @@ public class FlagPickup : MonoBehaviour
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
 
-        if (collected) return; // already held
+        if (collected) return;
 
-        holder = other.transform;
+        // Attach to visual model if present
+        Transform visualRoot = other.transform.Find("VisualModel");
+        holder = visualRoot != null ? visualRoot : other.transform;
+
         collected = true;
 
-        // Disable collider while held
         if (TryGetComponent(out Collider col))
             col.enabled = false;
 
-        // Attach to holder’s center (offset upward)
-        transform.SetParent(holder, worldPositionStays: true);
+        transform.SetParent(holder, true);
         transform.position = holder.position + Vector3.up * attachHeightOffset;
-
-        // Keep upright
         transform.rotation = initialWorldRotation;
 
         Debug.Log($"🏁 Flag collected by: {holder.name}");
@@ -68,22 +63,36 @@ public class FlagPickup : MonoBehaviour
     {
         if (!collected) return;
 
-        // If holder destroyed or disabled -> respawn
-        if (holder == null || !holder.gameObject.activeInHierarchy)
+        // Drop if holder is null or dead
+        if (holder == null || IsHolderDead())
         {
             DropAndRespawn(FlagDropCause.Unknown);
             return;
         }
 
-        // Follow holder with offset, stay upright
+        // Follow holder
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
 
-        // Fell off map? -> auto drop & respawn
+        // If holder falls off map
         if (holder.position.y < autoDropY)
         {
             DropAndRespawn(FlagDropCause.FellOffMap);
         }
+    }
+
+    private bool IsHolderDead()
+    {
+        // PLAYER CHECK
+        var player = holder.GetComponentInParent<PlayerRespawn>();
+        if (player != null)
+            return player.IsDead;
+
+        // ENEMY CHECK — enemy dies by disabling GameObject
+        if (!holder.gameObject.activeInHierarchy)
+            return true;
+
+        return false;
     }
 
     public void DropAndRespawn(FlagDropCause cause, Transform killer = null, Vector3? deathPosition = null)
@@ -91,11 +100,9 @@ public class FlagPickup : MonoBehaviour
         transform.SetParent(null);
         collected = false;
 
-        // Re-enable collider
         if (TryGetComponent(out Collider col))
             col.enabled = true;
 
-        // Keep kinematic
         if (TryGetComponent(out Rigidbody rb))
         {
             rb.linearVelocity = Vector3.zero;
@@ -108,37 +115,46 @@ public class FlagPickup : MonoBehaviour
 
         Vector3 spawnPos;
 
+        // Determine if the holder was a player
+        bool holderIsPlayer = holder != null && holder.CompareTag("Player");
+
         switch (cause)
         {
             case FlagDropCause.KilledByEnemy:
                 if (killer != null)
                 {
                     // Transfer instantly to killer
-                    holder = killer;
+                    Transform killerVisual = killer.Find("VisualModel");
+                    holder = killerVisual != null ? killerVisual : killer;
+
                     collected = true;
 
-                    transform.SetParent(killer, worldPositionStays: true);
-                    transform.position = killer.position + Vector3.up * attachHeightOffset;
+                    transform.SetParent(holder, true);
+                    transform.position = holder.position + Vector3.up * attachHeightOffset;
                     transform.rotation = initialWorldRotation;
 
-                    Debug.Log($"🏁 Flag transferred to {killer.name}");
+                    Debug.Log($"🏁 Flag transferred to {holder.name}");
                     return;
                 }
                 spawnPos = GetRandomSpawn();
                 break;
 
-            case FlagDropCause.SelfDestruct:
             case FlagDropCause.FellOffMap:
+                // Player falling off map -> ALWAYS use safe random spawn
+                spawnPos = GetRandomSpawn();
+                break;
+
+            case FlagDropCause.SelfDestruct:
             case FlagDropCause.Unknown:
-                spawnPos = deathPosition ?? GetRandomSpawn();
+                // Debug kill or unknown -> ALWAYS safe ground spawn
+                spawnPos = GetRandomSpawn();
                 break;
 
             default:
-                spawnPos = deathPosition ?? GetRandomSpawn();
+                spawnPos = GetRandomSpawn();
                 break;
         }
 
-        // ✅ Ensure flag spawns slightly above ground
         transform.position = spawnPos + Vector3.up * respawnHeightOffset;
         Debug.Log($"Flag respawned at {transform.position} due to {cause}");
     }
@@ -153,7 +169,6 @@ public class FlagPickup : MonoBehaviour
         float rz = Random.Range(floorBounds.min.z + padZ, floorBounds.max.z - padZ);
         float rayStartY = floorBounds.max.y + 5f;
 
-        // Detect ground height
         if (Physics.Raycast(new Vector3(rx, rayStartY, rz), Vector3.down, out RaycastHit hit, 10f, LayerMask.GetMask("Ground")))
             return hit.point;
 
@@ -166,11 +181,9 @@ public class FlagPickup : MonoBehaviour
         if (floor != null && floor.TryGetComponent(out BoxCollider col))
             return col.bounds;
 
-        Debug.LogWarning("PhysicsFloor not found — using fallback bounds.");
         return new Bounds(Vector3.zero, new Vector3(10f, 1f, 8f));
     }
 
-    // Helper accessors
     public bool IsHeldBy(Transform t) => holder != null && holder == t;
     public Transform CurrentHolder => holder;
     public bool IsHeld => holder != null;

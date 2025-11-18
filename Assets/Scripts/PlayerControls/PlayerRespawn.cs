@@ -5,9 +5,9 @@ public class PlayerRespawn : MonoBehaviour
 {
     [Header("Respawn Settings")]
     [Tooltip("Assign one or more spawn points here")]
-    public Transform[] spawnPoints;        // Multiple spawn options
-    public float fallThreshold = -10f;     // Y height that triggers death
-    public float respawnDelay = 1.5f;      // Delay before respawn
+    public Transform[] spawnPoints;
+    public float fallThreshold = -10f;
+    public float respawnDelay = 1.5f;
 
     [Header("Death Effects")]
     [Tooltip("Spawns chunk explosion & swaps player model")]
@@ -16,11 +16,13 @@ public class PlayerRespawn : MonoBehaviour
     private Rigidbody rb;
     private bool isRespawning = false;
 
+    // NEW — allows Flag to detect Holder death reliably
+    public bool IsDead { get; private set; } = false;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
 
-        // If no spawn points assigned, create one at start position
         if (spawnPoints == null || spawnPoints.Length == 0)
         {
             GameObject defaultSpawn = new GameObject("DefaultSpawnPoint");
@@ -31,7 +33,6 @@ public class PlayerRespawn : MonoBehaviour
 
     private void Update()
     {
-        // Detect death by falling below threshold
         if (!isRespawning && transform.position.y < fallThreshold)
         {
             HandleDeath(FlagPickup.FlagDropCause.FellOffMap);
@@ -42,7 +43,8 @@ public class PlayerRespawn : MonoBehaviour
     {
         if (isRespawning) return;
 
-        // 🔥 Spawn chunk explosion prefab and hide player model
+        IsDead = true;   // <-- CRITICAL FIX
+
         if (explosionSpawner != null)
             explosionSpawner.SpawnChunkExplosion();
 
@@ -58,11 +60,10 @@ public class PlayerRespawn : MonoBehaviour
 
         Debug.Log($"{gameObject.name} has died (cause: {cause}).");
 
-        // 🔹 Find the flag
+        // Flag handling
         FlagPickup flag = Object.FindAnyObjectByType<FlagPickup>();
         if (flag != null)
         {
-            // Only the flag holder triggers a drop
             if (flag.IsHeldBy(transform))
             {
                 flag.DropAndRespawn(cause, killer, transform.position);
@@ -72,10 +73,6 @@ public class PlayerRespawn : MonoBehaviour
             {
                 Debug.Log($"{gameObject.name} died, but they weren’t holding the flag.");
             }
-        }
-        else
-        {
-            Debug.LogWarning("No FlagPickup found in the scene!");
         }
 
         yield return new WaitForSeconds(respawnDelay);
@@ -87,13 +84,9 @@ public class PlayerRespawn : MonoBehaviour
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        // --- Pick random spawn point ---
         Transform spawn = spawnPoints[Random.Range(0, spawnPoints.Length)];
-
-        // --- Safe reposition ---
         Vector3 safePosition = spawn.position + Vector3.up * 0.5f;
 
-        // Optional: snap onto terrain
         if (Physics.Raycast(safePosition, Vector3.down, out RaycastHit hit, 2f))
         {
             safePosition = hit.point + Vector3.up * 0.5f;
@@ -102,9 +95,10 @@ public class PlayerRespawn : MonoBehaviour
         transform.position = safePosition;
         transform.rotation = spawn.rotation;
 
-        // ✔ Restore player model after death explosion
         if (explosionSpawner != null)
             explosionSpawner.RestorePlayerModel();
+
+        IsDead = false;   // <-- Reset after respawn
 
         Debug.Log($"{gameObject.name} respawned at {spawn.position}.");
 
