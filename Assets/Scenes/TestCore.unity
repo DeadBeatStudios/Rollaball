@@ -1661,7 +1661,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 24.99945, y: -1}
+  m_AnchoredPosition: {x: 24.99939, y: -1}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1634306842
@@ -2893,8 +2893,24 @@ PrefabInstance:
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 5588758321713824423, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: jumpForce
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 5588758321713824423, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: visualModel
+      value: 
+      objectReference: {fileID: 930238735}
+    - target: {fileID: 5588758321713824423, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
       propertyPath: groundLayer.m_Bits
-      value: 4294967295
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5588758321713824423, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: groundCheckDistance
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5588758321713824423, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: jumpCooldownSeconds
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 5919138668250432695, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
       propertyPath: m_Name
