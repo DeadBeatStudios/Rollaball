@@ -45,9 +45,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   enemyPrefab: {fileID: 5267770077472934122, guid: f8c7bc5187c41d1479ca38fbb0bf106d, type: 3}
-  spawnCount: 4
+  spawnCount: 0
   respawnOnDeath: 1
   respawnDelay: 1
   spawnLift: 0.8
   edgePaddingPercent: 0.1
-  playerTarget: {fileID: 0}
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0

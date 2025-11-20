@@ -55,8 +55,8 @@ MonoBehaviour:
   - {fileID: 1066547763954215324}
   - {fileID: 1705848778892673743}
   chunksAreChildren: 1
-  explosionForce: 12
-  explosionRadius: 3
+  explosionForce: 2
+  explosionRadius: 6
   upwardsModifier: 0.5
   randomForceJitter: 0.25
   randomTorque: 5

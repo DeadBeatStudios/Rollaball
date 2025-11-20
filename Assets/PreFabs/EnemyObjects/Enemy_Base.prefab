@@ -281,7 +281,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFallDetector
   fallThresholdY: -10
-  spawner: {fileID: 0}
+  spawner: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
   explosionSpawner: {fileID: 2574202967793689050}
 --- !u!114 &2574202967793689050
 MonoBehaviour:
@@ -296,5 +296,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChunkExplosionSpawner
   playerModelRoot: {fileID: 107728053623164529}
-  explosionChunkPrefab: {fileID: 0}
+  explosionChunkPrefab: {fileID: 1476351624188654985, guid: 3f5eb13b89f8a3d44b62cf5aac82e019, type: 3}
   playerMaterial: {fileID: 2100000, guid: f99c2f606e487bd4ba7c619b09a10f39, type: 2}
