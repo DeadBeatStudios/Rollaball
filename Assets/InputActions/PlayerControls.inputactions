@@ -34,15 +34,6 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "RotateCamera",
-                    "type": "Value",
-                    "id": "5ae764c7-38b3-45bb-8af4-04166f8e5ba3",
-                    "expectedControlType": "Axis",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
                     "name": "Zoom",
                     "type": "Value",
                     "id": "92b2f016-0c70-4d44-bdbb-d5ef6c7f43f9",
@@ -50,6 +41,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "LockOn",
+                    "type": "Button",
+                    "id": "be798615-ca1b-4f76-958f-13d8b97cfacf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -165,23 +165,23 @@
                 },
                 {
                     "name": "",
-                    "id": "54af5e69-4f08-4421-9692-eb17877a3852",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "Hold(duration=0.1,pressPoint=0.1)",
-                    "processors": "",
-                    "groups": "",
-                    "action": "RotateCamera",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "2c8215f2-d565-44c3-8b46-ec2b010ebcfb",
                     "path": "<Mouse>/scroll/y",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Zoom",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "68a89592-8565-4b1a-8b78-d3b72ab34af7",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LockOn",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
