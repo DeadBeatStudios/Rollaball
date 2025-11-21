@@ -396,7 +396,7 @@ GameObject:
   - component: {fileID: 8495593634423343559}
   - component: {fileID: 961351831974327327}
   m_Layer: 7
-  m_Name: Player 1
+  m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -641,11 +641,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LockOnSystem
   lockOnRange: 25
   lockOnAngle: 60
-  cameraTrackingWeight: 0.6
-  cameraTransform: {fileID: 9195951345357137867}
   targetLayers:
     serializedVersion: 2
-    m_Bits: 192
+    m_Bits: 0
+  enableCameraTracking: 1
+  lockOnSnapStrength: 0.8
+  lockOnDampingMultiplier: 0.4
+  cineCamera: {fileID: 5012492912428318775}
+  cameraTransform: {fileID: 9195951345357137867}
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   highlightIntensity: 2
   showDebug: 1

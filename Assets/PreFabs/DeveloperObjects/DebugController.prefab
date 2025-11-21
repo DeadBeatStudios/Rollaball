@@ -1,0 +1,176 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &9081976394738434340
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5572500887655417952}
+  - component: {fileID: 6679302243683158931}
+  - component: {fileID: 8034650008461297925}
+  - component: {fileID: 5853816117591039961}
+  m_Layer: 0
+  m_Name: DebugController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5572500887655417952
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9081976394738434340}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.33701, y: 0, z: 3.29825}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6679302243683158931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9081976394738434340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79af79868cbcd564fa17335b760eda65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DebugControls
+  playerRespawn: {fileID: 0}
+  playerExplosion: {fileID: 8034650008461297925}
+  killAllEnemies: 1
+--- !u!114 &8034650008461297925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9081976394738434340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e58fc9a8a9325644868b9ffaee29602, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChunkExplosionSpawner
+  playerModelRoot: {fileID: 0}
+  explosionChunkPrefab: {fileID: 0}
+  playerMaterial: {fileID: 0}
+--- !u!114 &5853816117591039961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9081976394738434340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 4a3e929d22f76c44a9ee29cb148c029d, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6679302243683158931}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnKillPlayer
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 6bb89253-0b62-4b33-9c20-208f9dea9bbb
+    m_ActionName: 'DebugActions/KillPlayer[/Keyboard/f1]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6679302243683158931}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnKillEnemies
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: f4a4dc59-5de9-49bb-8cc6-9b721da2e40d
+    m_ActionName: 'DebugActions/KillEnemies[/Keyboard/f2]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6679302243683158931}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnForceFlagDrop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: ef46dd58-a4b9-41ff-99d8-7cf416425fc3
+    m_ActionName: 'DebugActions/ForceFlagDrop[/Keyboard/f3]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6679302243683158931}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnTeleportPlayer
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: eaed3592-c250-47f5-b4a7-ed69855892db
+    m_ActionName: 'DebugActions/TeleportPlayer[/Keyboard/f4]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6679302243683158931}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnRespawnEnemies
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: eda952c4-f61e-4b9d-9ef5-37b24f612fcf
+    m_ActionName: 'DebugActions/RespawnEnemies[/Keyboard/f5]'
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: DebugActions
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
