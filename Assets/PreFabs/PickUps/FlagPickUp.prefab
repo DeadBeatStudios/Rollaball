@@ -104,14 +104,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 812618f92e07c1c4c8b4bfacc83526dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FlagPickup
-  offset: {x: 0, y: 0.86, z: 0}
-  floatAmplitude: 0
-  floatSpeed: 0
-  rotationSpeed: 45
-  shrinkScale: 1
-  shrinkSpeed: 10
+  attachHeightOffset: 0.82
+  respawnHeightOffset: 1.44
   edgePaddingPercent: 0.1
-  spawnLift: 0.8
+  maxSpawnSlope: 30
+  maxSpawnAttempts: 10
+  autoDropY: -5
+  showDebugLogs: 1
 --- !u!1001 &8607343816357816190
 PrefabInstance:
   m_ObjectHideFlags: 0

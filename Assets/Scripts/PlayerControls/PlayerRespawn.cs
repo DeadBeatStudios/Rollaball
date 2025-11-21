@@ -86,7 +86,7 @@ public class PlayerRespawn : MonoBehaviour
         IsDead = false;   // <-- Reset after respawn
 
         Debug.Log($"{gameObject.name} respawned at {spawn.position}.");
-
         isRespawning = false;
     }
+
 }

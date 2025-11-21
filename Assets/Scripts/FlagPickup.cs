@@ -1,5 +1,10 @@
 ﻿using UnityEngine;
+using System.Linq;
 
+/// <summary>
+/// Flag pickup system with terrain-first spawning.
+/// Supports Unity Terrain, tagged ground objects, and graceful fallbacks.
+/// </summary>
 public class FlagPickup : MonoBehaviour
 {
     public enum FlagDropCause
@@ -21,24 +26,43 @@ public class FlagPickup : MonoBehaviour
     [Tooltip("Percent of arena bounds to avoid near edges when random spawning.")]
     [SerializeField, Range(0f, 0.5f)] private float edgePaddingPercent = 0.05f;
 
+    [Header("Terrain Spawn Validation")]
+    [Tooltip("Maximum slope angle (degrees) for valid spawn points. Set to 90 to disable.")]
+    [SerializeField, Range(0f, 90f)] private float maxSpawnSlope = 30f;
+
+    [Tooltip("Number of attempts to find valid flat spawn location.")]
+    [SerializeField] private int maxSpawnAttempts = 10;
+
     [Header("Safety")]
     [Tooltip("If the holder falls below this Y value, the flag will auto-drop and respawn.")]
     [SerializeField] private float autoDropY = -5f;
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugLogs = true;
+
+    // State
     private Transform holder;
     private bool isHeld = false;
     private Quaternion initialWorldRotation;
+
+    // Cached references (performance optimization)
+    private GameObject cachedGroundObject;
+    private Bounds cachedGroundBounds;
+    private bool groundBoundsCached = false;
 
     private void Start()
     {
         initialWorldRotation = transform.rotation;
 
-        // Ensure the flag behaves like a VFX object, not a physics projectile.
+        // Ensure the flag behaves like a pickup, not physics-driven
         if (TryGetComponent(out Rigidbody rb))
         {
             rb.isKinematic = true;
             rb.useGravity = false;
         }
+
+        // 🔥 ENHANCEMENT: Cache ground bounds at start
+        CacheGroundBounds();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -47,42 +71,37 @@ public class FlagPickup : MonoBehaviour
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
 
-        if (isHeld) return; // already attached to someone
+        if (isHeld) return;
 
-        // Prefer a child "VisualModel" if present, otherwise use root
+        // Prefer a child "VisualModel" if present
         Transform visualRoot = other.transform.Find("VisualModel");
         holder = visualRoot != null ? visualRoot : other.transform;
 
         isHeld = true;
 
-        // Disable our own collider while held
         if (TryGetComponent(out Collider col))
             col.enabled = false;
 
-        // ⭐ CRITICAL FIX: DO NOT parent the flag - just follow it manually
-        // This prevents the flag from becoming inactive when VisualModel is hidden
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
 
-        Debug.Log($"🏁 Flag collected by: {holder.name}");
+        if (showDebugLogs)
+            Debug.Log($"🏁 Flag collected by: {holder.name}");
     }
 
     private void LateUpdate()
     {
         if (!isHeld) return;
 
-        // If holder is gone or considered dead → drop + respawn.
         if (HolderMissingOrDead())
         {
             RespawnAtRandom();
             return;
         }
 
-        // Follow holder, stay upright
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
 
-        // If holder falls below threshold → drop + respawn
         if (holder.position.y < autoDropY)
         {
             RespawnAtRandom();
@@ -94,46 +113,33 @@ public class FlagPickup : MonoBehaviour
         if (holder == null)
             return true;
 
-        // If this holder belongs to a player, consult PlayerRespawn
         PlayerRespawn player = holder.GetComponentInParent<PlayerRespawn>();
-        if (player != null)
-        {
-            if (player.IsDead)
-                return true;
-        }
+        if (player != null && player.IsDead)
+            return true;
 
-        // For enemies or other entities, treat inactive hierarchy as dead
         if (!holder.gameObject.activeInHierarchy)
             return true;
 
         return false;
     }
 
-    /// <summary>
-    /// Public API kept for compatibility.
-    /// Internally we now always do a clean random respawn.
-    /// </summary>
     public void DropAndRespawn(
         FlagDropCause cause = FlagDropCause.Unknown,
         Transform killer = null,
         Vector3? deathPosition = null)
     {
-        // Ignore killer / deathPosition for now – keep behavior simple and robust.
         RespawnAtRandom();
     }
 
     private void RespawnAtRandom()
     {
-        // ⭐ CRITICAL FIX: Ensure parent is cleared (in case it was set elsewhere)
         transform.SetParent(null);
         holder = null;
         isHeld = false;
 
-        // Re-enable collider so it can be picked up again
         if (TryGetComponent(out Collider col))
             col.enabled = true;
 
-        // Keep rigidbody safe & kinematic
         if (TryGetComponent(out Rigidbody rb))
         {
             rb.linearVelocity = Vector3.zero;
@@ -142,53 +148,252 @@ public class FlagPickup : MonoBehaviour
             rb.useGravity = false;
         }
 
-        // Pick a safe ground position
         Vector3 groundPos = GetRandomSpawn();
         transform.position = groundPos + Vector3.up * respawnHeightOffset;
         transform.rotation = initialWorldRotation;
 
-        Debug.Log($"🏁 Flag respawned at {transform.position}");
+        if (showDebugLogs)
+            Debug.Log($"🏁 Flag respawned at {transform.position}");
     }
 
+    // ============================================================
+    // TERRAIN-FIRST GROUND SYSTEM (ENHANCED)
+    // ============================================================
+
+    /// <summary>
+    /// Cache ground bounds on startup for performance
+    /// </summary>
+    private void CacheGroundBounds()
+    {
+        cachedGroundBounds = GetGroundBounds();
+        groundBoundsCached = true;
+
+        if (showDebugLogs)
+            Debug.Log($"FlagPickup: Cached ground bounds {cachedGroundBounds}");
+    }
+
+    /// <summary>
+    /// Public method to refresh ground bounds if level changes at runtime
+    /// </summary>
+    public void RefreshGroundBounds()
+    {
+        groundBoundsCached = false;
+        CacheGroundBounds();
+
+        if (showDebugLogs)
+            Debug.Log("FlagPickup: Ground bounds refreshed");
+    }
+
+    /// <summary>
+    /// Get random spawn location with slope validation
+    /// </summary>
     private Vector3 GetRandomSpawn()
     {
-        Bounds floorBounds = GetPhysicsFloorBounds();
-        float padX = floorBounds.extents.x * edgePaddingPercent;
-        float padZ = floorBounds.extents.z * edgePaddingPercent;
+        Bounds arena = groundBoundsCached ? cachedGroundBounds : GetGroundBounds();
 
-        float rx = Random.Range(floorBounds.min.x + padX, floorBounds.max.x - padX);
-        float rz = Random.Range(floorBounds.min.z + padZ, floorBounds.max.z - padZ);
-        float rayStartY = floorBounds.max.y + 5f;
+        float padX = arena.extents.x * edgePaddingPercent;
+        float padZ = arena.extents.z * edgePaddingPercent;
 
-        Vector3 rayOrigin = new Vector3(rx, rayStartY, rz);
+        // 🔥 ENHANCEMENT: Attempt to find valid flat spawn location
+        for (int attempt = 0; attempt < maxSpawnAttempts; attempt++)
+        {
+            float rx = Random.Range(arena.min.x + padX, arena.max.x - padX);
+            float rz = Random.Range(arena.min.z + padZ, arena.max.z - padZ);
+            Vector3 testPoint = new Vector3(rx, arena.max.y + 2f, rz);
 
-        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 10f, LayerMask.GetMask("Ground")))
-            return hit.point;
+            float ry = GetGroundHeight(testPoint);
+            Vector3 spawnPos = new Vector3(rx, ry, rz);
 
-        // Fallback if raycast misses
-        return new Vector3(rx, floorBounds.max.y, rz);
+            // 🔥 ENHANCEMENT: Validate slope angle for terrain spawns
+            if (Terrain.activeTerrain != null && maxSpawnSlope < 90f)
+            {
+                float slope = GetSlopeAtPosition(spawnPos);
+
+                if (slope <= maxSpawnSlope)
+                {
+                    if (showDebugLogs && attempt > 0)
+                        Debug.Log($"FlagPickup: Found valid spawn after {attempt + 1} attempts (slope: {slope:F1}°)");
+                    return spawnPos;
+                }
+
+                if (showDebugLogs && attempt == maxSpawnAttempts - 1)
+                    Debug.LogWarning($"FlagPickup: All {maxSpawnAttempts} spawn attempts exceeded max slope {maxSpawnSlope}°");
+            }
+            else
+            {
+                // No terrain or slope check disabled, accept immediately
+                return spawnPos;
+            }
+        }
+
+        // 🔥 ENHANCEMENT: Fallback to arena center if all attempts failed
+        Vector3 centerPos = new Vector3(arena.center.x, GetGroundHeight(arena.center), arena.center.z);
+
+        if (showDebugLogs)
+            Debug.LogWarning($"FlagPickup: Using fallback center spawn at {centerPos}");
+
+        return centerPos;
     }
 
-    private Bounds GetPhysicsFloorBounds()
+    /// <summary>
+    /// Get ground bounds with terrain-first priority and combined multi-object support
+    /// </summary>
+    private Bounds GetGroundBounds()
     {
-        GameObject floor = GameObject.Find("PhysicsFloor");
-        if (floor != null && floor.TryGetComponent(out BoxCollider col))
-            return col.bounds;
+        // 1. If terrain exists, use its world bounds
+        if (Terrain.activeTerrain != null)
+        {
+            Terrain t = Terrain.activeTerrain;
+            Bounds b = t.terrainData.bounds;
+            b.center += t.transform.position;
 
-        Debug.LogWarning("FlagPickup: PhysicsFloor not found — using fallback bounds.");
-        return new Bounds(Vector3.zero, new Vector3(10f, 1f, 8f));
+            if (showDebugLogs)
+                Debug.Log($"FlagPickup: Using Terrain bounds {b}");
+
+            return b;
+        }
+
+        // 🔥 ENHANCEMENT: 2. Combine ALL Ground-tagged objects
+        GameObject[] groundObjects = GameObject.FindGameObjectsWithTag("Ground");
+        Collider[] groundColliders = groundObjects
+            .Select(go => go.GetComponent<Collider>())
+            .Where(col => col != null)
+            .ToArray();
+
+        if (groundColliders.Length > 0)
+        {
+            Bounds combinedBounds = groundColliders[0].bounds;
+
+            for (int i = 1; i < groundColliders.Length; i++)
+            {
+                combinedBounds.Encapsulate(groundColliders[i].bounds);
+            }
+
+            if (showDebugLogs)
+                Debug.Log($"FlagPickup: Combined {groundColliders.Length} Ground-tagged colliders, bounds: {combinedBounds}");
+
+            return combinedBounds;
+        }
+
+        // 3. Final fallback
+        if (showDebugLogs)
+            Debug.LogWarning("FlagPickup: No terrain or Ground-tagged objects found, using fallback bounds");
+
+        return new Bounds(Vector3.zero, new Vector3(10f, 1f, 10f));
     }
 
-    // Helper accessors
+    /// <summary>
+    /// Get ground height at world position with terrain-first sampling
+    /// </summary>
+    private float GetGroundHeight(Vector3 worldPoint)
+    {
+        // Terrain-first height sampling
+        if (Terrain.activeTerrain != null)
+        {
+            Terrain t = Terrain.activeTerrain;
+            return t.SampleHeight(worldPoint) + t.transform.position.y;
+        }
+
+        // 🔥 FIX: Use Ground layer mask for raycast
+        if (Physics.Raycast(worldPoint, Vector3.down, out RaycastHit hit, 50f, LayerMask.GetMask("Ground")))
+        {
+            return hit.point.y;
+        }
+
+        // 🔥 ENHANCEMENT: Better fallback with warning
+        if (showDebugLogs)
+            Debug.LogWarning($"FlagPickup: No ground found at {worldPoint}, using fallback height 0");
+
+        return 0f;
+    }
+
+    /// <summary>
+    /// Get slope angle (in degrees) at world position on active terrain
+    /// </summary>
+    private float GetSlopeAtPosition(Vector3 worldPos)
+    {
+        if (Terrain.activeTerrain == null)
+            return 0f;
+
+        Terrain t = Terrain.activeTerrain;
+        TerrainData data = t.terrainData;
+        Vector3 terrainPos = t.transform.position;
+
+        // Convert world position to normalized terrain coordinates (0-1)
+        float normalizedX = (worldPos.x - terrainPos.x) / data.size.x;
+        float normalizedZ = (worldPos.z - terrainPos.z) / data.size.z;
+
+        // Clamp to terrain bounds
+        normalizedX = Mathf.Clamp01(normalizedX);
+        normalizedZ = Mathf.Clamp01(normalizedZ);
+
+        // Get steepness at this position
+        return data.GetSteepness(normalizedX, normalizedZ);
+    }
+
+    // ============================================================
+    // PUBLIC API
+    // ============================================================
+
+    /// <summary>
+    /// Check if flag is held by specific transform
+    /// </summary>
     public bool IsHeldBy(Transform t)
     {
         if (!isHeld || holder == null || t == null)
             return false;
 
-        // True if the holder is this transform or a child of it
         return holder == t || holder.IsChildOf(t);
     }
 
+    /// <summary>
+    /// Current holder transform (null if not held)
+    /// </summary>
     public Transform CurrentHolder => holder;
+
+    /// <summary>
+    /// Is flag currently being held
+    /// </summary>
     public bool IsHeld => isHeld;
+
+    // ============================================================
+    // DEBUG VISUALIZATION
+    // ============================================================
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!Application.isPlaying)
+            return;
+
+        // Draw ground bounds
+        if (groundBoundsCached)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireCube(cachedGroundBounds.center, cachedGroundBounds.size);
+        }
+
+        // Draw padded spawn area
+        if (groundBoundsCached)
+        {
+            float padX = cachedGroundBounds.extents.x * edgePaddingPercent;
+            float padZ = cachedGroundBounds.extents.z * edgePaddingPercent;
+
+            Vector3 paddedSize = new Vector3(
+                cachedGroundBounds.size.x - (padX * 2f),
+                cachedGroundBounds.size.y,
+                cachedGroundBounds.size.z - (padZ * 2f)
+            );
+
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(cachedGroundBounds.center, paddedSize);
+        }
+
+        // Draw attachment point if held
+        if (isHeld && holder != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawLine(holder.position, transform.position);
+            Gizmos.DrawWireSphere(holder.position + Vector3.up * attachHeightOffset, 0.3f);
+        }
+    }
 }
