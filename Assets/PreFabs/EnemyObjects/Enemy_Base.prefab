@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8711023098106510381}
   - component: {fileID: 2631987107568307891}
   - component: {fileID: 4479843564328953600}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: VisualModel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +105,8 @@ GameObject:
   - component: {fileID: 8609381514511259401}
   - component: {fileID: -1892484579140901611}
   - component: {fileID: 2574202967793689050}
-  m_Layer: 6
+  - component: {fileID: 4843871582936143101}
+  m_Layer: 7
   m_Name: Enemy_Base
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -300,3 +301,16 @@ MonoBehaviour:
   playerModelRoot: {fileID: 107728053623164529}
   explosionChunkPrefab: {fileID: 1476351624188654985, guid: 3f5eb13b89f8a3d44b62cf5aac82e019, type: 3}
   playerMaterial: {fileID: 2100000, guid: f99c2f606e487bd4ba7c619b09a10f39, type: 2}
+--- !u!114 &4843871582936143101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5267770077472934122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e53cfa631d653b74e814db971c2fab20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerScore
+  playerID: 0

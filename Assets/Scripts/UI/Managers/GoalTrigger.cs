@@ -5,31 +5,29 @@ public class GoalTrigger : MonoBehaviour
     [Header("Scoring")]
     [SerializeField] private int pointsPerScore = 100;
 
+    [Header("References")]
+    [SerializeField] private FlagPickup flag;  // ← Drag the FlagPickup prefab or instance here
+
     private void OnTriggerEnter(Collider other)
     {
-        // Only react to players
-        if (!other.CompareTag("Player"))
+        // Must have a PlayerScore component (Player or Enemy)
+        if (!other.TryGetComponent<PlayerScore>(out var scorer))
             return;
 
-        // Does this player have PlayerScore?
-        PlayerScore scorer = other.GetComponent<PlayerScore>();
-        if (scorer == null)
-            return;
-
-        // Does the player currently hold the flag?
-        FlagPickup flag = FindObjectOfType<FlagPickup>();
         if (flag == null)
+        {
+            Debug.LogError("GoalTrigger: No Flag assigned!");
             return;
+        }
 
+        // Must be holding the flag
         if (!flag.IsHeldBy(other.transform))
             return;
 
-        // Award points
         scorer.AddPoints(pointsPerScore);
 
-        // Reset the flag
-        flag.DropAndRespawn(FlagPickup.FlagDropCause.SelfDestruct);
+        flag.DropAndRespawn();
 
-        Debug.Log($"🏁 Player {scorer.playerID} scored! +{pointsPerScore} points");
+        Debug.Log($"🏁 {other.name} scored! +{pointsPerScore}");
     }
 }
