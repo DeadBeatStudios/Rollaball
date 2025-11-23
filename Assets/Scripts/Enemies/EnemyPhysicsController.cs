@@ -5,7 +5,11 @@ public class EnemyPhysicsController : MonoBehaviour
 {
     [Header("Targeting")]
     public Transform target;
-    public FlagPickup flag; // reference to FlagPickup in scene
+    public FlagPickup flag;  // auto-found on Awake
+
+    [Header("Flag Scoring")]
+    public Transform goalTarget;        // Set in Inspector
+    public float scoreDistance = 2.0f;  // Distance required to score
 
     [Header("Movement")]
     public float moveForce = 45f;
@@ -31,13 +35,13 @@ public class EnemyPhysicsController : MonoBehaviour
     public float edgeCheckDistance = 3.5f;
     public float edgeBrakeForce = 8f;
     public float safeTurnForce = 25f;
-    public float edgeRecoveryDelay = 1.5f; // seconds to wait before chasing again
+    public float edgeRecoveryDelay = 1.5f;
 
     [Header("AI Tuning")]
     public float predictionTime = 0.35f;
     public float closeBrakeDistance = 2.5f;
 
-    // --- Private State ---
+    // Private State
     private Rigidbody rb;
     private Vector3 desiredDirection;
     private bool avoidingEdge = false;
@@ -55,51 +59,51 @@ public class EnemyPhysicsController : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
-        // Auto-find the flag if not assigned
         if (flag == null)
         {
-            FlagPickup foundFlag = Object.FindAnyObjectByType<FlagPickup>();
-            if (foundFlag != null)
-            {
-                flag = foundFlag;
-                Debug.Log($"{name}: Found flag automatically ({flag.name})");
-            }
-            else
-            {
-                Debug.LogWarning($"{name}: No FlagPickup found in scene!");
-            }
+            flag = Object.FindAnyObjectByType<FlagPickup>();
+            if (flag != null)
+                Debug.Log($"{name}: Found FlagPickup automatically.");
         }
     }
 
     private void FixedUpdate()
     {
-        // --- Dynamic Target Selection ---
+        // ============================================================
+        // FLAG STATE DRIVES TARGET SELECTION
+        // ============================================================
         if (flag != null)
         {
             if (!flag.IsHeld)
             {
-                // Flag is free on the ground
+                // Flag free on ground → chase it
                 target = flag.transform;
             }
             else
             {
                 Transform holder = flag.CurrentHolder;
+
                 if (holder != null && holder != transform)
                 {
-                    // Chase whoever has the flag
+                    // Someone else has flag → chase them
                     target = holder;
                 }
                 else
                 {
-                    // We are holding the flag, stop chasing
-                    target = null;
+                    // WE have the flag → go to goal
+                    if (goalTarget != null)
+                        target = goalTarget;
+                    else
+                        target = null;
                 }
             }
         }
 
         if (!target) return;
 
-        // --- Predictive Targeting ---
+        // ============================================================
+        // PREDICTIVE TARGETING
+        // ============================================================
         Vector3 targetVel = Vector3.zero;
         if (target.TryGetComponent<Rigidbody>(out var targetRb))
             targetVel = targetRb.linearVelocity;
@@ -109,43 +113,33 @@ public class EnemyPhysicsController : MonoBehaviour
         float distance = toTarget.magnitude;
         Vector3 seekDir = toTarget.normalized;
 
-        // --- Helmet-Cam Edge Detection (velocity-based, slight upward tilt) ---
+        // ============================================================
+        // EDGE DETECTION
+        // ============================================================
         float speed = rb.linearVelocity.magnitude;
         if (speed < 0.1f) speed = 0.1f;
 
         float speedRatio = Mathf.Clamp01(speed / maxSpeed);
         float lookDistance = Mathf.Lerp(edgeCheckDistance, edgeCheckDistance * 3f, speedRatio);
 
-        // Raise origin slightly higher
-        Vector3 headHeightOffset = Vector3.up * (radius + 1.0f);
-        Vector3 origin = transform.position + headHeightOffset;
+        Vector3 headOffset = Vector3.up * (radius + 1.0f);
+        Vector3 origin = transform.position + headOffset;
 
-        // Movement direction (not rotation)
         Vector3 moveDir = rb.linearVelocity.sqrMagnitude > 0.01f
             ? rb.linearVelocity.normalized
             : transform.forward;
 
-        // Slightly upward angled rays
         float verticalTilt = -0.25f;
         Vector3 forwardDown = (moveDir + Vector3.up * verticalTilt).normalized;
         Vector3 leftDown = (Quaternion.Euler(0, -25f, 0) * moveDir + Vector3.up * verticalTilt).normalized;
         Vector3 rightDown = (Quaternion.Euler(0, 25f, 0) * moveDir + Vector3.up * verticalTilt).normalized;
 
-        // Perform raycasts
-        bool centerHit = Physics.Raycast(origin, forwardDown, out RaycastHit hitC, lookDistance, groundMask);
-        bool leftHit = Physics.Raycast(origin, leftDown, out RaycastHit hitL, lookDistance, groundMask);
-        bool rightHit = Physics.Raycast(origin, rightDown, out RaycastHit hitR, lookDistance, groundMask);
+        bool centerHit = Physics.Raycast(origin, forwardDown, out _, lookDistance, groundMask);
+        bool leftHit = Physics.Raycast(origin, leftDown, out _, lookDistance, groundMask);
+        bool rightHit = Physics.Raycast(origin, rightDown, out _, lookDistance, groundMask);
 
-        // Combine
         _groundDetected = centerHit || leftHit || rightHit;
 
-        // Debug visualize
-        Color rayColor = _groundDetected ? Color.green : Color.red;
-        Debug.DrawRay(origin, forwardDown * lookDistance, rayColor);
-        Debug.DrawRay(origin, leftDown * lookDistance, rayColor);
-        Debug.DrawRay(origin, rightDown * lookDistance, rayColor);
-
-        // --- Edge Detection Logic ---
         if (!_groundDetected)
         {
             if (!avoidingEdge)
@@ -155,11 +149,9 @@ public class EnemyPhysicsController : MonoBehaviour
                 Debug.Log($"{name}: ⚠️ Avoiding edge!");
             }
 
-            // Brake hard proportional to speed
             float brakeStrength = Mathf.Lerp(edgeBrakeForce, edgeBrakeForce * 2f, speedRatio);
             rb.AddForce(-rb.linearVelocity * brakeStrength * Time.fixedDeltaTime, ForceMode.Acceleration);
 
-            // Turn back toward last safe direction
             Vector3 avoidDir = Vector3.Lerp(-moveDir, lastSafeDirection, 0.6f);
             desiredDirection = Vector3.Lerp(desiredDirection, avoidDir, 0.8f);
         }
@@ -169,57 +161,74 @@ public class EnemyPhysicsController : MonoBehaviour
             {
                 edgeTimer -= Time.fixedDeltaTime;
                 if (edgeTimer <= 0f)
-                {
                     avoidingEdge = false;
-                    Debug.Log($"{name}: ✅ Back to chase mode!");
-                }
             }
 
             lastSafeDirection = moveDir;
         }
 
-        // --- Obstacle Avoidance ---
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit obstacleHit, obstacleCheckDistance, obstacleMask))
+        // ============================================================
+        // OBSTACLE AVOIDANCE
+        // ============================================================
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, obstacleCheckDistance, obstacleMask))
         {
-            Vector3 avoidDir = Vector3.Reflect(seekDir, obstacleHit.normal);
+            Vector3 avoidDir = Vector3.Reflect(seekDir, hit.normal);
             seekDir = Vector3.Lerp(seekDir, avoidDir, 0.9f);
         }
 
-        // --- Smooth Steering ---
+        // ============================================================
+        // MOVEMENT STEERING
+        // ============================================================
         float turnRate = avoidingEdge ? turnSharpness * 0.4f : turnSharpness;
         desiredDirection = Vector3.Lerp(desiredDirection, seekDir, Time.fixedDeltaTime * turnRate);
         desiredDirection.y = 0f;
         desiredDirection.Normalize();
 
-        // --- Steering Force ---
         Vector3 horizontalVel = rb.linearVelocity;
         horizontalVel.y = 0f;
+
         Vector3 steering = (desiredDirection - horizontalVel.normalized) * steerResponsiveness;
         steering.y = 0f;
 
-        // --- Movement Force ---
         float speedMultiplier = avoidingEdge ? 0.2f : 1f;
         float currentSpeed = horizontalVel.magnitude;
+
         if (currentSpeed < maxSpeed)
             rb.AddForce((desiredDirection * moveForce * speedMultiplier + steering) * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
-        // --- Brake when close to target ---
         if (distance < closeBrakeDistance)
             rb.linearVelocity *= 0.97f;
 
-        // --- Clamp vertical drift ---
         Vector3 vel = rb.linearVelocity;
         if (vel.y > 0.05f)
             vel.y = Mathf.Lerp(vel.y, 0f, 0.5f);
+
         rb.linearVelocity = vel;
+
+        // ============================================================
+        // SCORING LOGIC (NEW)
+        // ============================================================
+        if (flag != null && flag.IsHeldBy(transform) && goalTarget != null)
+        {
+            if (Vector3.Distance(transform.position, goalTarget.position) < scoreDistance)
+            {
+                if (TryGetComponent<PlayerScore>(out var ps))
+                    ps.AddPoints(1);
+
+                Debug.Log($"{name} scored a point!");
+
+                flag.DropAndRespawn();
+                target = null;
+            }
+        }
     }
 
     private void OnDrawGizmosSelected()
     {
         if (Application.isPlaying)
         {
-            Color rayColor = _groundDetected ? Color.green : Color.red;
-            Gizmos.color = rayColor;
+            Color c = _groundDetected ? Color.green : Color.red;
+            Gizmos.color = c;
             Gizmos.DrawSphere(transform.position + Vector3.up * (radius + 1.0f), 0.1f);
         }
     }
