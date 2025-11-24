@@ -1,44 +1,66 @@
-﻿using UnityEngine;
-using UnityEngine.InputSystem;   // REQUIRED for new Input System
+﻿using System.Collections;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PauseMenu : MonoBehaviour
 {
-    [Header("Menu")]
-    public GameObject pauseMenuUI;
-
-    [Header("Scene Loading")]
-    public SceneLoader sceneLoader;
-
-    [Header("Music Timer Reference")]
-    [SerializeField] private MusicCountdownUI musicCountdown;  // auto-assigned if null
+    [Header("Pause Menu UI")]
+    [SerializeField] private GameObject pauseMenuUI;
 
     private bool isPaused = false;
+    private PlayerInput playerInput;
+    private MusicCountdownUI musicCountdownUI;
 
     private void Awake()
     {
-        // Auto-assign the MusicCountdownUI if not set
-        if (musicCountdown == null)
-        {
-            musicCountdown = FindAnyObjectByType<MusicCountdownUI>();
-        }
+        playerInput = FindAnyObjectByType<PlayerInput>();
+        musicCountdownUI = FindAnyObjectByType<MusicCountdownUI>();
+
+        if (pauseMenuUI != null)
+            pauseMenuUI.SetActive(false);
     }
 
-    // Input System callback (Esc / Start button)
-    public void OnPause(InputAction.CallbackContext context)
+    private void OnEnable()
     {
-        if (!context.performed)
+        if (playerInput != null)
+            playerInput.actions["Pause"].performed += OnPausePerformed;
+    }
+
+    private void OnDisable()
+    {
+        if (playerInput != null)
+            playerInput.actions["Pause"].performed -= OnPausePerformed;
+    }
+
+    private void OnPausePerformed(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed)
             return;
 
-        if (isPaused)
-            Resume();
-        else
-        {
-            // 🔥 Pause audio BEFORE UI opens (instant freeze)
-            if (musicCountdown != null)
-                musicCountdown.PauseTimer(true);
+        if (isPaused) Resume();
+        else Pause();
+    }
 
-            Pause();
-        }
+    private void Pause()
+    {
+        StartCoroutine(PauseSequence());
+    }
+
+    private IEnumerator PauseSequence()
+    {
+        Time.timeScale = 0f;
+        isPaused = true;
+
+        if (musicCountdownUI != null)
+            musicCountdownUI.PauseTimer(true);
+
+        yield return null; // Allow TMP/Canvas to rebuild
+
+        pauseMenuUI.SetActive(true);
+
+        // Unlock cursor
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void Resume()
@@ -47,25 +69,25 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
         isPaused = false;
 
-        // 🔥 Resume timer + music
-        if (musicCountdown != null)
-            musicCountdown.PauseTimer(false);
+        if (musicCountdownUI != null)
+            musicCountdownUI.PauseTimer(false);
+
+        // Re-lock cursor
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
-    public void Pause()
+    public void RestartLevel()
     {
-        pauseMenuUI.SetActive(true);
-        Time.timeScale = 0f;
-        isPaused = true;
-
-        // (Music is already paused instantly above)
+        Time.timeScale = 1f;
+        isPaused = false;
+        // SceneLoader.Instance.LoadScene("AshenPeaks");
     }
 
     public void QuitToMenu()
     {
-        // Restore timescale before changing scenes
         Time.timeScale = 1f;
-
-        sceneLoader.LoadScene("MainMenu");
+        isPaused = false;
+        // SceneLoader.Instance.LoadScene("MainMenu");
     }
 }

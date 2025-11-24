@@ -9,11 +9,9 @@ public class DebugControls : MonoBehaviour
     [Header("Enemy Debug Settings")]
     [SerializeField] private bool killAllEnemies = true;
 
-    // =============================
-    // Input System Event Handlers
-    // (These methods are called
-    // by PlayerInput automatically)
-    // =============================
+    // ============================================================
+    //  DEBUG ACTION METHODS (connected through Input Action Events)
+    // ============================================================
 
     public void OnKillPlayer()
     {
@@ -52,9 +50,47 @@ public class DebugControls : MonoBehaviour
         RespawnAllEnemies();
     }
 
-    // =============================
-    // Implementation
-    // =============================
+    // ========= NEW DEBUG COMMANDS ========= //
+
+    public void OnForceGameOver()
+    {
+        var goUI = SimpleGameOverUI.Instance;
+        if (goUI == null)
+        {
+            Debug.LogError("DEBUG: SimpleGameOverUI.Instance is NULL — cannot force Game Over!");
+            return;
+        }
+
+        Debug.Log("DEBUG: Forcing Game Over…");
+        goUI.ShowGameOver();
+    }
+
+    public void OnForceFlagCapture()
+    {
+        FlagPickup flag = Object.FindAnyObjectByType<FlagPickup>();
+        if (flag == null)
+        {
+            Debug.LogError("DEBUG: No FlagPickup found.");
+            return;
+        }
+
+        if (playerRespawn == null)
+        {
+            Debug.LogError("DEBUG: No PlayerRespawn assigned.");
+            return;
+        }
+
+        Transform player = playerRespawn.transform;
+
+        // Attach flag to player exactly as game logic expects
+        flag.AttachToHolder(player);
+
+        Debug.Log("DEBUG: Forced flag capture by player.");
+    }
+
+    // ============================================================
+    //  INTERNAL IMPLEMENTATIONS
+    // ============================================================
 
     private void KillAllEnemies()
     {
@@ -96,7 +132,11 @@ public class DebugControls : MonoBehaviour
     private void RespawnAllEnemies()
     {
         EnemySpawner spawner = Object.FindAnyObjectByType<EnemySpawner>();
-        if (spawner == null) return;
+        if (spawner == null)
+        {
+            Debug.LogError("DEBUG: No EnemySpawner found.");
+            return;
+        }
 
         spawner.RespawnAllEnemiesDEBUG();
         Debug.Log("DEBUG: Respawned all enemies.");

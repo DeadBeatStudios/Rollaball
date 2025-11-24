@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
 
 public class SimpleGameOverUI : MonoBehaviour
 {
@@ -19,25 +18,38 @@ public class SimpleGameOverUI : MonoBehaviour
 
     public void ShowGameOver()
     {
-        if (gameOverPanel != null)
+        if (gameOverPanel == null)
         {
-            gameOverPanel.SetActive(true);
-            Time.timeScale = 0f; // freeze gameplay
+            Debug.LogError("GameOver Panel is missing!");
+            return;
         }
+
+        gameOverPanel.SetActive(true);
+
+        // Re-enable cursor for selection
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        Time.timeScale = 0f;
     }
 
     public void RestartGame()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void QuitGame()
     {
-        Application.Quit();
+        Time.timeScale = 1f;
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
 #endif
     }
 }

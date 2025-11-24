@@ -8,14 +8,14 @@ public class PlayerController : MonoBehaviour
     public float moveForce = 20f;
     public float maxSpeed = 10f;
     public float jumpForce = 5f;
-    public Transform cameraTransform; // assign Main Camera in Inspector
+    public Transform cameraTransform;
 
     [Header("Visual Rolling")]
-    public Transform visualModel; // 💡 NEW: Assign the VisualModel child here
-    public float rollSpeed = 50f; // 💡 NEW: Controls visual rolling speed
+    public Transform visualModel;
+    public float rollSpeed = 50f;
 
     [Header("Air Control")]
-    public float airControlMultiplier = 0.5f; // 💡 NEW: How much control in air
+    public float airControlMultiplier = 0.5f;
 
     private Rigidbody rb;
     private Vector2 moveInput;
@@ -33,9 +33,9 @@ public class PlayerController : MonoBehaviour
     [Header("Jump Timing")]
     public float jumpCooldownSeconds = 1f;
     private float jumpCooldownTimer = 0f;
-    private float timeSinceJump = Mathf.Infinity; // 🔥 NEW: Tracks time since last jump
-    private int consecutiveGroundedFrames = 0; // 🔥 NEW: Must be grounded for multiple frames
-    public int requiredGroundedFrames = 2; // 🔥 NEW: How many frames before allowing jump
+    private float timeSinceJump = Mathf.Infinity;
+    private int consecutiveGroundedFrames = 0;
+    public int requiredGroundedFrames = 2;
 
     private void Awake()
     {
@@ -54,101 +54,93 @@ public class PlayerController : MonoBehaviour
             LockCursor(true);
     }
 
+    private void LockCursor(bool locked)
+    {
+        Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !locked;
+        isCursorLocked = locked;
+    }
+
     private bool CheckGrounded()
     {
-        // 🔥 FIX: Don't consider grounded immediately after jumping
         if (timeSinceJump < 0.15f)
-        {
             return false;
-        }
 
-        // 🔥 FIX: Don't check ground while moving upward (prevents double jump)
         if (rb.linearVelocity.y > 0.5f)
-        {
             return false;
-        }
 
         float sphereRadius = 0.45f;
         float castDistance = groundCheckDistance + 0.05f;
-        Vector3 origin = transform.position;
 
         bool hit = Physics.SphereCast(
-            origin,
+            transform.position,
             sphereRadius,
             Vector3.down,
-            out RaycastHit hitInfo,
+            out _,
             castDistance,
             groundLayer,
             QueryTriggerInteraction.Ignore
         );
 
-        Debug.DrawRay(origin, Vector3.down * castDistance, hit ? Color.green : Color.red);
         return hit;
     }
 
     private void FixedUpdate()
     {
-        // 🔥 Update jump timer
         timeSinceJump += Time.fixedDeltaTime;
-
-        // 🔥 Ground check - ONLY ONCE per FixedUpdate
         isGrounded = CheckGrounded();
 
-        // Cooldowns
         if (jumpCooldownTimer > 0f)
             jumpCooldownTimer -= Time.fixedDeltaTime;
 
-        // Movement (Camera aligned)
+        // Movement
         if (cameraTransform != null)
         {
-            Vector3 camForward = cameraTransform.forward;
-            Vector3 camRight = cameraTransform.right;
+            Vector3 forward = cameraTransform.forward;
+            Vector3 right = cameraTransform.right;
 
-            camForward.y = 0f;
-            camRight.y = 0f;
-            camForward.Normalize();
-            camRight.Normalize();
+            forward.y = 0;
+            right.y = 0;
 
-            Vector3 moveDirection = (camForward * moveInput.y + camRight * moveInput.x).normalized;
+            forward.Normalize();
+            right.Normalize();
+
+            Vector3 moveDirection = (forward * moveInput.y + right * moveInput.x).normalized;
 
             if (moveDirection.sqrMagnitude > 0.01f)
             {
-                Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+                Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
                 if (isGrounded)
                 {
-                    // GROUND MOVEMENT (Original code)
-                    float alignment = 0f;
-                    if (horizontalVelocity.magnitude > 0.1f)
-                        alignment = Vector3.Dot(horizontalVelocity.normalized, moveDirection);
+                    float alignment = horizontalVel.magnitude > 0.1f
+                        ? Vector3.Dot(horizontalVel.normalized, moveDirection)
+                        : 0f;
 
                     if (alignment < 0.8f)
-                        rb.AddForce(-horizontalVelocity * 0.5f, ForceMode.Force);
+                        rb.AddForce(-horizontalVel * 0.5f, ForceMode.Force);
 
-                    Vector3 right = Vector3.Cross(Vector3.up, moveDirection);
-                    float lateralSpeed = Vector3.Dot(rb.linearVelocity, right);
-                    rb.AddForce(-right * lateralSpeed * 2f, ForceMode.Force);
+                    Vector3 rightDir = Vector3.Cross(Vector3.up, moveDirection);
+                    float lateralSpeed = Vector3.Dot(rb.linearVelocity, rightDir);
+                    rb.AddForce(-rightDir * lateralSpeed * 2f, ForceMode.Force);
 
                     if (rb.linearVelocity.magnitude < maxSpeed)
                         rb.AddForce(moveDirection * moveForce, ForceMode.Force);
 
-                    Vector3 torqueDir = new Vector3(moveDirection.z, 0f, -moveDirection.x);
+                    Vector3 torqueDir = new Vector3(moveDirection.z, 0, -moveDirection.x);
                     rb.AddTorque(torqueDir * moveForce * 0.5f, ForceMode.Force);
                 }
                 else
                 {
-                    // 💡 NEW: AIR CONTROL - Simple steering while airborne
-                    if (horizontalVelocity.magnitude < maxSpeed)
-                    {
+                    if (horizontalVel.magnitude < maxSpeed)
                         rb.AddForce(moveDirection * moveForce * airControlMultiplier, ForceMode.Force);
-                    }
                 }
 
-                // 💡 NEW: VISUAL ROLLING - Rotate visual model based on velocity
-                if (visualModel != null && horizontalVelocity.magnitude > 0.1f)
+                // Visual Rolling
+                if (visualModel != null && horizontalVel.magnitude > 0.1f)
                 {
-                    Vector3 rollAxis = Vector3.Cross(Vector3.up, horizontalVelocity.normalized);
-                    float rollAmount = horizontalVelocity.magnitude * rollSpeed * Time.fixedDeltaTime;
+                    Vector3 rollAxis = Vector3.Cross(Vector3.up, horizontalVel.normalized);
+                    float rollAmount = horizontalVel.magnitude * rollSpeed * Time.fixedDeltaTime;
                     visualModel.Rotate(rollAxis, rollAmount, Space.World);
                 }
             }
@@ -159,55 +151,29 @@ public class PlayerController : MonoBehaviour
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             jumpCooldownTimer = jumpCooldownSeconds;
-            timeSinceJump = 0f; // 🔥 CRITICAL: Reset jump timer
+            timeSinceJump = 0f;
             isGrounded = false;
-            consecutiveGroundedFrames = 0; // 🔥 NEW: Reset grounded frames
+            consecutiveGroundedFrames = 0;
         }
 
         jumpRequested = false;
     }
 
-    // ================================
-    // NEW INPUT METHODS (Unity Events)
-    // ================================
-    public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
-    {
-        moveInput = ctx.ReadValue<Vector2>();
-    }
+    // INPUT SYSTEM CALLBACKS
+    public void OnMove(InputAction.CallbackContext ctx) => moveInput = ctx.ReadValue<Vector2>();
 
-    public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    public void OnJump(InputAction.CallbackContext ctx)
     {
         if (ctx.performed)
             jumpRequested = true;
     }
-    // ================================
 
-    private void LockCursor(bool locked)
-    {
-        if (locked)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            isCursorLocked = true;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            isCursorLocked = false;
-        }
-    }
-
+#if !UNITY_EDITOR
+    // Optional ESC handling for builds
     private void Update()
     {
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
             LockCursor(!isCursorLocked);
-        }
     }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        Debug.Log("Hit: " + collision.gameObject.name);
-    }
+#endif
 }

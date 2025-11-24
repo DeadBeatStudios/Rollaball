@@ -186,6 +186,154 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Debug",
+            "id": "4a1b6a6a-00f1-4e75-a59c-bdfd747f55b2",
+            "actions": [
+                {
+                    "name": "KillPlayer",
+                    "type": "Button",
+                    "id": "17288cfd-dc00-4a06-9b0b-577cf4eb7f30",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "KillEnemies",
+                    "type": "Button",
+                    "id": "3b9aea5c-a3ef-459e-aeb2-848688e707dc",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ForceFlagDrop",
+                    "type": "Button",
+                    "id": "653376a0-04c6-4b93-a178-32e43389b740",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TeleportPlayer",
+                    "type": "Button",
+                    "id": "8e025ef3-1ac7-4e96-b72d-220fc41dc9f3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RespawnEnemies",
+                    "type": "Button",
+                    "id": "e5113370-a537-4b10-bbd9-0d1abb5ab145",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ForceGameOver",
+                    "type": "Button",
+                    "id": "5d620e38-bbd6-4be5-b60b-d231ae7e8a7e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ForceFlagCapture",
+                    "type": "Button",
+                    "id": "dd3aaa49-6255-4f5a-bc6e-a93b6d2cc284",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "24e1211c-81d0-479e-8e07-65aad5618598",
+                    "path": "<Keyboard>/f1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "KillPlayer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "50bdedd4-09e0-4673-aad1-bfb652bf18af",
+                    "path": "<Keyboard>/f2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "KillEnemies",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "be1e7458-ded3-4ed1-9639-8651378a8ec2",
+                    "path": "<Keyboard>/f3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ForceFlagDrop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0172b183-e4ce-42a4-bdc0-ae337ec12b89",
+                    "path": "<Keyboard>/f4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TeleportPlayer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "05c72dba-3c3c-48cf-bfb6-e3f809fcf061",
+                    "path": "<Keyboard>/f5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RespawnEnemies",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4dffc9f6-59eb-4767-a171-32a693a6f61b",
+                    "path": "<Keyboard>/f6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ForceGameOver",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "99eaf999-0c70-4c78-b993-4d132ca8b986",
+                    "path": "<Keyboard>/f7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ForceFlagCapture",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

@@ -596,7 +596,10 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  fallThreshold: -5
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  fallThreshold: -1
   respawnDelay: 0.5
   explosionSpawner: {fileID: 8495593634423343559}
 --- !u!114 &3787373116209747972
@@ -643,8 +646,8 @@ MonoBehaviour:
   lockOnAngle: 60
   targetLayers:
     serializedVersion: 2
-    m_Bits: 0
-  enableCameraTracking: 1
+    m_Bits: 128
+  enableCameraTracking: 0
   lockOnSnapStrength: 0.8
   lockOnDampingMultiplier: 0.4
   cineCamera: {fileID: 5012492912428318775}

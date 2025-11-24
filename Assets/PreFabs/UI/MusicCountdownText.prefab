@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 3845127747671935426}
   - component: {fileID: 6664459553430406123}
   - component: {fileID: 4520465435857752209}
-  - component: {fileID: 3470422170446435750}
   - component: {fileID: 6023953432446065729}
   - component: {fileID: 9221071508510465363}
   - component: {fileID: 1851507719633908821}
@@ -87,23 +86,6 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 0
---- !u!114 &3470422170446435750
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1316386466769473986}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!222 &6023953432446065729
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -215,5 +197,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d87733e2863dc564cb4d0e4aebcb4b57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicCountdownUI
-  countdownText: {fileID: 9221071508510465363}
   musicSource: {fileID: 0}
+  timeText: {fileID: 0}
+  triggerGameOverOnFinish: 1

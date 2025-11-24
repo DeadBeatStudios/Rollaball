@@ -248,8 +248,7 @@ MonoBehaviour:
   target: {fileID: 0}
   flag: {fileID: 0}
   goalTarget: {fileID: 0}
-  scoreDistance: 1
-  moveForce: 50
+  moveForce: 60
   maxSpeed: 25
   turnSharpness: 50
   steerResponsiveness: 8
@@ -267,6 +266,7 @@ MonoBehaviour:
   obstacleAvoidStrength: 40
   edgeCheckDistance: 20
   edgeBrakeForce: 20
+  safeTurnForce: 25
   edgeRecoveryDelay: 1.5
   predictionTime: 0.01
   closeBrakeDistance: 3

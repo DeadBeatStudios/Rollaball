@@ -39,11 +39,25 @@ public class FlagPickup : MonoBehaviour
     private Bounds cachedGroundBounds;
     private bool groundBoundsCached = false;
 
+    private Rigidbody rb;
+    private Collider pickupCollider;
+
+
+    // ======================================================
+    // LIFECYCLE
+    // ======================================================
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        pickupCollider = GetComponent<Collider>();
+    }
+
     private void Start()
     {
         initialWorldRotation = transform.rotation;
 
-        if (TryGetComponent(out Rigidbody rb))
+        if (rb != null)
         {
             rb.isKinematic = true;
             rb.useGravity = false;
@@ -52,31 +66,10 @@ public class FlagPickup : MonoBehaviour
         CacheGroundBounds();
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
-            return;
-
-        if (isHeld) return;
-
-        // 🔥 FIX: ALWAYS USE ROOT — NEVER VisualModel
-        holder = other.transform;
-
-        isHeld = true;
-
-        if (TryGetComponent(out Collider col))
-            col.enabled = false;
-
-        transform.position = holder.position + Vector3.up * attachHeightOffset;
-        transform.rotation = initialWorldRotation;
-
-        if (showDebugLogs)
-            Debug.Log($"🏁 Flag collected by: {holder.name}");
-    }
-
     private void LateUpdate()
     {
-        if (!isHeld) return;
+        if (!isHeld || holder == null)
+            return;
 
         if (HolderMissingOrDead())
         {
@@ -84,14 +77,101 @@ public class FlagPickup : MonoBehaviour
             return;
         }
 
+        // Follow the holder
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
 
+        // Auto drop if falling
         if (holder.position.y < autoDropY)
-        {
             RespawnAtRandom();
-        }
     }
+
+
+    // ======================================================
+    // PICKUP LOGIC
+    // ======================================================
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+            return;
+
+        if (isHeld)
+            return;
+
+        // Always attach to the ROOT object, not VisualModel
+        AttachToHolder(other.transform);
+    }
+
+    public void AttachToHolder(Transform newHolder)
+    {
+        holder = newHolder;
+        isHeld = true;
+
+        // Disable collider so the flag is no longer pickable
+        if (pickupCollider != null)
+            pickupCollider.enabled = false;
+
+        // Stop physics
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        // Attach visually
+        transform.SetParent(holder);
+        transform.localPosition = Vector3.up * attachHeightOffset;
+        transform.localRotation = Quaternion.identity;
+
+        if (showDebugLogs)
+            Debug.Log($"🏁 Flag attached to holder: {holder.name}");
+    }
+
+
+    // ======================================================
+    // DROP + RESPAWN
+    // ======================================================
+
+    public void DropAndRespawn(
+        FlagDropCause cause = FlagDropCause.Unknown,
+        Transform killer = null,
+        Vector3? deathPosition = null)
+    {
+        RespawnAtRandom();
+    }
+
+    private void RespawnAtRandom()
+    {
+        // Unparent from previous holder
+        transform.SetParent(null);
+
+        holder = null;
+        isHeld = false;
+
+        if (pickupCollider != null)
+            pickupCollider.enabled = true;
+
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        Vector3 groundPos = GetRandomSpawn();
+        transform.position = groundPos + Vector3.up * respawnHeightOffset;
+        transform.rotation = initialWorldRotation;
+
+        if (showDebugLogs)
+            Debug.Log($"🏁 Flag respawned at {transform.position}");
+    }
+
+
+    // ======================================================
+    // HOLDER VALIDATION
+    // ======================================================
 
     private bool HolderMissingOrDead()
     {
@@ -108,42 +188,10 @@ public class FlagPickup : MonoBehaviour
         return false;
     }
 
-    public void DropAndRespawn(
-        FlagDropCause cause = FlagDropCause.Unknown,
-        Transform killer = null,
-        Vector3? deathPosition = null)
-    {
-        RespawnAtRandom();
-    }
 
-    private void RespawnAtRandom()
-    {
-        transform.SetParent(null);
-        holder = null;
-        isHeld = false;
-
-        if (TryGetComponent(out Collider col))
-            col.enabled = true;
-
-        if (TryGetComponent(out Rigidbody rb))
-        {
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-            rb.isKinematic = true;
-            rb.useGravity = false;
-        }
-
-        Vector3 groundPos = GetRandomSpawn();
-        transform.position = groundPos + Vector3.up * respawnHeightOffset;
-        transform.rotation = initialWorldRotation;
-
-        if (showDebugLogs)
-            Debug.Log($"🏁 Flag respawned at {transform.position}");
-    }
-
-    // --------------------------
-    // TERRAIN-FIRST RESPAWNING
-    // --------------------------
+    // ======================================================
+    // TERRAIN-BASED SPAWNING
+    // ======================================================
 
     private void CacheGroundBounds()
     {
@@ -241,9 +289,10 @@ public class FlagPickup : MonoBehaviour
         return data.GetSteepness(nx, nz);
     }
 
-    // --------------------------
+
+    // ======================================================
     // PUBLIC API
-    // --------------------------
+    // ======================================================
 
     public bool IsHeldBy(Transform t)
     {
