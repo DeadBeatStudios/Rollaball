@@ -267,7 +267,6 @@ MonoBehaviour:
   obstacleAvoidStrength: 40
   edgeCheckDistance: 20
   edgeBrakeForce: 20
-  safeTurnForce: 30
   edgeRecoveryDelay: 1.5
   predictionTime: 0.01
   closeBrakeDistance: 3
