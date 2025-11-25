@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7039589519338965652}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: CameraPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 4772604205498877609}
   - component: {fileID: 6609354860806493046}
   - component: {fileID: 9181343248694137024}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: VisualModel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 4089071194763223908}
   - component: {fileID: 4775418511691106341}
   - component: {fileID: 663566443254942635}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: FreeLook Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -395,7 +395,8 @@ GameObject:
   - component: {fileID: 3787373116209747972}
   - component: {fileID: 8495593634423343559}
   - component: {fileID: 961351831974327327}
-  m_Layer: 7
+  - component: {fileID: -1007630495355823590}
+  m_Layer: 0
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -548,6 +549,34 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: be798615-ca1b-4f76-958f-13d8b97cfacf
     m_ActionName: 'Player/LockOn[/Mouse/rightButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 17288cfd-dc00-4a06-9b0b-577cf4eb7f30
+    m_ActionName: 'Debug/KillPlayer[/Keyboard/f1]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 3b9aea5c-a3ef-459e-aeb2-848688e707dc
+    m_ActionName: 'Debug/KillEnemies[/Keyboard/f2]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 653376a0-04c6-4b93-a178-32e43389b740
+    m_ActionName: 'Debug/ForceFlagDrop[/Keyboard/f3]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8e025ef3-1ac7-4e96-b72d-220fc41dc9f3
+    m_ActionName: 'Debug/TeleportPlayer[/Keyboard/f4]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e5113370-a537-4b10-bbd9-0d1abb5ab145
+    m_ActionName: 'Debug/RespawnEnemies[/Keyboard/f5]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 5d620e38-bbd6-4be5-b60b-d231ae7e8a7e
+    m_ActionName: 'Debug/ForceGameOver[/Keyboard/f6]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: dd3aaa49-6255-4f5a-bc6e-a93b6d2cc284
+    m_ActionName: 'Debug/ForceFlagCapture[/Keyboard/f7]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -655,3 +684,19 @@ MonoBehaviour:
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   highlightIntensity: 2
   showDebug: 1
+--- !u!114 &-1007630495355823590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5919138668250432695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aab889059f53cae4388b6d6260638285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KnockbackOnCollision
+  knockbackForce: 14
+  minHitSpeed: 4
+  dropFlagOnStrongHit: 1
+  dropFlagSpeedThreshold: 6

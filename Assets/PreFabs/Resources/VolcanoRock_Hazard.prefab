@@ -152,6 +152,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80dd5b41f0108c440846dc3be6da8b70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HazardRock
-  lifetime: 12
+  lifetime: 20
   minScale: 5
   maxScale: 10

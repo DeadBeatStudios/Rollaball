@@ -32,6 +32,7 @@ public class FlagPickup : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
+    // State
     private Transform holder;
     private bool isHeld = false;
     private Quaternion initialWorldRotation;
@@ -39,25 +40,11 @@ public class FlagPickup : MonoBehaviour
     private Bounds cachedGroundBounds;
     private bool groundBoundsCached = false;
 
-    private Rigidbody rb;
-    private Collider pickupCollider;
-
-
-    // ======================================================
-    // LIFECYCLE
-    // ======================================================
-
-    private void Awake()
-    {
-        rb = GetComponent<Rigidbody>();
-        pickupCollider = GetComponent<Collider>();
-    }
-
     private void Start()
     {
         initialWorldRotation = transform.rotation;
 
-        if (rb != null)
+        if (TryGetComponent(out Rigidbody rb))
         {
             rb.isKinematic = true;
             rb.useGravity = false;
@@ -66,9 +53,21 @@ public class FlagPickup : MonoBehaviour
         CacheGroundBounds();
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        // Only players or enemies may pick up
+        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+            return;
+
+        if (isHeld)
+            return;
+
+        AttachToHolder(other.transform);
+    }
+
     private void LateUpdate()
     {
-        if (!isHeld || holder == null)
+        if (!isHeld)
             return;
 
         if (HolderMissingOrDead())
@@ -77,101 +76,14 @@ public class FlagPickup : MonoBehaviour
             return;
         }
 
-        // Follow the holder
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
 
-        // Auto drop if falling
         if (holder.position.y < autoDropY)
+        {
             RespawnAtRandom();
-    }
-
-
-    // ======================================================
-    // PICKUP LOGIC
-    // ======================================================
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
-            return;
-
-        if (isHeld)
-            return;
-
-        // Always attach to the ROOT object, not VisualModel
-        AttachToHolder(other.transform);
-    }
-
-    public void AttachToHolder(Transform newHolder)
-    {
-        holder = newHolder;
-        isHeld = true;
-
-        // Disable collider so the flag is no longer pickable
-        if (pickupCollider != null)
-            pickupCollider.enabled = false;
-
-        // Stop physics
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
         }
-
-        // Attach visually
-        transform.SetParent(holder);
-        transform.localPosition = Vector3.up * attachHeightOffset;
-        transform.localRotation = Quaternion.identity;
-
-        if (showDebugLogs)
-            Debug.Log($"🏁 Flag attached to holder: {holder.name}");
     }
-
-
-    // ======================================================
-    // DROP + RESPAWN
-    // ======================================================
-
-    public void DropAndRespawn(
-        FlagDropCause cause = FlagDropCause.Unknown,
-        Transform killer = null,
-        Vector3? deathPosition = null)
-    {
-        RespawnAtRandom();
-    }
-
-    private void RespawnAtRandom()
-    {
-        // Unparent from previous holder
-        transform.SetParent(null);
-
-        holder = null;
-        isHeld = false;
-
-        if (pickupCollider != null)
-            pickupCollider.enabled = true;
-
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-        }
-
-        Vector3 groundPos = GetRandomSpawn();
-        transform.position = groundPos + Vector3.up * respawnHeightOffset;
-        transform.rotation = initialWorldRotation;
-
-        if (showDebugLogs)
-            Debug.Log($"🏁 Flag respawned at {transform.position}");
-    }
-
-
-    // ======================================================
-    // HOLDER VALIDATION
-    // ======================================================
 
     private bool HolderMissingOrDead()
     {
@@ -188,10 +100,107 @@ public class FlagPickup : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Original API: used for deaths / scoring where we want a random respawn.
+    /// </summary>
+    public void DropAndRespawn(
+        FlagDropCause cause = FlagDropCause.Unknown,
+        Transform killer = null,
+        Vector3? deathPosition = null)
+    {
+        RespawnAtRandom();
+    }
 
-    // ======================================================
-    // TERRAIN-BASED SPAWNING
-    // ======================================================
+    /// <summary>
+    /// NEW: Drop the flag into the world near a position (used by knockback / hits).
+    /// Does NOT random-respawn, it just places the flag on the ground.
+    /// </summary>
+    public void DropToWorld(
+        FlagDropCause cause = FlagDropCause.Unknown,
+        Transform killer = null,
+        Vector3? dropPosition = null)
+    {
+        Transform oldHolder = holder;
+
+        holder = null;
+        isHeld = false;
+        transform.SetParent(null);
+
+        if (TryGetComponent(out Collider col))
+            col.enabled = true;
+
+        if (TryGetComponent(out Rigidbody rb))
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true;   // still behaves like a pickup
+            rb.useGravity = false;
+        }
+
+        Vector3 basePos = dropPosition ?? (oldHolder != null ? oldHolder.position : transform.position);
+
+        // Align to ground if possible
+        float groundY = GetGroundHeight(basePos);
+        Vector3 worldPos = new Vector3(basePos.x, groundY, basePos.z);
+
+        transform.position = worldPos + Vector3.up * respawnHeightOffset;
+        transform.rotation = initialWorldRotation;
+
+        if (showDebugLogs)
+            Debug.Log($"🏁 Flag dropped to world at {transform.position} (cause: {cause})");
+    }
+
+    /// <summary>
+    /// NEW: Attach flag to a given holder (player or enemy root).
+    /// Used by trigger and can be re-used by debug / special logic.
+    /// </summary>
+    public void AttachToHolder(Transform newHolder)
+    {
+        if (newHolder == null)
+            return;
+
+        holder = newHolder;
+        isHeld = true;
+
+        if (TryGetComponent(out Collider col))
+            col.enabled = false;
+
+        transform.SetParent(null);
+        transform.position = holder.position + Vector3.up * attachHeightOffset;
+        transform.rotation = initialWorldRotation;
+
+        if (showDebugLogs)
+            Debug.Log($"🏁 Flag attached to: {holder.name}");
+    }
+
+    // --------------------------
+    // TERRAIN-FIRST RESPAWNING
+    // --------------------------
+
+    private void RespawnAtRandom()
+    {
+        transform.SetParent(null);
+        holder = null;
+        isHeld = false;
+
+        if (TryGetComponent(out Collider col))
+            col.enabled = true;
+
+        if (TryGetComponent(out Rigidbody rb))
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+
+        Vector3 groundPos = GetRandomSpawn();
+        transform.position = groundPos + Vector3.up * respawnHeightOffset;
+        transform.rotation = initialWorldRotation;
+
+        if (showDebugLogs)
+            Debug.Log($"🏁 Flag respawned at {transform.position}");
+    }
 
     private void CacheGroundBounds()
     {
@@ -225,7 +234,10 @@ public class FlagPickup : MonoBehaviour
                 if (slope <= maxSpawnSlope)
                     return spawn;
             }
-            else return spawn;
+            else
+            {
+                return spawn;
+            }
         }
 
         Vector3 fallback = new Vector3(
@@ -251,7 +263,8 @@ public class FlagPickup : MonoBehaviour
         GameObject[] groundObjects = GameObject.FindGameObjectsWithTag("Ground");
         Collider[] cols = groundObjects
             .Select(g => g.GetComponent<Collider>())
-            .Where(c => c != null).ToArray();
+            .Where(c => c != null)
+            .ToArray();
 
         if (cols.Length > 0)
         {
@@ -289,10 +302,9 @@ public class FlagPickup : MonoBehaviour
         return data.GetSteepness(nx, nz);
     }
 
-
-    // ======================================================
+    // --------------------------
     // PUBLIC API
-    // ======================================================
+    // --------------------------
 
     public bool IsHeldBy(Transform t)
     {
