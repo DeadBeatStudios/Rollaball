@@ -136,12 +136,19 @@ public class PlayerController : MonoBehaviour
                         rb.AddForce(moveDirection * moveForce * airControlMultiplier, ForceMode.Force);
                 }
 
-                // Visual Rolling
+                // --- REALISTIC VISUAL ROLLING ---
                 if (visualModel != null && horizontalVel.magnitude > 0.1f)
                 {
+                    float radius = 0.5f; // Adjust if your ball is larger
                     Vector3 rollAxis = Vector3.Cross(Vector3.up, horizontalVel.normalized);
-                    float rollAmount = horizontalVel.magnitude * rollSpeed * Time.fixedDeltaTime;
-                    visualModel.Rotate(rollAxis, rollAmount, Space.World);
+
+                    // Angular velocity from linear velocity
+                    float angularRate = horizontalVel.magnitude / radius;
+
+                    // Convert rad/sec → degrees
+                    float rotationAmount = angularRate * Mathf.Rad2Deg * Time.fixedDeltaTime;
+
+                    visualModel.Rotate(rollAxis, rotationAmount, Space.World);
                 }
             }
         }
