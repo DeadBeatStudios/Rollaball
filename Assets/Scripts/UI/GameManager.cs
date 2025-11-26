@@ -5,18 +5,17 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    // ID → Score
     private Dictionary<int, int> playerScores = new Dictionary<int, int>();
 
-    public int highScore { get; private set; } = 0;
-    public int highScorePlayerID { get; private set; } = -1;
+    public IReadOnlyDictionary<int, int> Scores => playerScores;
 
     private void Awake()
     {
-        // Singleton pattern ensures only one GameManager exists
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(this);
         }
         else
         {
@@ -24,48 +23,29 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void Start()
+    // Register any player or enemy
+    public void RegisterPlayer(int id)
     {
-        // 🔹 Load high score from PlayerPrefs when game starts
-        highScore = PlayerPrefs.GetInt("HighScore", 0);
-        highScorePlayerID = PlayerPrefs.GetInt("HighScorePlayerID", -1);
+        if (!playerScores.ContainsKey(id))
+            playerScores[id] = 0;
+
+        UIManager.Instance?.RefreshScoreboard(playerScores);
     }
 
-    public void RegisterPlayer(int playerID)
+    // Add score
+    public void AddPoints(int id, int points)
     {
-        if (!playerScores.ContainsKey(playerID))
-        {
-            playerScores.Add(playerID, 0);
-        }
+        if (!playerScores.ContainsKey(id))
+            playerScores[id] = 0;
+
+        playerScores[id] += points;
+
+        // Update UI Scoreboard
+        UIManager.Instance?.RefreshScoreboard(playerScores);
     }
 
-    // ✅ Keep only this version of AddPoints
-    public void AddPoints(int playerID, int points)
+    public int GetScore(int id)
     {
-        if (!playerScores.ContainsKey(playerID))
-            return;
-
-        playerScores[playerID] += points;
-        int currentScore = playerScores[playerID];
-
-        // Update high score
-        if (currentScore > highScore)
-        {
-            highScore = currentScore;
-            highScorePlayerID = playerID;
-
-            PlayerPrefs.SetInt("HighScore", highScore);
-            PlayerPrefs.SetInt("HighScorePlayerID", highScorePlayerID);
-            PlayerPrefs.Save();
-        }
-
-        // 🔹 Update UI
-        if (UIManager.Instance != null)
-            UIManager.Instance.UpdateScoreUI(currentScore, highScore);
-    }
-
-    public int GetPlayerScore(int playerID)
-    {
-        return playerScores.ContainsKey(playerID) ? playerScores[playerID] : 0;
+        return playerScores.ContainsKey(id) ? playerScores[id] : 0;
     }
 }

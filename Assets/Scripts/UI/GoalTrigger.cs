@@ -5,93 +5,86 @@ public class GoalTrigger : MonoBehaviour
 {
     [Header("Scoring")]
     [SerializeField] private int pointsPerScore = 100;
-    [SerializeField] private float moveDelayAfterScore = 1.5f;  // Time for SFX/VFX to play
+    [SerializeField] private float moveDelayAfterScore = 1.25f;
 
     [Header("References")]
     [SerializeField] private FlagPickup flag;
 
-    [Header("Spawn Positions")]
+    [Header("Respawn Locations")]
     [SerializeField] private Transform[] spawnPoints;
 
+    private bool isProcessingScore = false;
     private int lastSpawnIndex = -1;
-    private bool isProcessingScore = false;  // Prevent double-scoring during delay
+
+    private void Awake()
+    {
+        // Auto-assign flag if missing
+        if (flag == null)
+            flag = FindFirstObjectByType<FlagPickup>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        // Prevent scoring while goal is about to move
-        if (isProcessingScore)
-            return;
+        if (isProcessingScore) return;
 
-        // Must have a PlayerScore component
+        // Must have PlayerScore (works for players AND enemies)
         if (!other.TryGetComponent<PlayerScore>(out var scorer))
             return;
 
-        if (flag == null)
-        {
-            Debug.LogError("GoalTrigger: No Flag assigned!");
-            return;
-        }
-
         // Must be holding the flag
-        if (!flag.IsHeldBy(other.transform))
+        if (flag == null || !flag.IsHeldBy(other.transform))
             return;
 
-        // Start the scoring sequence
-        StartCoroutine(ScoreSequence(scorer, other.name));
+        StartCoroutine(ScoreSequence(scorer));
     }
 
-    private IEnumerator ScoreSequence(PlayerScore scorer, string scorerName)
+    private IEnumerator ScoreSequence(PlayerScore scorer)
     {
         isProcessingScore = true;
 
-        // Award points
-        scorer.AddPoints(pointsPerScore);
+        // --- Award Score ---
+        int scorerID = scorer.ID;   // NEW: InstanceID system
+        GameManager.Instance.AddPoints(scorerID, pointsPerScore);
 
-        // Drop flag and respawn it
+        Debug.Log($"🏁 Score! ID {scorerID} earns {pointsPerScore} points.");
+
+        // Drop & random respawn the flag
         flag.DropAndRespawn();
 
-        Debug.Log($"🏁 {scorerName} scored! +{pointsPerScore}");
+        // Optional VFX/SFX can go here
 
-        // 🎵 SFX/VFX play here (handled by other systems listening for score events)
-
-        // Wait for SFX to finish
         yield return new WaitForSeconds(moveDelayAfterScore);
 
-        // Move goal to new position
-        MoveToRandomPosition();
-
+        MoveGoalToNewPosition();
         isProcessingScore = false;
     }
 
-    private void MoveToRandomPosition()
+    private void MoveGoalToNewPosition()
     {
         if (spawnPoints == null || spawnPoints.Length < 2)
         {
-            Debug.LogWarning("GoalTrigger: Need at least 2 spawn points!");
+            Debug.LogWarning("GoalTrigger: Not enough spawn points (need 2+)");
             return;
         }
 
         int newIndex;
-
-        // Keep rolling until we get a different position
         do
         {
             newIndex = Random.Range(0, spawnPoints.Length);
         }
         while (newIndex == lastSpawnIndex);
 
-        // Move the goal
         transform.position = spawnPoints[newIndex].position;
         transform.rotation = spawnPoints[newIndex].rotation;
 
         lastSpawnIndex = newIndex;
 
-        Debug.Log($"📍 Goal moved to position {newIndex + 1}");
+        Debug.Log($"📍 Goal moved to spawn index {newIndex}");
     }
 
     private void Start()
     {
-        // Start at random position
+        // Start goal at random
         if (spawnPoints != null && spawnPoints.Length > 0)
         {
             int startIndex = Random.Range(0, spawnPoints.Length);

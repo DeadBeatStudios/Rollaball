@@ -1,40 +1,40 @@
-﻿using UnityEngine;
-using TMPro;   // Make sure this is included
+﻿using System.Collections.Generic;
+using UnityEngine;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
 
-    [Header("UI References")]
-    [SerializeField] private TMP_Text scoreText;      // assigned in Inspector
-    [SerializeField] private TMP_Text highScoreText;  // assigned in Inspector
+    [Header("Scoreboard UI")]
+    [SerializeField] private Transform scoreboardRoot;   // Parent container for rows
+    [SerializeField] private GameObject scoreboardRowPrefab;
+
+    // Internal storage (so we don’t keep clearing/recreating rows)
+    private Dictionary<int, TextMeshProUGUI> rowDisplays = new Dictionary<int, TextMeshProUGUI>();
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        Instance = this;
     }
 
-    private void Start()
+    // Refresh entire scoreboard
+    public void RefreshScoreboard(IReadOnlyDictionary<int, int> scores)
     {
-        // Initialize from GameManager values
-        if (scoreText != null)
-            scoreText.text = "Score: 0";
-
-        if (highScoreText != null)
+        foreach (var entry in scores)
         {
-            int savedHigh = PlayerPrefs.GetInt("HighScore", 0);
-            highScoreText.text = "High Score: " + savedHigh;
+            int id = entry.Key;
+            int score = entry.Value;
+
+            if (!rowDisplays.ContainsKey(id))
+            {
+                GameObject row = Instantiate(scoreboardRowPrefab, scoreboardRoot);
+                TextMeshProUGUI text = row.GetComponentInChildren<TextMeshProUGUI>();
+
+                rowDisplays[id] = text;
+            }
+
+            rowDisplays[id].text = $"ID {id}: {score}";
         }
-    }
-
-    // Called whenever points are added
-    public void UpdateScoreUI(int currentScore, int highScore)
-    {
-        if (scoreText != null)
-            scoreText.text = $"Score: {currentScore}";
-
-        if (highScoreText != null)
-            highScoreText.text = $"High Score: {highScore}";
     }
 }

@@ -187,4 +187,16 @@ public class FlagPickup : MonoBehaviour
 
     public Transform CurrentHolder => holder;
     public bool IsHeld => isHeld;
+
+    public int CurrentHolderID
+    {
+        get
+        {
+            if (holder == null) return -1;
+
+            PlayerScore score = holder.GetComponent<PlayerScore>();
+            return score != null ? score.ID : -1;
+        }
+    }
+
 }

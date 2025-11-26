@@ -2,15 +2,22 @@ using UnityEngine;
 
 public class PlayerScore : MonoBehaviour
 {
-    public int playerID;
+    public int ID { get; private set; }
+
+    private void Awake()
+    {
+        // Unique per entity using InstanceID
+        ID = GetInstanceID();
+    }
+
     private void Start()
     {
-        // Register this player with the GameManager
-        GameManager.Instance.RegisterPlayer(playerID);
+        // Register in global manager
+        GameManager.Instance.RegisterPlayer(ID);
     }
 
     public void AddPoints(int points)
     {
-        GameManager.Instance.AddPoints(playerID, points);
+        GameManager.Instance.AddPoints(ID, points);
     }
 }
