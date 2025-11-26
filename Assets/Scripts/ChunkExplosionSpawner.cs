@@ -4,14 +4,27 @@ public class ChunkExplosionSpawner : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private GameObject playerModelRoot;
+
+    [Tooltip("Auto-loaded from Resources/DeathFX.")]
     [SerializeField] private GameObject explosionChunkPrefab;
 
-    [Tooltip("Assign the player material so the chunks match the player’s look.")]
+    [Tooltip("Player material applied to the chunks.")]
     [SerializeField] private Material playerMaterial;
 
-    /// <summary>
-    /// Swaps model → chunk prefab AND triggers the explosion.
-    /// </summary>
+    private void Awake()
+    {
+        // Auto-load explosion prefab if not manually assigned
+        if (explosionChunkPrefab == null)
+        {
+            explosionChunkPrefab = FXLoader.LoadChunkExplosion();
+
+            if (explosionChunkPrefab == null)
+            {
+                Debug.LogError("❌ Cannot load Explosion_ChunkSet from Resources/DeathFX/");
+            }
+        }
+    }
+
     public void SpawnChunkExplosion()
     {
         if (playerModelRoot != null)
@@ -19,23 +32,20 @@ public class ChunkExplosionSpawner : MonoBehaviour
 
         if (explosionChunkPrefab == null)
         {
-            Debug.LogError("Explosion chunk prefab not assigned!");
+            Debug.LogError("❌ Explosion chunk prefab is missing.");
             return;
         }
 
-        // 🔥 Use the exact position of the visual mesh
-        Vector3 spawnPos = playerModelRoot != null
-            ? playerModelRoot.transform.position
-            : transform.position;
+        Vector3 spawnPos =
+            playerModelRoot != null ? playerModelRoot.transform.position : transform.position;
 
-        // Spawn chunk set
         GameObject explosionInstance = Instantiate(
             explosionChunkPrefab,
             spawnPos,
             transform.rotation
         );
 
-        // Apply player material
+        // Apply player material to all renderers
         if (playerMaterial != null)
         {
             MeshRenderer[] renderers = explosionInstance.GetComponentsInChildren<MeshRenderer>(true);
@@ -43,16 +53,12 @@ public class ChunkExplosionSpawner : MonoBehaviour
                 r.material = playerMaterial;
         }
 
-        // Trigger explosion physics at correct position
+        // Trigger explosion physics
         ChunkDeathExplosion explosion = explosionInstance.GetComponent<ChunkDeathExplosion>();
         if (explosion != null)
             explosion.TriggerExplosion(spawnPos);
     }
 
-
-    /// <summary>
-    /// Called by PlayerRespawn to restore visibility.
-    /// </summary>
     public void RestorePlayerModel()
     {
         if (playerModelRoot != null)

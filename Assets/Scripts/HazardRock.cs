@@ -7,33 +7,54 @@ public class HazardRock : MonoBehaviour
     public float minScale = 5f;
     public float maxScale = 10f;
 
+    [Header("Impact Settings")]
+    [Tooltip("How long the rock rolls after hitting the ground.")]
+    public float postImpactLifetime = 1.0f;
+
+    private bool hasHitGround = false;
+
     private void Start()
     {
         // Randomize rock size
         float size = Random.Range(minScale, maxScale);
         transform.localScale = Vector3.one * size;
 
-        // Auto-destroy if it never hits anything
+        // Auto-destroy later if nothing happens
         Destroy(gameObject, lifetime);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Ignore self collisions & emitters
-        if (collision.collider.CompareTag("Enemy"))
-            return;
-
-        // 🔥 Kill the player if hit
+        // ----- PLAYER HIT -----
         if (collision.collider.CompareTag("Player"))
         {
             PlayerRespawn pr = collision.collider.GetComponent<PlayerRespawn>();
             if (pr != null)
-            {
                 pr.HandleDeath(FlagPickup.FlagDropCause.SelfDestruct);
-            }
+
+            Destroy(gameObject);
+            return;
         }
 
-        // When rock hits anything, destroy it
-        Destroy(gameObject);
+        // ----- ENEMY HIT -----
+        if (collision.collider.CompareTag("Enemy"))
+        {
+            // Enemy just dies — no rolling needed
+            EnemyFallDetector efd = collision.collider.GetComponent<EnemyFallDetector>();
+            if (efd != null)
+                efd.ForceKillDEBUG();
+
+            Destroy(gameObject);
+            return;
+        }
+
+        // ----- GROUND / ANYTHING ELSE -----
+        if (!hasHitGround)
+        {
+            hasHitGround = true;
+
+            // Let it roll/slide for a bit
+            Destroy(gameObject, postImpactLifetime);
+        }
     }
 }

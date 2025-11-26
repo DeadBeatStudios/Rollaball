@@ -4,6 +4,9 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
+    // --------------------------------------------------------------
+    //  MOVEMENT SETTINGS
+    // --------------------------------------------------------------
     [Header("Movement Settings")]
     public float moveForce = 20f;
     public float maxSpeed = 10f;
@@ -21,26 +24,35 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
     private bool jumpRequested;
 
+    // --------------------------------------------------------------
+    //  CURSOR
+    // --------------------------------------------------------------
     [Header("Cursor Settings")]
     public bool lockCursorOnStart = true;
     private bool isCursorLocked = false;
 
+    // --------------------------------------------------------------
+    //  GROUND CHECK
+    // --------------------------------------------------------------
     [Header("Ground Check")]
     public float groundCheckDistance = 0.2f;
     public LayerMask groundLayer;
-    private bool isGrounded;
 
+    private bool isGrounded;
+    private int groundedFrames = 0;
+    private int ungroundedFrames = 0;
+
+    // --------------------------------------------------------------
+    //  JUMP TIMING
+    // --------------------------------------------------------------
     [Header("Jump Timing")]
     public float jumpCooldownSeconds = 1f;
     private float jumpCooldownTimer = 0f;
     private float timeSinceJump = Mathf.Infinity;
-    private int consecutiveGroundedFrames = 0;
-    public int requiredGroundedFrames = 2;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-
         rb.useGravity = true;
         rb.isKinematic = false;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
@@ -61,23 +73,28 @@ public class PlayerController : MonoBehaviour
         isCursorLocked = locked;
     }
 
-    private bool CheckGrounded()
+    // --------------------------------------------------------------
+    //  GROUND CHECK WITH SMOOTHING
+    // --------------------------------------------------------------
+    private bool CheckRawGrounded()
     {
+        // Ignore grounding right after a jump
         if (timeSinceJump < 0.15f)
             return false;
 
+        // Ignore if moving up too fast
         if (rb.linearVelocity.y > 0.5f)
             return false;
 
-        float sphereRadius = 0.45f;
-        float castDistance = groundCheckDistance + 0.05f;
+        float radius = 0.45f;
+        float distance = groundCheckDistance + 0.05f;
 
         bool hit = Physics.SphereCast(
             transform.position,
-            sphereRadius,
+            radius,
             Vector3.down,
             out _,
-            castDistance,
+            distance,
             groundLayer,
             QueryTriggerInteraction.Ignore
         );
@@ -85,22 +102,50 @@ public class PlayerController : MonoBehaviour
         return hit;
     }
 
+    private void UpdateGroundState()
+    {
+        bool rawGrounded = CheckRawGrounded();
+
+        // Smooth grounding — prevents micro-bounce issues
+        if (rawGrounded)
+        {
+            groundedFrames++;
+            ungroundedFrames = 0;
+        }
+        else
+        {
+            groundedFrames = 0;
+            ungroundedFrames++;
+        }
+
+        // Require 2 consecutive grounded frames
+        isGrounded = groundedFrames >= 2;
+
+    }
+
+    // --------------------------------------------------------------
+    //  FIXED UPDATE — MAIN PHYSICS LOOP
+    // --------------------------------------------------------------
     private void FixedUpdate()
     {
         timeSinceJump += Time.fixedDeltaTime;
-        isGrounded = CheckGrounded();
+
+        // Update ground state
+        UpdateGroundState();
 
         if (jumpCooldownTimer > 0f)
             jumpCooldownTimer -= Time.fixedDeltaTime;
 
-        // Movement
+        // --------------------------------------------------
+        // MOVEMENT
+        // --------------------------------------------------
         if (cameraTransform != null)
         {
             Vector3 forward = cameraTransform.forward;
             Vector3 right = cameraTransform.right;
 
-            forward.y = 0;
-            right.y = 0;
+            forward.y = 0f;
+            right.y = 0f;
 
             forward.Normalize();
             right.Normalize();
@@ -117,6 +162,7 @@ public class PlayerController : MonoBehaviour
                         ? Vector3.Dot(horizontalVel.normalized, moveDirection)
                         : 0f;
 
+                    // Stability & directional damping
                     if (alignment < 0.8f)
                         rb.AddForce(-horizontalVel * 0.5f, ForceMode.Force);
 
@@ -132,20 +178,20 @@ public class PlayerController : MonoBehaviour
                 }
                 else
                 {
+                    // Air control
                     if (horizontalVel.magnitude < maxSpeed)
                         rb.AddForce(moveDirection * moveForce * airControlMultiplier, ForceMode.Force);
                 }
 
-                // --- REALISTIC VISUAL ROLLING ---
+                // --------------------------------------------------
+                // VISUAL ROLLING BASED ON REAL PHYSICS SPEED
+                // --------------------------------------------------
                 if (visualModel != null && horizontalVel.magnitude > 0.1f)
                 {
-                    float radius = 0.5f; // Adjust if your ball is larger
+                    float radius = 0.5f; // adjust if needed
                     Vector3 rollAxis = Vector3.Cross(Vector3.up, horizontalVel.normalized);
 
-                    // Angular velocity from linear velocity
                     float angularRate = horizontalVel.magnitude / radius;
-
-                    // Convert rad/sec → degrees
                     float rotationAmount = angularRate * Mathf.Rad2Deg * Time.fixedDeltaTime;
 
                     visualModel.Rotate(rollAxis, rotationAmount, Space.World);
@@ -153,21 +199,26 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Jump
+        // --------------------------------------------------
+        // JUMP
+        // --------------------------------------------------
         if (jumpRequested && isGrounded && jumpCooldownTimer <= 0f)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             jumpCooldownTimer = jumpCooldownSeconds;
             timeSinceJump = 0f;
+            groundedFrames = 0; // prevent double jump
             isGrounded = false;
-            consecutiveGroundedFrames = 0;
         }
 
         jumpRequested = false;
     }
 
-    // INPUT SYSTEM CALLBACKS
-    public void OnMove(InputAction.CallbackContext ctx) => moveInput = ctx.ReadValue<Vector2>();
+    // --------------------------------------------------------------
+    //  INPUT SYSTEM
+    // --------------------------------------------------------------
+    public void OnMove(InputAction.CallbackContext ctx) =>
+        moveInput = ctx.ReadValue<Vector2>();
 
     public void OnJump(InputAction.CallbackContext ctx)
     {
@@ -176,7 +227,6 @@ public class PlayerController : MonoBehaviour
     }
 
 #if !UNITY_EDITOR
-    // Optional ESC handling for builds
     private void Update()
     {
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
