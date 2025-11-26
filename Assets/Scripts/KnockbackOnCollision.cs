@@ -4,9 +4,15 @@
 public class KnockbackOnCollision : MonoBehaviour
 {
     [Header("Knockback Settings")]
-    [SerializeField] private float maxKnockbackStrength = 20f;
-    [SerializeField] private float dropThreshold = 7.5f;   // Momentum needed to drop flag
-    [SerializeField] private bool ignoreVertical = true;   // Horizontal-only collisions feel better
+    [SerializeField] private float baseKnockback = 14f;
+    [SerializeField] private float momentumMultiplier = 1.25f;
+    [SerializeField] private float winnerRecoilPercent = 0.25f;
+    [SerializeField] private float minSpeedDifference = 0.15f;
+    [SerializeField] private float maxKnockback = 22f;
+    [SerializeField] private bool ignoreVertical = true;
+
+    [Header("Flag Drop")]
+    [SerializeField] private float dropThreshold = 8f;
 
     private Rigidbody rb;
     private FlagPickup flag;
@@ -14,91 +20,94 @@ public class KnockbackOnCollision : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        flag = FindAnyObjectByType<FlagPickup>();
     }
 
-    //-------------------------
-    //   MOMENTUM CALCULATION
-    //-------------------------
-    private float GetMomentum()
+    private FlagPickup Flag
     {
-        Vector3 hVel = rb.linearVelocity;
-        if (ignoreVertical) hVel.y = 0f;
-
-        return rb.mass * hVel.magnitude;
+        get
+        {
+            if (flag == null)
+                flag = FindFirstObjectByType<FlagPickup>();
+            return flag;
+        }
     }
 
-    private float GetMomentum(Rigidbody body)
+    private float GetHorizontalSpeed(Rigidbody b)
     {
-        Vector3 hVel = body.linearVelocity;
-        if (ignoreVertical) hVel.y = 0f;
-
-        return body.mass * hVel.magnitude;
+        Vector3 v = b.linearVelocity;
+        if (ignoreVertical) v.y = 0;
+        return v.magnitude;
     }
 
-    //-------------------------
-    //   COLLISION
-    //-------------------------
     private void OnCollisionEnter(Collision collision)
     {
-        if (!collision.rigidbody)
+        if (!collision.rigidbody) return;
+
+        Rigidbody other = collision.rigidbody;
+
+        // ---- SINGLE AUTHORITY: prevents double knockback ----
+        if (GetInstanceID() > other.GetInstanceID()) return;
+
+        float mySpeed = GetHorizontalSpeed(rb);
+        float theirSpeed = GetHorizontalSpeed(other);
+        float speedDiff = mySpeed - theirSpeed;
+
+        // Too small of an impact
+        if (Mathf.Abs(speedDiff) < minSpeedDifference)
             return;
 
-        Rigidbody otherRb = collision.rigidbody;
+        // ---- RELATIVE VELOCITY for true impact direction ----
+        Vector3 relVel = rb.linearVelocity - other.linearVelocity;
+        if (ignoreVertical) relVel.y = 0;
 
-        // Calculate momentum difference
-        float myMomentum = GetMomentum(rb);
-        float theirMomentum = GetMomentum(otherRb);
-        float diff = myMomentum - theirMomentum;
+        Vector3 dir = relVel.normalized;
+        float relativeSpeed = relVel.magnitude;
 
-        // Close to equal? → small bump, skip launch
-        if (Mathf.Abs(diff) < 0.15f)
-            return;
+        // ---- MOMENTUM-BASED FORCE (your version) ----
+        float force = relativeSpeed * momentumMultiplier * baseKnockback;
+        force = Mathf.Clamp(force, 0f, maxKnockback);
 
-        // Determine knockback direction
-        Vector3 dirToOther = (collision.transform.position - transform.position).normalized;
-        Vector3 dirToSelf = -dirToOther;
-
-        // Calculate force magnitude (clamped)
-        float rawForce = Mathf.Abs(diff);
-        float finalForce = Mathf.Clamp(rawForce, 0f, maxKnockbackStrength);
-
-        // Apply: who gets launched?
-        if (diff > 0)
+        // ---- APPLY HYBRID KNOCKBACK ----
+        if (speedDiff > 0)
         {
-            // I had more momentum → THEY get launched
-            ApplyKnockback(otherRb, dirToOther * finalForce);
+            // YOU ARE FASTER → launch opponent
+            other.AddForce(dir * force, ForceMode.Impulse);
+
+            // winner gets light bounce for fun feel
+            rb.AddForce(-dir * (force * winnerRecoilPercent), ForceMode.Impulse);
         }
         else
         {
-            // They had more → I get launched
-            ApplyKnockback(rb, dirToSelf * finalForce);
+            // YOU ARE SLOWER → opponent launches YOU
+            rb.AddForce(-dir * force, ForceMode.Impulse);
+
+            // faster opponent gets light bounce
+            other.AddForce(dir * (force * winnerRecoilPercent), ForceMode.Impulse);
         }
 
-        //-----------------------------------
-        // FLAG DROP LOGIC (Momentum-based)
-        //-----------------------------------
-        if (flag != null && flag.IsHeld)
-        {
-            Transform holder = flag.CurrentHolder;
-
-            // Only drop if the COLLISION involved the holder
-            if (holder == transform || holder == collision.transform)
-            {
-                if (rawForce >= dropThreshold)
-                {
-                    Vector3 dropPoint = collision.contacts[0].point;
-                    flag.DropToWorld(FlagPickup.FlagDropCause.Unknown, holder, dropPoint);
-                }
-            }
-        }
+        // ---- FLAG DROP LOGIC ----
+        TryDropFlag(collision, relativeSpeed, dir);
     }
 
-    private void ApplyKnockback(Rigidbody body, Vector3 force)
+    private void TryDropFlag(Collision collision, float impactForce, Vector3 dir)
     {
-        if (ignoreVertical)
-            force.y = 0f;
+        if (Flag == null || !Flag.IsHeld) return;
 
-        body.AddForce(force, ForceMode.VelocityChange);
+        Transform holder = Flag.CurrentHolder;
+        if (holder == null) return;
+
+        // Must involve the holder
+        if (holder != transform && holder != collision.transform)
+            return;
+
+        // Not enough force to drop
+        if (impactForce < dropThreshold)
+            return;
+
+        Vector3 dropPoint = collision.contacts.Length > 0 ?
+            collision.contacts[0].point :
+            holder.position;
+
+        Flag.DropToWorld(FlagPickup.FlagDropCause.Unknown, holder, dropPoint);
     }
 }
