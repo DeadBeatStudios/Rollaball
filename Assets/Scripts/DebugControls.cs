@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class DebugControls : MonoBehaviour
 {
@@ -9,9 +9,11 @@ public class DebugControls : MonoBehaviour
     [Header("Enemy Debug Settings")]
     [SerializeField] private bool killAllEnemies = true;
 
-    // ============================================================
-    //  DEBUG ACTION METHODS (connected through Input Action Events)
-    // ============================================================
+    // =============================
+    // Input System Event Handlers
+    // (These methods are called
+    // by PlayerInput via events)
+    // =============================
 
     public void OnKillPlayer()
     {
@@ -50,47 +52,27 @@ public class DebugControls : MonoBehaviour
         RespawnAllEnemies();
     }
 
-    // ========= NEW DEBUG COMMANDS ========= //
-
     public void OnForceGameOver()
     {
-        var goUI = SimpleGameOverUI.Instance;
-        if (goUI == null)
+        if (SimpleGameOverUI.Instance != null)
         {
-            Debug.LogError("DEBUG: SimpleGameOverUI.Instance is NULL � cannot force Game Over!");
-            return;
+            SimpleGameOverUI.Instance.ShowGameOver();
+            Debug.Log("DEBUG: Forced Game Over screen.");
         }
-
-        Debug.Log("DEBUG: Forcing Game Over�");
-        goUI.ShowGameOver();
+        else
+        {
+            Debug.LogWarning("DEBUG: SimpleGameOverUI.Instance is null – cannot force Game Over.");
+        }
     }
 
     public void OnForceFlagCapture()
     {
-        FlagPickup flag = Object.FindAnyObjectByType<FlagPickup>();
-        if (flag == null)
-        {
-            Debug.LogError("DEBUG: No FlagPickup found.");
-            return;
-        }
-
-        if (playerRespawn == null)
-        {
-            Debug.LogError("DEBUG: No PlayerRespawn assigned.");
-            return;
-        }
-
-        Transform player = playerRespawn.transform;
-
-        // Attach flag to player exactly as game logic expects
-        flag.AttachToHolder(player);
-
-        Debug.Log("DEBUG: Forced flag capture by player.");
+        ForceFlagCapture();
     }
 
-    // ============================================================
-    //  INTERNAL IMPLEMENTATIONS
-    // ============================================================
+    // =============================
+    // Implementation
+    // =============================
 
     private void KillAllEnemies()
     {
@@ -98,7 +80,10 @@ public class DebugControls : MonoBehaviour
             Object.FindObjectsByType<EnemyFallDetector>(FindObjectsSortMode.None);
 
         foreach (var e in enemies)
-            e.ForceKillDEBUG();
+        {
+            if (e != null)
+                e.ForceKillDEBUG();
+        }
 
         Debug.Log("DEBUG: Killed ALL enemies.");
     }
@@ -117,6 +102,8 @@ public class DebugControls : MonoBehaviour
 
         foreach (var enemy in enemies)
         {
+            if (enemy == null) continue;
+
             float d = Vector3.Distance(p, enemy.transform.position);
             if (d < shortest)
             {
@@ -126,7 +113,10 @@ public class DebugControls : MonoBehaviour
         }
 
         if (nearest != null)
+        {
             nearest.ForceKillDEBUG();
+            Debug.Log($"DEBUG: Killed nearest enemy: {nearest.name}");
+        }
     }
 
     private void RespawnAllEnemies()
@@ -134,7 +124,7 @@ public class DebugControls : MonoBehaviour
         EnemySpawner spawner = Object.FindAnyObjectByType<EnemySpawner>();
         if (spawner == null)
         {
-            Debug.LogError("DEBUG: No EnemySpawner found.");
+            Debug.LogWarning("DEBUG: No EnemySpawner found for RespawnAllEnemiesDEBUG.");
             return;
         }
 
@@ -145,17 +135,47 @@ public class DebugControls : MonoBehaviour
     private void ForceFlagDrop()
     {
         FlagPickup flag = Object.FindAnyObjectByType<FlagPickup>();
-        if (flag == null) return;
-
-        if (flag.IsHeld)
+        if (flag == null)
         {
-            flag.DropAndRespawn(
-                FlagPickup.FlagDropCause.SelfDestruct,
-                null,
-                flag.transform.position
-            );
+            Debug.LogWarning("DEBUG: No FlagPickup found for ForceFlagDrop.");
+            return;
         }
 
-        Debug.Log("DEBUG: Forced flag drop.");
+        if (!flag.IsHeld)
+        {
+            Debug.Log("DEBUG: Flag is not currently held. Nothing to drop.");
+            return;
+        }
+
+        Transform holder = flag.CurrentHolder;
+        Vector3 dropPos = holder != null ? holder.position : flag.transform.position;
+
+        // ✅ Use DropToWorld (3 args) — does NOT random respawn
+        flag.DropToWorld(
+            FlagPickup.FlagDropCause.SelfDestruct,
+            holder,
+            dropPos
+        );
+
+        Debug.Log($"DEBUG: Forced flag drop to world at {dropPos}.");
+    }
+
+    private void ForceFlagCapture()
+    {
+        FlagPickup flag = Object.FindAnyObjectByType<FlagPickup>();
+        if (flag == null)
+        {
+            Debug.LogWarning("DEBUG: No FlagPickup found for ForceFlagCapture.");
+            return;
+        }
+
+        if (playerRespawn == null)
+        {
+            Debug.LogWarning("DEBUG: No PlayerRespawn assigned for ForceFlagCapture.");
+            return;
+        }
+
+        flag.AttachToHolder(playerRespawn.transform);
+        Debug.Log("DEBUG: Forced flag attachment to PLAYER.");
     }
 }

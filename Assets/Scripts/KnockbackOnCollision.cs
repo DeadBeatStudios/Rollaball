@@ -1,75 +1,104 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// Universal knockback system for Player and Enemy.
-/// Attach to BOTH.
-/// Automatically detects momentum difference and applies force.
-/// No tags, no layers required.
-/// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class KnockbackOnCollision : MonoBehaviour
 {
     [Header("Knockback Settings")]
-    [Tooltip("Scales total knockback force")]
-    public float knockbackMultiplier = 0.12f;
-
-    [Tooltip("Minimum knockback force to avoid dead collisions")]
-    public float minKnockback = 2f;
+    [SerializeField] private float maxKnockbackStrength = 20f;
+    [SerializeField] private float dropThreshold = 7.5f;   // Momentum needed to drop flag
+    [SerializeField] private bool ignoreVertical = true;   // Horizontal-only collisions feel better
 
     private Rigidbody rb;
+    private FlagPickup flag;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        flag = FindAnyObjectByType<FlagPickup>();
     }
 
-    private float GetHorizontalSpeed()
+    //-------------------------
+    //   MOMENTUM CALCULATION
+    //-------------------------
+    private float GetMomentum()
     {
-        Vector3 vel = rb.linearVelocity;
-        vel.y = 0;
-        return vel.magnitude;
+        Vector3 hVel = rb.linearVelocity;
+        if (ignoreVertical) hVel.y = 0f;
+
+        return rb.mass * hVel.magnitude;
     }
 
+    private float GetMomentum(Rigidbody body)
+    {
+        Vector3 hVel = body.linearVelocity;
+        if (ignoreVertical) hVel.y = 0f;
+
+        return body.mass * hVel.magnitude;
+    }
+
+    //-------------------------
+    //   COLLISION
+    //-------------------------
     private void OnCollisionEnter(Collision collision)
     {
-        // Only react if other object also uses this script
-        if (!collision.gameObject.TryGetComponent(out KnockbackOnCollision other))
+        if (!collision.rigidbody)
             return;
 
-        ResolveKnockback(other, collision.transform);
-    }
+        Rigidbody otherRb = collision.rigidbody;
 
-    private void ResolveKnockback(KnockbackOnCollision other, Transform otherTransform)
-    {
-        float mySpeed = GetHorizontalSpeed();
-        float theirSpeed = other.GetHorizontalSpeed();
+        // Calculate momentum difference
+        float myMomentum = GetMomentum(rb);
+        float theirMomentum = GetMomentum(otherRb);
+        float diff = myMomentum - theirMomentum;
 
-        // Momentum difference
-        float momentumDiff = (mySpeed * mySpeed) - (theirSpeed * theirSpeed);
+        // Close to equal? → small bump, skip launch
+        if (Mathf.Abs(diff) < 0.15f)
+            return;
 
-        if (Mathf.Abs(momentumDiff) < 0.01f)
-            return; // tie → ignore small bumps
+        // Determine knockback direction
+        Vector3 dirToOther = (collision.transform.position - transform.position).normalized;
+        Vector3 dirToSelf = -dirToOther;
 
-        Vector3 dir = (otherTransform.position - transform.position).normalized;
+        // Calculate force magnitude (clamped)
+        float rawForce = Mathf.Abs(diff);
+        float finalForce = Mathf.Clamp(rawForce, 0f, maxKnockbackStrength);
 
-        // Convert momentum difference into force
-        float force = Mathf.Abs(momentumDiff) * knockbackMultiplier;
-        force = Mathf.Max(force, minKnockback);
-
-        if (momentumDiff > 0)
+        // Apply: who gets launched?
+        if (diff > 0)
         {
-            // YOU hit harder → knock back opponent
-            other.ApplyKnockback(dir, force);
+            // I had more momentum → THEY get launched
+            ApplyKnockback(otherRb, dirToOther * finalForce);
         }
         else
         {
-            // They hit harder → you get knocked back
-            ApplyKnockback(-dir, force);
+            // They had more → I get launched
+            ApplyKnockback(rb, dirToSelf * finalForce);
+        }
+
+        //-----------------------------------
+        // FLAG DROP LOGIC (Momentum-based)
+        //-----------------------------------
+        if (flag != null && flag.IsHeld)
+        {
+            Transform holder = flag.CurrentHolder;
+
+            // Only drop if the COLLISION involved the holder
+            if (holder == transform || holder == collision.transform)
+            {
+                if (rawForce >= dropThreshold)
+                {
+                    Vector3 dropPoint = collision.contacts[0].point;
+                    flag.DropToWorld(FlagPickup.FlagDropCause.Unknown, holder, dropPoint);
+                }
+            }
         }
     }
 
-    public void ApplyKnockback(Vector3 direction, float force)
+    private void ApplyKnockback(Rigidbody body, Vector3 force)
     {
-        rb.AddForce(direction.normalized * force, ForceMode.Impulse);
+        if (ignoreVertical)
+            force.y = 0f;
+
+        body.AddForce(force, ForceMode.VelocityChange);
     }
 }
