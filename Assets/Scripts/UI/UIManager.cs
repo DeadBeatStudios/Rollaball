@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -8,9 +9,6 @@ public class UIManager : MonoBehaviour
     public Transform scoreboardContent;
     public GameObject scoreboardRowPrefab;
 
-    /// <summary>
-    /// Rebuild the scoreboard UI from scratch based on player scores.
-    /// </summary>
     public void RefreshScoreboard(IReadOnlyDictionary<int, int> scores)
     {
         if (scoreboardContent == null || scoreboardRowPrefab == null)
@@ -23,23 +21,18 @@ public class UIManager : MonoBehaviour
         foreach (Transform child in scoreboardContent)
             Destroy(child.gameObject);
 
-        // Sort scores descending
-        var sorted = new List<KeyValuePair<int, int>>(scores);
+        // Convert + sort
+        var sorted = scores.ToList();
         sorted.Sort((a, b) => b.Value.CompareTo(a.Value));
 
-        // Spawn one row per player
+        // Build rows
         foreach (var kvp in sorted)
         {
-            int id = kvp.Key;
-            int score = kvp.Value;
-
             GameObject rowObj = Instantiate(scoreboardRowPrefab, scoreboardContent);
             ScoreboardRowUI rowUI = rowObj.GetComponent<ScoreboardRowUI>();
 
             if (rowUI != null)
-                rowUI.SetRow(id, score);
-            else
-                Debug.LogError("UIManager: ScoreboardRow prefab is missing ScoreboardRowUI script!");
+                rowUI.SetRow(kvp.Key, kvp.Value);
         }
     }
 }
