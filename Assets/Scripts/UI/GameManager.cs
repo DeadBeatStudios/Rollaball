@@ -1,51 +1,65 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Central authority for scoring, scoreboard updates, and player registration.
+/// </summary>
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance;
+    public static GameManager Instance { get; private set; }
 
-    // ID → Score
-    private Dictionary<int, int> playerScores = new Dictionary<int, int>();
+    [Header("References")]
+    [Tooltip("Assign your UIManager in Inspector.")]
+    public UIManager uiManager;
 
-    public IReadOnlyDictionary<int, int> Scores => playerScores;
+    // Player scores stored using InstanceID → Score
+    private Dictionary<int, int> scores = new Dictionary<int, int>();
+
+    public IReadOnlyDictionary<int, int> Scores => scores;
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(this);
-        }
-        else
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
-    // Register any player or enemy
+    /// <summary>
+    /// Registers a player by ID if not already stored.
+    /// </summary>
     public void RegisterPlayer(int id)
     {
-        if (!playerScores.ContainsKey(id))
-            playerScores[id] = 0;
-
-        UIManager.Instance?.RefreshScoreboard(playerScores);
+        if (!scores.ContainsKey(id))
+            scores.Add(id, 0);
     }
 
-    // Add score
-    public void AddPoints(int id, int points)
+    /// <summary>
+    /// Adds points to a player and updates the scoreboard.
+    /// </summary>
+    public void AddPoints(int id, int value)
     {
-        if (!playerScores.ContainsKey(id))
-            playerScores[id] = 0;
+        if (!scores.ContainsKey(id))
+            scores[id] = 0;
 
-        playerScores[id] += points;
+        scores[id] += value;
 
-        // Update UI Scoreboard
-        UIManager.Instance?.RefreshScoreboard(playerScores);
+        Debug.Log($"🏆 Player {id} scored! New score = {scores[id]}");
+
+        // Update UI if available
+        if (uiManager != null)
+            uiManager.RefreshScoreboard(scores);
     }
 
+    /// <summary>
+    /// Gets score for an ID safely.
+    /// </summary>
     public int GetScore(int id)
     {
-        return playerScores.ContainsKey(id) ? playerScores[id] : 0;
+        return scores.TryGetValue(id, out int score) ? score : 0;
     }
 }

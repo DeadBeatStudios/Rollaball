@@ -623,7 +623,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7979115711335168412, guid: fcdbcd176611acd44bf2aa82689745e3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.5001831
+      value: 0.5001221
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -660,7 +660,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   enemyPrefab: {fileID: 5267770077472934122, guid: f8c7bc5187c41d1479ca38fbb0bf106d, type: 3}
-  spawnCount: 5
+  spawnCount: 0
   respawnOnDeath: 1
   respawnDelay: 3
   spawnLift: 0.3
@@ -1253,17 +1253,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3757785484060632675, guid: 51a57af76b6188a4f8d2c873e8d89ed4, type: 3}
   m_PrefabInstance: {fileID: 223581078}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &609548731 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5014584481192436019, guid: fcdbcd176611acd44bf2aa82689745e3, type: 3}
-  m_PrefabInstance: {fileID: 231949285}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!218 &636345573 stripped
 Terrain:
   m_CorrespondingSourceObject: {fileID: 3113348911439764525, guid: 04a81f92922f9144f8f239dad87ce794, type: 3}
@@ -1653,17 +1642,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3757785484060632675, guid: 51a57af76b6188a4f8d2c873e8d89ed4, type: 3}
   m_PrefabInstance: {fileID: 884714832}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &848324230 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 718595588089998257, guid: fcdbcd176611acd44bf2aa82689745e3, type: 3}
-  m_PrefabInstance: {fileID: 231949285}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1001 &876383521
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2256,8 +2234,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08e1c7a550974954c82ff611f8108f17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  scoreText: {fileID: 609548731}
-  highScoreText: {fileID: 848324230}
+  scoreboardRoot: {fileID: 0}
+  scoreboardRowPrefab: {fileID: 0}
 --- !u!4 &1073200965
 Transform:
   m_ObjectHideFlags: 0

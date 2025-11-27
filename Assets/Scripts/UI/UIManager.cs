@@ -1,40 +1,45 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 public class UIManager : MonoBehaviour
 {
-    public static UIManager Instance;
-
     [Header("Scoreboard UI")]
-    [SerializeField] private Transform scoreboardRoot;   // Parent container for rows
-    [SerializeField] private GameObject scoreboardRowPrefab;
+    public GameObject scoreboardPanel;
+    public Transform scoreboardContent;
+    public GameObject scoreboardRowPrefab;
 
-    // Internal storage (so we don’t keep clearing/recreating rows)
-    private Dictionary<int, TextMeshProUGUI> rowDisplays = new Dictionary<int, TextMeshProUGUI>();
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
-    // Refresh entire scoreboard
+    /// <summary>
+    /// Rebuild the scoreboard UI from scratch based on player scores.
+    /// </summary>
     public void RefreshScoreboard(IReadOnlyDictionary<int, int> scores)
     {
-        foreach (var entry in scores)
+        if (scoreboardContent == null || scoreboardRowPrefab == null)
         {
-            int id = entry.Key;
-            int score = entry.Value;
+            Debug.LogError("UIManager: ScoreboardContent or RowPrefab not assigned!");
+            return;
+        }
 
-            if (!rowDisplays.ContainsKey(id))
-            {
-                GameObject row = Instantiate(scoreboardRowPrefab, scoreboardRoot);
-                TextMeshProUGUI text = row.GetComponentInChildren<TextMeshProUGUI>();
+        // Clear old rows
+        foreach (Transform child in scoreboardContent)
+            Destroy(child.gameObject);
 
-                rowDisplays[id] = text;
-            }
+        // Sort scores descending
+        var sorted = new List<KeyValuePair<int, int>>(scores);
+        sorted.Sort((a, b) => b.Value.CompareTo(a.Value));
 
-            rowDisplays[id].text = $"ID {id}: {score}";
+        // Spawn one row per player
+        foreach (var kvp in sorted)
+        {
+            int id = kvp.Key;
+            int score = kvp.Value;
+
+            GameObject rowObj = Instantiate(scoreboardRowPrefab, scoreboardContent);
+            ScoreboardRowUI rowUI = rowObj.GetComponent<ScoreboardRowUI>();
+
+            if (rowUI != null)
+                rowUI.SetRow(id, score);
+            else
+                Debug.LogError("UIManager: ScoreboardRow prefab is missing ScoreboardRowUI script!");
         }
     }
 }

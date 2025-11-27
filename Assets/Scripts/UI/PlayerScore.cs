@@ -2,22 +2,24 @@ using UnityEngine;
 
 public class PlayerScore : MonoBehaviour
 {
-    public int ID { get; private set; }
+    public int playerID;  // Assigned at runtime using InstanceID
 
     private void Awake()
     {
-        // Unique per entity using InstanceID
-        ID = GetInstanceID();
+        // Use InstanceID so ALL players/enemies show on scoreboard
+        playerID = GetInstanceID();
     }
 
     private void Start()
     {
-        // Register in global manager
-        GameManager.Instance.RegisterPlayer(ID);
+        // REGISTER USING ONLY ONE ARGUMENT
+        GameManager.Instance.RegisterPlayer(playerID);
     }
 
     public void AddPoints(int points)
     {
-        GameManager.Instance.AddPoints(ID, points);
+        GameManager.Instance.AddPoints(playerID, points);
     }
+
+    public int ID => playerID;
 }

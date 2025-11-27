@@ -1,9 +1,19 @@
 ﻿using UnityEngine;
 using System.Linq;
 
+/// <summary>
+/// Flag pickup system with terrain-first spawning.
+/// Supports Unity Terrain, tagged ground objects, and graceful fallbacks.
+/// </summary>
 public class FlagPickup : MonoBehaviour
 {
-    public enum FlagDropCause { KilledByEnemy, SelfDestruct, FellOffMap, Unknown }
+    public enum FlagDropCause
+    {
+        KilledByEnemy,
+        SelfDestruct,
+        FellOffMap,
+        Unknown
+    }
 
     [Header("Attachment Settings")]
     [SerializeField] private float attachHeightOffset = 1.5f;
@@ -19,6 +29,7 @@ public class FlagPickup : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
+    // State
     private Transform holder;
     private bool isHeld = false;
     private Quaternion initialWorldRotation;
@@ -41,16 +52,20 @@ public class FlagPickup : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (isHeld) return;
-        if (!other.CompareTag("Player") && !other.CompareTag("Enemy")) return;
+
+        // Only players or enemies may pick up
+        if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
+            return;
 
         AttachToHolder(other.transform);
     }
 
     private void LateUpdate()
     {
-        if (!isHeld || holder == null) return;
+        if (!isHeld || holder == null)
+            return;
 
-        // Holder died?
+        // If holder has a PlayerRespawn and is dead → respawn flag
         PlayerRespawn pr = holder.GetComponentInParent<PlayerRespawn>();
         if (pr != null && pr.IsDead)
         {
@@ -58,20 +73,29 @@ public class FlagPickup : MonoBehaviour
             return;
         }
 
-        // Update position
+        // Stick to holder
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
     }
 
-    // Attach to a player/enemy
+    // -------------------------------------------------
+    // ATTACH / DROP API
+    // -------------------------------------------------
+
+    /// <summary>
+    /// Attach the flag to a player or enemy root.
+    /// </summary>
     public void AttachToHolder(Transform newHolder)
     {
+        if (newHolder == null) return;
+
         holder = newHolder;
         isHeld = true;
 
         if (TryGetComponent(out Collider col))
             col.enabled = false;
 
+        transform.SetParent(null);
         transform.position = newHolder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
 
@@ -79,7 +103,10 @@ public class FlagPickup : MonoBehaviour
             Debug.Log($"🏁 Flag attached to {newHolder.name}");
     }
 
-    // Drop from knockback impact to world
+    /// <summary>
+    /// Drop the flag into the world near a position (used by knockback / hits).
+    /// Does NOT random-respawn, it just places the flag on the ground.
+    /// </summary>
     public void DropToWorld(
         FlagDropCause cause = FlagDropCause.Unknown,
         Transform killer = null,
@@ -96,11 +123,14 @@ public class FlagPickup : MonoBehaviour
         {
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-            rb.isKinematic = true;
+            rb.isKinematic = true;   // keep it as a pickup, not physics debris
             rb.useGravity = false;
         }
 
-        Vector3 basePos = dropPos ?? prevHolder.position;
+        // Where should we drop it from?
+        Vector3 basePos = dropPos ?? (prevHolder != null ? prevHolder.position : transform.position);
+
+        // Snap to ground
         float groundY = GetGroundHeight(basePos);
         Vector3 finalPos = new Vector3(basePos.x, groundY + respawnHeightOffset, basePos.z);
 
@@ -108,14 +138,20 @@ public class FlagPickup : MonoBehaviour
         transform.rotation = initialWorldRotation;
 
         if (showDebugLogs)
-            Debug.Log($"🏁 Flag dropped on ground at {finalPos}");
+            Debug.Log($"🏁 Flag dropped on ground at {finalPos} (cause: {cause})");
     }
 
-    // Only for scoring & death
+    /// <summary>
+    /// Only for scoring & death logic (random respawn in arena).
+    /// </summary>
     public void DropAndRespawn(FlagDropCause cause = FlagDropCause.Unknown)
     {
         RespawnAtRandom();
     }
+
+    // -------------------------------------------------
+    // RESPAWN / GROUND HELPERS
+    // -------------------------------------------------
 
     private void RespawnAtRandom()
     {
@@ -125,6 +161,14 @@ public class FlagPickup : MonoBehaviour
         if (TryGetComponent(out Collider col))
             col.enabled = true;
 
+        if (TryGetComponent(out Rigidbody rb))
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+
         Vector3 point = GetRandomPointInArena();
         transform.position = point + Vector3.up * respawnHeightOffset;
         transform.rotation = initialWorldRotation;
@@ -133,10 +177,9 @@ public class FlagPickup : MonoBehaviour
             Debug.Log($"🏁 Flag respawned randomly at {transform.position}");
     }
 
-    // --- Ground helpers ---
     private Bounds GetGroundBounds()
     {
-        // Priority: Terrain
+        // 1) Terrain first
         if (Terrain.activeTerrain != null)
         {
             Terrain t = Terrain.activeTerrain;
@@ -145,11 +188,17 @@ public class FlagPickup : MonoBehaviour
             return b;
         }
 
-        // Fallback: all Ground-tagged objects
+        // 2) Ground-tagged colliders
         var cols = GameObject.FindGameObjectsWithTag("Ground")
             .Select(g => g.GetComponent<Collider>())
             .Where(c => c != null)
             .ToArray();
+
+        if (cols.Length == 0)
+        {
+            Debug.LogWarning("FlagPickup: No terrain or Ground-tagged colliders found. Using fallback bounds.");
+            return new Bounds(Vector3.zero, new Vector3(10f, 1f, 10f));
+        }
 
         Bounds combined = cols[0].bounds;
         for (int i = 1; i < cols.Length; i++)
@@ -161,12 +210,15 @@ public class FlagPickup : MonoBehaviour
     private float GetGroundHeight(Vector3 world)
     {
         if (Terrain.activeTerrain != null)
-            return Terrain.activeTerrain.SampleHeight(world) + Terrain.activeTerrain.transform.position.y;
+        {
+            Terrain t = Terrain.activeTerrain;
+            return t.SampleHeight(world) + t.transform.position.y;
+        }
 
         if (Physics.Raycast(world + Vector3.up * 10f, Vector3.down, out var hit, 50f, LayerMask.GetMask("Ground")))
             return hit.point.y;
 
-        return 0f;
+        return world.y; // fallback: don't snap if nothing hit
     }
 
     private Vector3 GetRandomPointInArena()
@@ -182,21 +234,13 @@ public class FlagPickup : MonoBehaviour
         return new Vector3(rx, ry, rz);
     }
 
+    // -------------------------------------------------
+    // PUBLIC API
+    // -------------------------------------------------
+
     public bool IsHeldBy(Transform t)
         => isHeld && holder != null && (holder == t || holder.IsChildOf(t));
 
     public Transform CurrentHolder => holder;
     public bool IsHeld => isHeld;
-
-    public int CurrentHolderID
-    {
-        get
-        {
-            if (holder == null) return -1;
-
-            PlayerScore score = holder.GetComponent<PlayerScore>();
-            return score != null ? score.ID : -1;
-        }
-    }
-
 }
