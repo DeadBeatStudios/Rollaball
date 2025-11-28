@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 2422992291040826593}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.70446, y: -0, z: -0.84451}
+  m_LocalPosition: {x: -3.99004, y: 52.48136, z: 28.7529}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -44,5 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08e1c7a550974954c82ff611f8108f17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  scoreText: {fileID: 0}
-  highScoreText: {fileID: 0}
+  scoreboardPanel: {fileID: 0}
+  scoreboardContent: {fileID: 0}
+  scoreboardRowPrefab: {fileID: 3850429744666690506, guid: 9a3bdc7751b7e4040b459aa18f081d73, type: 3}
+  showHeaderRow: 1

@@ -396,6 +396,8 @@ GameObject:
   - component: {fileID: 8495593634423343559}
   - component: {fileID: 961351831974327327}
   - component: {fileID: -1007630495355823590}
+  - component: {fileID: 8798383171569236041}
+  - component: {fileID: 6060765819980663278}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -449,7 +451,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5919138668250432695}
   serializedVersion: 5
-  m_Mass: 2
+  m_Mass: 3
   m_LinearDamping: 0.1
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -550,31 +552,115 @@ MonoBehaviour:
     m_ActionId: be798615-ca1b-4f76-958f-13d8b97cfacf
     m_ActionName: 'Player/LockOn[/Mouse/rightButton]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnKillPlayer
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 17288cfd-dc00-4a06-9b0b-577cf4eb7f30
     m_ActionName: 'Debug/KillPlayer[/Keyboard/f1]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnKillEnemies
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 3b9aea5c-a3ef-459e-aeb2-848688e707dc
     m_ActionName: 'Debug/KillEnemies[/Keyboard/f2]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnForceFlagDrop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 653376a0-04c6-4b93-a178-32e43389b740
     m_ActionName: 'Debug/ForceFlagDrop[/Keyboard/f3]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnTeleportPlayer
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 8e025ef3-1ac7-4e96-b72d-220fc41dc9f3
     m_ActionName: 'Debug/TeleportPlayer[/Keyboard/f4]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnRespawnEnemies
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: e5113370-a537-4b10-bbd9-0d1abb5ab145
     m_ActionName: 'Debug/RespawnEnemies[/Keyboard/f5]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnForceGameOver
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 5d620e38-bbd6-4be5-b60b-d231ae7e8a7e
     m_ActionName: 'Debug/ForceGameOver[/Keyboard/f6]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: DebugControls, Assembly-CSharp
+        m_MethodName: OnForceFlagCapture
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: dd3aaa49-6255-4f5a-bc6e-a93b6d2cc284
     m_ActionName: 'Debug/ForceFlagCapture[/Keyboard/f7]'
   m_NeverAutoSwitchControlSchemes: 0
@@ -594,20 +680,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae3c068f7fdb4c143afdce3fc9db23c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  moveForce: 50
+  moveForce: 60
   maxSpeed: 25
   jumpForce: 15
   cameraTransform: {fileID: 9195951345357137867}
   visualModel: {fileID: 4772604205498877609}
-  rollSpeed: 50
+  rollSpeed: 0
   airControlMultiplier: 0.5
   lockCursorOnStart: 1
   groundCheckDistance: 0.1
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  jumpCooldownSeconds: 0.3
-  requiredGroundedFrames: 2
+  jumpCooldownSeconds: 0.2
 --- !u!114 &6216268824416032323
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -644,6 +729,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerScore
   playerID: 0
+  playerName: Tester
 --- !u!114 &8495593634423343559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -676,7 +762,7 @@ MonoBehaviour:
   targetLayers:
     serializedVersion: 2
     m_Bits: 128
-  enableCameraTracking: 0
+  enableCameraTracking: 1
   lockOnSnapStrength: 0.8
   lockOnDampingMultiplier: 0.4
   cineCamera: {fileID: 5012492912428318775}
@@ -696,7 +782,123 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aab889059f53cae4388b6d6260638285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KnockbackOnCollision
-  knockbackForce: 14
-  minHitSpeed: 4
-  dropFlagOnStrongHit: 1
-  dropFlagSpeedThreshold: 6
+  baseKnockback: 14
+  momentumMultiplier: 1.25
+  winnerRecoilPercent: 0.25
+  minSpeedDifference: 0.15
+  maxKnockback: 22
+  ignoreVertical: 1
+  dropThreshold: 8
+--- !u!82 &8798383171569236041
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5919138668250432695}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 56acd8a7a1d5bcc47ac48ba2a1ca0895, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0.433
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &6060765819980663278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5919138668250432695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 652d7ebdcf9de9644bc92164a3813e1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RollingSound
+  rollingAudio: {fileID: 8798383171569236041}
+  speedThreshold: 0.5
+  maxSpeedForVolume: 12
+  enabledSceneName: Fire_AshenPeaksLevel

@@ -9,7 +9,10 @@ public class UIManager : MonoBehaviour
     public Transform scoreboardContent;
     public GameObject scoreboardRowPrefab;
 
-    public void RefreshScoreboard(IReadOnlyDictionary<int, int> scores)
+    [Header("Settings")]
+    [SerializeField] private bool showHeaderRow = true;  // 💡 New: Toggle header
+
+    public void RefreshScoreboard(IReadOnlyDictionary<int, int> scores, IReadOnlyDictionary<int, string> playerNames = null)  // 💡 Modified: Accept names
     {
         if (scoreboardContent == null || scoreboardRowPrefab == null)
         {
@@ -21,6 +24,15 @@ public class UIManager : MonoBehaviour
         foreach (Transform child in scoreboardContent)
             Destroy(child.gameObject);
 
+        // 💡 New: Add header row
+        if (showHeaderRow)
+        {
+            GameObject headerRow = Instantiate(scoreboardRowPrefab, scoreboardContent);
+            ScoreboardRowUI headerUI = headerRow.GetComponent<ScoreboardRowUI>();
+            if (headerUI != null)
+                headerUI.SetHeader("Player", "Score");  // Uses new method
+        }
+
         // Convert + sort
         var sorted = scores.ToList();
         sorted.Sort((a, b) => b.Value.CompareTo(a.Value));
@@ -30,9 +42,17 @@ public class UIManager : MonoBehaviour
         {
             GameObject rowObj = Instantiate(scoreboardRowPrefab, scoreboardContent);
             ScoreboardRowUI rowUI = rowObj.GetComponent<ScoreboardRowUI>();
-
             if (rowUI != null)
-                rowUI.SetRow(kvp.Key, kvp.Value);
+            {
+                string name = playerNames?.GetValueOrDefault(kvp.Key, $"Player {kvp.Key}") ?? $"Player {kvp.Key}";
+                rowUI.SetRow(name, kvp.Value);  // 💡 Modified: Pass name instead of ID
+            }
         }
+    }
+
+    // Keep old signature for compatibility
+    public void RefreshScoreboard(IReadOnlyDictionary<int, int> scores)
+    {
+        RefreshScoreboard(scores, null);
     }
 }

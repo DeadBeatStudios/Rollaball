@@ -14,8 +14,10 @@ public class GameManager : MonoBehaviour
 
     // Player scores stored using InstanceID → Score
     private Dictionary<int, int> scores = new Dictionary<int, int>();
+    private Dictionary<int, string> playerNames = new Dictionary<int, string>();  // 💡 New: Store names
 
     public IReadOnlyDictionary<int, int> Scores => scores;
+    public IReadOnlyDictionary<int, string> PlayerNames => playerNames;  // 💡 New: Expose names
 
     private void Awake()
     {
@@ -24,7 +26,6 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
@@ -39,6 +40,14 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Sets/updates player name  // 💡 New method
+    /// </summary>
+    public void SetPlayerName(int id, string name)
+    {
+        playerNames[id] = name;
+    }
+
+    /// <summary>
     /// Adds points to a player and updates the scoreboard.
     /// </summary>
     public void AddPoints(int id, int value)
@@ -47,12 +56,11 @@ public class GameManager : MonoBehaviour
             scores[id] = 0;
 
         scores[id] += value;
+        Debug.Log($"🏆 Player {playerNames.GetValueOrDefault(id, id.ToString())} scored! New score = {scores[id]}");
 
-        Debug.Log($"🏆 Player {id} scored! New score = {scores[id]}");
-
-        // Update UI if available
+        // Update UI if available - pass names too
         if (uiManager != null)
-            uiManager.RefreshScoreboard(scores);
+            uiManager.RefreshScoreboard(scores, playerNames);  // 💡 Modified: Pass names
     }
 
     /// <summary>
