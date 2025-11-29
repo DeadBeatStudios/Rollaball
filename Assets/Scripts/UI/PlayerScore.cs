@@ -2,28 +2,28 @@
 
 public class PlayerScore : MonoBehaviour
 {
-    public int playerID;  // Assigned at runtime using InstanceID
+    public int playerID;
 
     [Header("Player Info")]
-    [SerializeField] private string playerName = "";  // 💡 New: Set in Inspector or generate
+    [SerializeField] private string playerName = "";  // allows preview but overwritten on start
 
     private void Awake()
     {
-        // Use InstanceID so ALL players/enemies show on scoreboard
+        // Use InstanceID for scoreboard indexing
         playerID = GetInstanceID();
-
-        // Auto-generate name if not set
-        if (string.IsNullOrEmpty(playerName))
-        {
-            playerName = gameObject.name;  // Use GameObject name as fallback
-        }
     }
 
     private void Start()
     {
-        // REGISTER USING ONLY ONE ARGUMENT
+        // Apply name selected in main menu
+        if (!string.IsNullOrEmpty(PlayerProfile.PlayerName))
+            playerName = PlayerProfile.PlayerName;
+        else
+            playerName = "Player";
+
+        // Register player in GameManager
         GameManager.Instance.RegisterPlayer(playerID);
-        GameManager.Instance.SetPlayerName(playerID, playerName);  // 💡 New: Register name
+        GameManager.Instance.SetPlayerName(playerID, playerName);
     }
 
     public void AddPoints(int points)
@@ -32,5 +32,5 @@ public class PlayerScore : MonoBehaviour
     }
 
     public int ID => playerID;
-    public string PlayerName => playerName;  // 💡 New getter
+    public string PlayerName => playerName;
 }
