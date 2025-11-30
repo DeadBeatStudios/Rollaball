@@ -3,6 +3,9 @@
 [RequireComponent(typeof(Rigidbody))]
 public class EnemyPhysicsController : MonoBehaviour
 {
+    // --------------------------------------------------------------
+    //  TARGETING
+    // --------------------------------------------------------------
     [Header("Targeting")]
     public Transform target;
     public FlagPickup flag;
@@ -10,18 +13,34 @@ public class EnemyPhysicsController : MonoBehaviour
     [Header("Flag Scoring")]
     public Transform goalTarget;
 
+    // --------------------------------------------------------------
+    //  MOVEMENT (Arcade)
+    // --------------------------------------------------------------
     [Header("Movement")]
-    public float moveForce = 45f;
     public float maxSpeed = 14f;
-    public float turnSharpness = 10f;
-    public float steerResponsiveness = 8f;
 
+    [Header("Arcade Movement")]
+    [Tooltip("How fast the enemy accelerates toward its desired direction (m/s²).")]
+    public float groundAcceleration = 50f;
+
+    [Tooltip("How fast the enemy slows down when direction changes occur (m/s²).")]
+    public float groundDeceleration = 70f;
+
+    [Tooltip("Extra snap when reversing direction (dot < 0).")]
+    public float reverseBoostMultiplier = 1.15f;
+
+    // --------------------------------------------------------------
+    //  PHYSICS
+    // --------------------------------------------------------------
     [Header("Physics")]
     public float mass = 3f;
     public float radius = 0.5f;
     public float linearDamping = 0.35f;
     public float angularDamping = 0.1f;
 
+    // --------------------------------------------------------------
+    //  ENVIRONMENT & AVOIDANCE
+    // --------------------------------------------------------------
     [Header("Environment")]
     public LayerMask groundMask;
     public LayerMask obstacleMask;
@@ -40,9 +59,18 @@ public class EnemyPhysicsController : MonoBehaviour
     public float predictionTime = 0.35f;
     public float closeBrakeDistance = 2.5f;
 
-    // --- Private State ---
+    // --------------------------------------------------------------
+    //  VISUAL ROLLING (MATCH PLAYER)
+    // --------------------------------------------------------------
+    [Header("Visual Rolling")]
+    public Transform visualModel;
+    public float visualRadius = 0.5f;
+
+    // --------------------------------------------------------------
+    //  PRIVATE STATE
+    // --------------------------------------------------------------
     private Rigidbody rb;
-    private Vector3 desiredDirection;
+    private Vector3 desiredDirection = Vector3.forward;
     private bool avoidingEdge = false;
     private bool _groundDetected = true;
     private Vector3 lastSafeDirection = Vector3.forward;
@@ -85,15 +113,14 @@ public class EnemyPhysicsController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // ---------------------------------------
+        // --------------------------------------------------------------
         // FLAG → TARGETING LOGIC
-        // ---------------------------------------
+        // --------------------------------------------------------------
         if (flag != null)
         {
             if (!flag.IsHeld)
             {
-                // Flag on ground → chase it
-                target = flag.transform;
+                target = flag.transform; // Flag on ground
             }
             else
             {
@@ -101,41 +128,38 @@ public class EnemyPhysicsController : MonoBehaviour
 
                 if (holder != null && holder != transform)
                 {
-                    // Someone else has the flag → chase them
-                    target = holder;
+                    target = holder; // Chase whoever holds it
                 }
                 else
                 {
-                    // WE HAVE THE FLAG → score!
-                    target = goalTarget;
+                    target = goalTarget; // We have flag → score!
                 }
             }
         }
 
-        if (!target) return;
+        if (!target)
+            return;
 
-        // ---------------------------------------
-        // Predictive movement toward target
-        // ---------------------------------------
-        Vector3 targetVel = Vector3.zero;
+        // --------------------------------------------------------------
+        // PREDICTIVE TARGET POSITION
+        // --------------------------------------------------------------
+        Vector3 targetVelocityEstimate = Vector3.zero;
         if (target.TryGetComponent<Rigidbody>(out var targetRb))
-            targetVel = targetRb.linearVelocity;
+            targetVelocityEstimate = targetRb.linearVelocity;
 
-        Vector3 predictedPos = target.position + targetVel * predictionTime;
+        Vector3 predictedPos = target.position + targetVelocityEstimate * predictionTime;
         Vector3 toTarget = predictedPos - transform.position;
         float distance = toTarget.magnitude;
         Vector3 seekDir = toTarget.normalized;
 
-        // ---------------------------------------
+        // --------------------------------------------------------------
         // EDGE DETECTION
-        // ---------------------------------------
+        // --------------------------------------------------------------
         float speed = rb.linearVelocity.magnitude;
-        if (speed < 0.1f) speed = 0.1f;
-
         float speedRatio = Mathf.Clamp01(speed / maxSpeed);
-        float lookDistance = Mathf.Lerp(edgeCheckDistance, edgeCheckDistance * 3f, speedRatio);
 
-        Vector3 headOffset = Vector3.up * (radius + 1.0f);
+        float lookDistance = Mathf.Lerp(edgeCheckDistance, edgeCheckDistance * 3f, speedRatio);
+        Vector3 headOffset = Vector3.up * (radius + 1f);
         Vector3 origin = transform.position + headOffset;
 
         Vector3 moveDir = rb.linearVelocity.sqrMagnitude > 0.01f
@@ -159,7 +183,6 @@ public class EnemyPhysicsController : MonoBehaviour
             {
                 avoidingEdge = true;
                 edgeTimer = edgeRecoveryDelay;
-                Debug.Log($"{name}: ⚠ Avoiding edge!");
             }
 
             float brake = Mathf.Lerp(edgeBrakeForce, edgeBrakeForce * 2f, speedRatio);
@@ -180,49 +203,103 @@ public class EnemyPhysicsController : MonoBehaviour
             lastSafeDirection = moveDir;
         }
 
-        // ---------------------------------------
+        // --------------------------------------------------------------
         // OBSTACLE AVOIDANCE
-        // ---------------------------------------
+        // --------------------------------------------------------------
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, obstacleCheckDistance, obstacleMask))
         {
             Vector3 avoidDir = Vector3.Reflect(seekDir, hit.normal);
             seekDir = Vector3.Lerp(seekDir, avoidDir, 0.9f);
         }
 
-        // ---------------------------------------
-        // STEERING & MOVEMENT
-        // ---------------------------------------
-        float turnRate = avoidingEdge ? turnSharpness * 0.4f : turnSharpness;
+        // --------------------------------------------------------------
+        // DIRECTION STEERING
+        // --------------------------------------------------------------
+        float turnRate = avoidingEdge ? safeTurnForce * 0.4f : safeTurnForce;
 
         desiredDirection = Vector3.Lerp(desiredDirection, seekDir, Time.fixedDeltaTime * turnRate);
         desiredDirection.y = 0f;
+        if (desiredDirection.sqrMagnitude < 0.001f)
+            desiredDirection = transform.forward;
         desiredDirection.Normalize();
 
-        Vector3 horizontalVel = rb.linearVelocity;
-        horizontalVel.y = 0f;
-        Vector3 steering = (desiredDirection - horizontalVel.normalized) * steerResponsiveness;
-        steering.y = 0f;
+        // --------------------------------------------------------------
+        // ARCADE MOVEMENT (MATCH PLAYER)
+        // --------------------------------------------------------------
+        Vector3 currentVel = rb.linearVelocity;
+        Vector3 horizVel = new Vector3(currentVel.x, 0f, currentVel.z);
+        float currentSpeed = horizVel.magnitude;
 
-        float speedMultiplier = avoidingEdge ? 0.2f : 1f;
-        float currentSpeed = horizontalVel.magnitude;
+        float targetSpeed = maxSpeed;
 
-        if (currentSpeed < maxSpeed)
+        if (avoidingEdge)
+            targetSpeed *= 0.4f;
+
+        // Brake when close to target
+        if (distance < closeBrakeDistance)
         {
-            rb.AddForce((desiredDirection * moveForce * speedMultiplier + steering) * Time.fixedDeltaTime,
-                ForceMode.VelocityChange);
+            float slowFactor = Mathf.Clamp01(distance / closeBrakeDistance);
+            targetSpeed *= slowFactor;
         }
 
-        // Brake if close
-        if (distance < closeBrakeDistance)
-            rb.linearVelocity *= 0.97f;
+        Vector3 desiredVel = desiredDirection * targetSpeed;
+        Vector3 deltaVel = desiredVel - horizVel;
 
-        // Remove upward drift
+        float dot = 1f;
+        if (currentSpeed > 0.01f && desiredDirection.sqrMagnitude > 0.0001f)
+            dot = Vector3.Dot(horizVel.normalized, desiredDirection);
+
+        bool reversing = dot < 0f;
+
+        float accel = groundAcceleration;
+        if (reversing)
+            accel *= reverseBoostMultiplier;
+
+        if (targetSpeed < 0.1f)
+            accel = groundDeceleration;
+
+        float maxDelta = accel * Time.fixedDeltaTime;
+
+        if (deltaVel.magnitude > maxDelta)
+            deltaVel = deltaVel.normalized * maxDelta;
+
+        rb.AddForce(new Vector3(deltaVel.x, 0f, deltaVel.z), ForceMode.VelocityChange);
+
+        // Clamp horizontal speed
+        currentVel = rb.linearVelocity;
+        horizVel = new Vector3(currentVel.x, 0f, currentVel.z);
+        if (horizVel.magnitude > maxSpeed)
+        {
+            horizVel = horizVel.normalized * maxSpeed;
+            rb.linearVelocity = new Vector3(horizVel.x, currentVel.y, horizVel.z);
+        }
+
+        // --------------------------------------------------------------
+        // ROLLING VISUAL (MATCH PLAYER)
+        // --------------------------------------------------------------
+        if (visualModel != null)
+        {
+            Vector3 rollVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            float rollSpeed = rollVel.magnitude;
+
+            if (rollSpeed > 0.05f && visualRadius > 0.001f)
+            {
+                Vector3 rollAxis = Vector3.Cross(Vector3.up, rollVel.normalized);
+
+                float angularRate = rollSpeed / visualRadius;
+                float rotationAmount = angularRate * Mathf.Rad2Deg * Time.fixedDeltaTime;
+
+                visualModel.Rotate(rollAxis, rotationAmount, Space.World);
+            }
+        }
+
+        // --------------------------------------------------------------
+        // VERTICAL CLEANUP
+        // --------------------------------------------------------------
         Vector3 v = rb.linearVelocity;
         if (v.y > 0.05f)
             v.y = Mathf.Lerp(v.y, 0f, 0.5f);
         rb.linearVelocity = v;
-
-        // 🎯 Scoring is now handled by GoalTrigger.OnTriggerEnter()
     }
 
     private void OnDrawGizmosSelected()

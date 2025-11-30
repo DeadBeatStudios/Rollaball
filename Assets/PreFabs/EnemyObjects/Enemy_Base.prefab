@@ -215,7 +215,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5267770077472934122}
   serializedVersion: 5
-  m_Mass: 2
+  m_Mass: 3
   m_LinearDamping: 0.1
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -249,10 +249,10 @@ MonoBehaviour:
   target: {fileID: 0}
   flag: {fileID: 0}
   goalTarget: {fileID: 0}
-  moveForce: 60
   maxSpeed: 25
-  turnSharpness: 50
-  steerResponsiveness: 8
+  groundAcceleration: 50
+  groundDeceleration: 70
+  reverseBoostMultiplier: 1.15
   mass: 3
   radius: 0.5
   linearDamping: 0.25
@@ -271,6 +271,8 @@ MonoBehaviour:
   edgeRecoveryDelay: 1.5
   predictionTime: 0.01
   closeBrakeDistance: 3
+  visualModel: {fileID: 8711023098106510381}
+  visualRadius: 0.5
 --- !u!114 &-1892484579140901611
 MonoBehaviour:
   m_ObjectHideFlags: 0
