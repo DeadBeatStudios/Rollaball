@@ -314,6 +314,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerScore
   playerID: 0
+  playerName: 
+  isEnemy: 1
 --- !u!114 &406064176594011501
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,7 +328,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aab889059f53cae4388b6d6260638285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KnockbackOnCollision
-  knockbackForce: 14
-  minHitSpeed: 4
-  dropFlagOnStrongHit: 1
-  dropFlagSpeedThreshold: 6
+  baseKnockback: 14
+  momentumMultiplier: 1.25
+  winnerRecoilPercent: 0.25
+  minSpeedDifference: 0.15
+  maxKnockback: 22
+  ignoreVertical: 1
+  dropThreshold: 8
