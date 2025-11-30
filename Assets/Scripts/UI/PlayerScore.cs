@@ -47,7 +47,7 @@ public class PlayerScore : MonoBehaviour
     private void GenerateEnemyName()
     {
         // 💡 Generate varied enemy names
-        string[] enemyTypes = { "Adrian", "Ethan", "Benjamin", "Corey", "Asshole" };
+        string[] enemyTypes = { "Adrian", "Ethan", "Benjamin", "Corey", "Connie", "Dennis" };
         string type = enemyTypes[Random.Range(0, enemyTypes.Length)];
         int number = Random.Range(100, 999);
         playerName = $"{type}_{number}";  // e.g., "Guard_247"
