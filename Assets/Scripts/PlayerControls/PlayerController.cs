@@ -8,10 +8,14 @@ public class PlayerController : MonoBehaviour
     //  MOVEMENT SETTINGS
     // --------------------------------------------------------------
     [Header("Movement Settings")]
-    public float moveForce = 20f;
-    public float maxSpeed = 10f;
-    public float jumpForce = 5f;
+    public float moveForce = 40f;
+    public float maxSpeed = 14f;
+    public float jumpForce = 7f;
     public Transform cameraTransform;
+
+    [Header("Arcade Controls")]
+    public float lateralDampingForce = 1.2f;   // Controls sliding/drift
+    public float counterForce = 0.3f;          // Gentle direction change assistance
 
     [Header("Visual Rolling")]
     public Transform visualModel;
@@ -120,7 +124,6 @@ public class PlayerController : MonoBehaviour
 
         // Require 2 consecutive grounded frames
         isGrounded = groundedFrames >= 2;
-
     }
 
     // --------------------------------------------------------------
@@ -162,17 +165,23 @@ public class PlayerController : MonoBehaviour
                         ? Vector3.Dot(horizontalVel.normalized, moveDirection)
                         : 0f;
 
-                    // Stability & directional damping
-                    if (alignment < 0.8f)
-                        rb.AddForce(-horizontalVel * 0.5f, ForceMode.Force);
+                    // 🔥 SMOOTH ARCADE MOVEMENT: Natural turning without robotic snap
+                    // Only apply gentle counter-force when changing direction
+                    if (alignment < 0.7f && horizontalVel.magnitude > 0.5f)
+                    {
+                        rb.AddForce(-horizontalVel * counterForce, ForceMode.Force);
+                    }
 
+                    // Lateral damping for controlled sliding
                     Vector3 rightDir = Vector3.Cross(Vector3.up, moveDirection);
                     float lateralSpeed = Vector3.Dot(rb.linearVelocity, rightDir);
-                    rb.AddForce(-rightDir * lateralSpeed * 2f, ForceMode.Force);
+                    rb.AddForce(-rightDir * lateralSpeed * lateralDampingForce, ForceMode.Force);
 
+                    // Main movement push (handles all acceleration naturally)
                     if (rb.linearVelocity.magnitude < maxSpeed)
                         rb.AddForce(moveDirection * moveForce, ForceMode.Force);
 
+                    // Rolling torque
                     Vector3 torqueDir = new Vector3(moveDirection.z, 0, -moveDirection.x);
                     rb.AddTorque(torqueDir * moveForce * 0.5f, ForceMode.Force);
                 }

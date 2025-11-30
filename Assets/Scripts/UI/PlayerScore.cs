@@ -1,30 +1,49 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class PlayerScore : MonoBehaviour
 {
     public int playerID;
 
     [Header("Player Info")]
-    [SerializeField] private string playerName = "";  // allows preview but overwritten on start
-    [SerializeField] private bool isEnemy = false;    // 💡 Check this box for enemies in Inspector
+    [SerializeField] private string playerName = "";
+    [SerializeField] private bool isEnemy = false;
+
+    // 💡 Static = shared across ALL PlayerScore instances
+    private static List<string> availableNames = new List<string>();
+    private static List<string> usedNames = new List<string>();
+    private static Dictionary<string, int> nameCounts = new Dictionary<string, int>();
 
     private void Awake()
     {
-        // Use InstanceID for scoreboard indexing
         playerID = GetInstanceID();
+
+        // 💡 Initialize name pool (only once, first enemy does this)
+        if (availableNames.Count == 0)
+        {
+            ResetNamePool();
+        }
+    }
+
+    private static void ResetNamePool()
+    {
+        availableNames = new List<string>
+        {
+            "Adrian", "Ethan", "Benjamin", "Corey", "Dennis",
+            "Connie", "Miranda", "Zoe", "Christy", "Mike"
+        };
+        usedNames.Clear();
+        nameCounts.Clear();
     }
 
     private void Start()
     {
-        // 🔥 CRITICAL: Determine if this is player or enemy
         if (isEnemy || gameObject.name.ToLower().Contains("enemy"))
         {
-            // Generate enemy name
-            GenerateEnemyName();
+            GenerateSmartEnemyName();
         }
-        else if (gameObject.CompareTag("Player"))  // Make sure your player has "Player" tag
+        else if (gameObject.CompareTag("Player"))
         {
-            // Apply name selected in main menu ONLY to player
             if (!string.IsNullOrEmpty(PlayerProfile.PlayerName))
                 playerName = PlayerProfile.PlayerName;
             else
@@ -32,33 +51,60 @@ public class PlayerScore : MonoBehaviour
         }
         else
         {
-            // Fallback for other entities
             if (string.IsNullOrEmpty(playerName))
                 playerName = gameObject.name;
         }
 
-        // Register in GameManager
         GameManager.Instance.RegisterPlayer(playerID);
         GameManager.Instance.SetPlayerName(playerID, playerName);
-
-        Debug.Log($"GameObject: {gameObject.name} , Tag: {gameObject.tag} , PlayerProfile Name: '{PlayerProfile.PlayerName}'");
     }
 
-    private void GenerateEnemyName()
+    private void GenerateSmartEnemyName()
     {
-        // 💡 Generate varied enemy names
-        string[] enemyTypes = { "Adrian", "Ethan", "Benjamin", "Corey", "Connie", "Dennis" };
-        string type = enemyTypes[Random.Range(0, enemyTypes.Length)];
-        int number = Random.Range(100, 999);
-        playerName = $"{type}_{number}";  // e.g., "Guard_247"
+        string baseName;
+
+        // 🔥 CRITICAL: If we still have unused names, pick one
+        if (availableNames.Count > 0)
+        {
+            // Pick random unused name
+            int index = Random.Range(0, availableNames.Count);
+            baseName = availableNames[index];
+
+            // Move it from available to used
+            availableNames.RemoveAt(index);
+            usedNames.Add(baseName);
+
+            // First use - no number needed!
+            playerName = baseName;
+        }
+        else
+        {
+            // All names used - pick from used names and add number
+            baseName = usedNames[Random.Range(0, usedNames.Count)];
+
+            // Track how many times this name has been reused
+            if (!nameCounts.ContainsKey(baseName))
+                nameCounts[baseName] = 1;
+
+            nameCounts[baseName]++;
+
+            // Add number for duplicates
+            playerName = $"{baseName}_{nameCounts[baseName]}";
+        }
     }
 
+    // 💡 Call this when returning to menu or resetting game
+    public static void ResetEnemyNames()
+    {
+        ResetNamePool();
+    }
+
+    // Rest of your existing code...
     public void AddPoints(int points)
     {
         GameManager.Instance.AddPoints(playerID, points);
     }
 
-    // 💡 Allow runtime name changes (useful for multiplayer later)
     public void SetPlayerName(string newName)
     {
         playerName = newName;

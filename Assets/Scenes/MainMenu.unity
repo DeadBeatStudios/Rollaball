@@ -674,7 +674,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuController
   nameInputField: {fileID: 1823791313}
-  nextSceneName: LevelSelectScene
+  nextSceneName: LevelSelect
 --- !u!4 &1620145207
 Transform:
   m_ObjectHideFlags: 0
@@ -1477,23 +1477,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3951001602614022381, guid: ee63a97d8ed0e6747ab99863228bb751, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3951001602614022381, guid: ee63a97d8ed0e6747ab99863228bb751, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 324380111}
+      objectReference: {fileID: 1620145206}
     - target: {fileID: 3951001602614022381, guid: ee63a97d8ed0e6747ab99863228bb751, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3951001602614022381, guid: ee63a97d8ed0e6747ab99863228bb751, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: LoadScene
+      value: StartGame
       objectReference: {fileID: 0}
     - target: {fileID: 3951001602614022381, guid: ee63a97d8ed0e6747ab99863228bb751, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: SceneLoader, Assembly-CSharp
+      value: MainMenuController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 3951001602614022381, guid: ee63a97d8ed0e6747ab99863228bb751, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
