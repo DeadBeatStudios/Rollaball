@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
-using System.Linq;
 
 /// <summary>
-/// Flag pickup system with terrain-first spawning.
-/// Supports Unity Terrain, tagged ground objects, and graceful fallbacks.
+/// Simplified Flag system using predefined Respawn Zones (FlagSpawners).
+/// Removes all random arena spawning, terrain logic, floating visuals, etc.
 /// </summary>
 public class FlagPickup : MonoBehaviour
 {
@@ -18,23 +17,20 @@ public class FlagPickup : MonoBehaviour
     [Header("Attachment Settings")]
     [SerializeField] private float attachHeightOffset = 1.5f;
 
-    [Header("Respawn Settings")]
-    [SerializeField] private float respawnHeightOffset = 0.5f;
-    [SerializeField, Range(0f, 0.5f)] private float edgePaddingPercent = 0.05f;
+    [Header("Respawn Zones")]
+    [Tooltip("Drag in the FlagSpawner objects where the flag is allowed to respawn.")]
+    public Transform[] respawnSpawners;
 
-    [Header("Terrain Spawn Validation")]
-    [SerializeField, Range(0f, 90f)] private float maxSpawnSlope = 30f;
-    [SerializeField] private int maxSpawnAttempts = 10;
+    [Tooltip("Height added above the spawner when respawning.")]
+    public float respawnHeightOffset = 0.5f;
 
     [Header("Debug")]
-    [SerializeField] private bool showDebugLogs = true;
+    public bool showDebugLogs = false;
 
     // State
     private Transform holder;
     private bool isHeld = false;
     private Quaternion initialWorldRotation;
-
-    private Bounds cachedBounds;
 
     private void Start()
     {
@@ -45,15 +41,13 @@ public class FlagPickup : MonoBehaviour
             rb.isKinematic = true;
             rb.useGravity = false;
         }
-
-        cachedBounds = GetGroundBounds();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isHeld) return;
+        if (isHeld)
+            return;
 
-        // Only players or enemies may pick up
         if (!other.CompareTag("Player") && !other.CompareTag("Enemy"))
             return;
 
@@ -65,29 +59,27 @@ public class FlagPickup : MonoBehaviour
         if (!isHeld || holder == null)
             return;
 
-        // If holder has a PlayerRespawn and is dead → respawn flag
+        // If holder dies → respawn at spawner
         PlayerRespawn pr = holder.GetComponentInParent<PlayerRespawn>();
         if (pr != null && pr.IsDead)
         {
-            RespawnAtRandom();
+            RespawnAtRandomSpawner();
             return;
         }
 
-        // Stick to holder
+        // Follow holder
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
     }
 
     // -------------------------------------------------
-    // ATTACH / DROP API
+    // ATTACH / DROP
     // -------------------------------------------------
 
-    /// <summary>
-    /// Attach the flag to a player or enemy root.
-    /// </summary>
     public void AttachToHolder(Transform newHolder)
     {
-        if (newHolder == null) return;
+        if (newHolder == null)
+            return;
 
         holder = newHolder;
         isHeld = true;
@@ -100,13 +92,9 @@ public class FlagPickup : MonoBehaviour
         transform.rotation = initialWorldRotation;
 
         if (showDebugLogs)
-            Debug.Log($"🏁 Flag attached to {newHolder.name}");
+            Debug.Log($"Flag attached to {newHolder.name}");
     }
 
-    /// <summary>
-    /// Drop the flag into the world near a position (used by knockback / hits).
-    /// Does NOT random-respawn, it just places the flag on the ground.
-    /// </summary>
     public void DropToWorld(
         FlagDropCause cause = FlagDropCause.Unknown,
         Transform killer = null,
@@ -123,38 +111,51 @@ public class FlagPickup : MonoBehaviour
         {
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-            rb.isKinematic = true;   // keep it as a pickup, not physics debris
+            rb.isKinematic = true;
             rb.useGravity = false;
         }
 
-        // Where should we drop it from?
         Vector3 basePos = dropPos ?? (prevHolder != null ? prevHolder.position : transform.position);
 
-        // Snap to ground
-        float groundY = GetGroundHeight(basePos);
-        Vector3 finalPos = new Vector3(basePos.x, groundY + respawnHeightOffset, basePos.z);
+        // Drop exactly at the position given (you can add ground snap if desired)
+        Vector3 finalPos = basePos + Vector3.up * respawnHeightOffset;
 
         transform.position = finalPos;
         transform.rotation = initialWorldRotation;
 
         if (showDebugLogs)
-            Debug.Log($"🏁 Flag dropped on ground at {finalPos} (cause: {cause})");
+            Debug.Log($"Flag dropped at {finalPos} (cause: {cause})");
     }
 
     /// <summary>
-    /// Only for scoring & death logic (random respawn in arena).
+    /// Used by scoring and instant respawn events.
     /// </summary>
     public void DropAndRespawn(FlagDropCause cause = FlagDropCause.Unknown)
     {
-        RespawnAtRandom();
+        RespawnAtRandomSpawner();
     }
 
     // -------------------------------------------------
-    // RESPAWN / GROUND HELPERS
+    // RESPAWN ZONES
     // -------------------------------------------------
 
-    private void RespawnAtRandom()
+    public void RespawnAtSpawner(int index)
     {
+        if (respawnSpawners == null || respawnSpawners.Length == 0)
+        {
+            Debug.LogError("FlagPickup: No respawn spawners assigned.");
+            return;
+        }
+
+        index = Mathf.Clamp(index, 0, respawnSpawners.Length - 1);
+
+        Transform sp = respawnSpawners[index];
+        if (sp == null)
+        {
+            Debug.LogError($"FlagPickup: Spawner at index {index} is null.");
+            return;
+        }
+
         isHeld = false;
         holder = null;
 
@@ -169,69 +170,23 @@ public class FlagPickup : MonoBehaviour
             rb.useGravity = false;
         }
 
-        Vector3 point = GetRandomPointInArena();
-        transform.position = point + Vector3.up * respawnHeightOffset;
+        transform.position = sp.position + Vector3.up * respawnHeightOffset;
         transform.rotation = initialWorldRotation;
 
         if (showDebugLogs)
-            Debug.Log($"🏁 Flag respawned randomly at {transform.position}");
+            Debug.Log($"Flag respawned at spawner: {sp.name}");
     }
 
-    private Bounds GetGroundBounds()
+    public void RespawnAtRandomSpawner()
     {
-        // 1) Terrain first
-        if (Terrain.activeTerrain != null)
+        if (respawnSpawners == null || respawnSpawners.Length == 0)
         {
-            Terrain t = Terrain.activeTerrain;
-            Bounds b = t.terrainData.bounds;
-            b.center += t.transform.position;
-            return b;
+            Debug.LogError("FlagPickup: No respawn spawners assigned.");
+            return;
         }
 
-        // 2) Ground-tagged colliders
-        var cols = GameObject.FindGameObjectsWithTag("Ground")
-            .Select(g => g.GetComponent<Collider>())
-            .Where(c => c != null)
-            .ToArray();
-
-        if (cols.Length == 0)
-        {
-            Debug.LogWarning("FlagPickup: No terrain or Ground-tagged colliders found. Using fallback bounds.");
-            return new Bounds(Vector3.zero, new Vector3(10f, 1f, 10f));
-        }
-
-        Bounds combined = cols[0].bounds;
-        for (int i = 1; i < cols.Length; i++)
-            combined.Encapsulate(cols[i].bounds);
-
-        return combined;
-    }
-
-    private float GetGroundHeight(Vector3 world)
-    {
-        if (Terrain.activeTerrain != null)
-        {
-            Terrain t = Terrain.activeTerrain;
-            return t.SampleHeight(world) + t.transform.position.y;
-        }
-
-        if (Physics.Raycast(world + Vector3.up * 10f, Vector3.down, out var hit, 50f, LayerMask.GetMask("Ground")))
-            return hit.point.y;
-
-        return world.y; // fallback: don't snap if nothing hit
-    }
-
-    private Vector3 GetRandomPointInArena()
-    {
-        Bounds a = cachedBounds;
-        float px = a.extents.x * edgePaddingPercent;
-        float pz = a.extents.z * edgePaddingPercent;
-
-        float rx = Random.Range(a.min.x + px, a.max.x - px);
-        float rz = Random.Range(a.min.z + pz, a.max.z - pz);
-        float ry = GetGroundHeight(new Vector3(rx, a.center.y, rz));
-
-        return new Vector3(rx, ry, rz);
+        int index = Random.Range(0, respawnSpawners.Length);
+        RespawnAtSpawner(index);
     }
 
     // -------------------------------------------------
