@@ -13,20 +13,12 @@ public class PlayerController : MonoBehaviour
     public Transform cameraTransform;
 
     [Header("Arcade Tuning")]
-    [Tooltip("How fast you accelerate on the ground towards max speed (m/s²).")]
     public float groundAcceleration = 60f;
-
-    [Tooltip("How fast you slow down on the ground when changing direction or releasing input (m/s²).")]
     public float groundDeceleration = 80f;
-
-    [Tooltip("Extra snap when reversing direction (dot < 0).")]
     public float reverseBoostMultiplier = 1.3f;
 
     [Header("Air Control")]
-    [Tooltip("How fast you can change horizontal velocity while airborne (m/s²).")]
     public float airAcceleration = 25f;
-
-    [Tooltip("How quickly you lose horizontal speed in air when no input (m/s²).")]
     public float airDeceleration = 5f;
 
     [Header("Visual Rolling")]
@@ -34,6 +26,7 @@ public class PlayerController : MonoBehaviour
     public float visualRadius = 0.5f;
 
     private Rigidbody rb;
+    private KnockbackHandler knockback;   // NEW
     private Vector2 moveInput;
     private bool jumpRequested;
 
@@ -66,6 +59,8 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        knockback = GetComponent<KnockbackHandler>(); // NEW
+
         rb.useGravity = true;
         rb.isKinematic = false;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
@@ -91,18 +86,16 @@ public class PlayerController : MonoBehaviour
     // --------------------------------------------------------------
     private bool CheckRawGrounded()
     {
-        // Ignore grounding right after a jump
         if (timeSinceJump < 0.15f)
             return false;
 
-        // Ignore if moving up too fast
         if (rb.linearVelocity.y > 0.5f)
             return false;
 
         float radius = 0.45f;
         float distance = groundCheckDistance + 0.05f;
 
-        bool hit = Physics.SphereCast(
+        return Physics.SphereCast(
             transform.position,
             radius,
             Vector3.down,
@@ -111,8 +104,6 @@ public class PlayerController : MonoBehaviour
             groundLayer,
             QueryTriggerInteraction.Ignore
         );
-
-        return hit;
     }
 
     private void UpdateGroundState()
@@ -130,7 +121,6 @@ public class PlayerController : MonoBehaviour
             ungroundedFrames++;
         }
 
-        // Require 2 consecutive grounded frames
         isGrounded = groundedFrames >= 2;
     }
 
@@ -139,14 +129,21 @@ public class PlayerController : MonoBehaviour
     // --------------------------------------------------------------
     private void FixedUpdate()
     {
+        // ------------------------------------------------------
+        //  KNOCKBACK / STAGGER OVERRIDE  (NEW)
+        // ------------------------------------------------------
+        if (knockback != null && knockback.IsStaggered)
+            return;
+
+        // ------------------------------------------------------
+        //  EXISTING MOVEMENT LOGIC
+        // ------------------------------------------------------
         timeSinceJump += Time.fixedDeltaTime;
         if (jumpCooldownTimer > 0f)
             jumpCooldownTimer -= Time.fixedDeltaTime;
 
-        // Update ground state
         UpdateGroundState();
 
-        // --------- CAMERA-RELATIVE MOVE DIRECTION ----------
         if (cameraTransform == null)
         {
             HandleJump();
@@ -166,12 +163,10 @@ public class PlayerController : MonoBehaviour
         if (moveDirection.sqrMagnitude > 1f)
             moveDirection.Normalize();
 
-        // Current horizontal velocity (XZ)
         Vector3 currentVel = rb.linearVelocity;
         Vector3 horizontalVel = new Vector3(currentVel.x, 0f, currentVel.z);
         float currentSpeed = horizontalVel.magnitude;
 
-        // --------- HORIZONTAL MOVEMENT (ARCade hybrid) ----------
         if (moveDirection.sqrMagnitude > 0.0001f)
         {
             Vector3 desiredDir = moveDirection.normalized;
@@ -187,7 +182,6 @@ public class PlayerController : MonoBehaviour
             bool reversing = dot < 0f;
 
             float accel = isGrounded ? groundAcceleration : airAcceleration;
-
             if (reversing && isGrounded)
                 accel *= reverseBoostMultiplier;
 
@@ -196,13 +190,11 @@ public class PlayerController : MonoBehaviour
             if (deltaVel.magnitude > maxDelta)
                 deltaVel = deltaVel.normalized * maxDelta;
 
-            // Apply horizontal correction as velocity change (ignores mass)
             Vector3 velocityChange = new Vector3(deltaVel.x, 0f, deltaVel.z);
             rb.AddForce(velocityChange, ForceMode.VelocityChange);
         }
         else
         {
-            // No input → brake towards zero
             if (currentSpeed > 0.01f)
             {
                 float decel = isGrounded ? groundDeceleration : airDeceleration;
@@ -216,16 +208,15 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Clamp horizontal speed to maxSpeed (safety net)
         currentVel = rb.linearVelocity;
         horizontalVel = new Vector3(currentVel.x, 0f, currentVel.z);
+
         if (horizontalVel.magnitude > maxSpeed)
         {
             horizontalVel = horizontalVel.normalized * maxSpeed;
             rb.linearVelocity = new Vector3(horizontalVel.x, currentVel.y, horizontalVel.z);
         }
 
-        // --------- VISUAL ROLLING ----------
         if (visualModel != null)
         {
             Vector3 horizVelForRoll = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
@@ -234,13 +225,12 @@ public class PlayerController : MonoBehaviour
             if (speed > 0.05f && visualRadius > 0.001f)
             {
                 Vector3 rollAxis = Vector3.Cross(Vector3.up, horizVelForRoll.normalized);
-                float angularRate = speed / visualRadius; // rad/s
+                float angularRate = speed / visualRadius;
                 float rotationAmount = angularRate * Mathf.Rad2Deg * Time.fixedDeltaTime;
                 visualModel.Rotate(rollAxis, rotationAmount, Space.World);
             }
         }
 
-        // --------- JUMP ----------
         HandleJump();
     }
 

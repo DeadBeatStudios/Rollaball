@@ -20,13 +20,8 @@ public class EnemyPhysicsController : MonoBehaviour
     public float maxSpeed = 14f;
 
     [Header("Arcade Movement")]
-    [Tooltip("How fast the enemy accelerates toward its desired direction (m/s²).")]
     public float groundAcceleration = 50f;
-
-    [Tooltip("How fast the enemy slows down when direction changes occur (m/s²).")]
     public float groundDeceleration = 70f;
-
-    [Tooltip("Extra snap when reversing direction (dot < 0).")]
     public float reverseBoostMultiplier = 1.15f;
 
     // --------------------------------------------------------------
@@ -60,7 +55,7 @@ public class EnemyPhysicsController : MonoBehaviour
     public float closeBrakeDistance = 2.5f;
 
     // --------------------------------------------------------------
-    //  VISUAL ROLLING (MATCH PLAYER)
+    //  VISUAL ROLLING
     // --------------------------------------------------------------
     [Header("Visual Rolling")]
     public Transform visualModel;
@@ -70,6 +65,7 @@ public class EnemyPhysicsController : MonoBehaviour
     //  PRIVATE STATE
     // --------------------------------------------------------------
     private Rigidbody rb;
+    private KnockbackHandler knockback; // NEW
     private Vector3 desiredDirection = Vector3.forward;
     private bool avoidingEdge = false;
     private bool _groundDetected = true;
@@ -79,6 +75,7 @@ public class EnemyPhysicsController : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        knockback = GetComponent<KnockbackHandler>(); // NEW
 
         rb.useGravity = true;
         rb.mass = mass;
@@ -114,26 +111,28 @@ public class EnemyPhysicsController : MonoBehaviour
     private void FixedUpdate()
     {
         // --------------------------------------------------------------
-        // FLAG → TARGETING LOGIC
+        //  KNOCKBACK / STAGGER OVERRIDE
+        // --------------------------------------------------------------
+        if (knockback != null && knockback.IsStaggered)
+            return; // Movement OFF during knockback
+
+        // --------------------------------------------------------------
+        //  FLAG → TARGETING LOGIC
         // --------------------------------------------------------------
         if (flag != null)
         {
             if (!flag.IsHeld)
             {
-                target = flag.transform; // Flag on ground
+                target = flag.transform;
             }
             else
             {
                 Transform holder = flag.CurrentHolder;
 
                 if (holder != null && holder != transform)
-                {
-                    target = holder; // Chase whoever holds it
-                }
+                    target = holder;
                 else
-                {
-                    target = goalTarget; // We have flag → score!
-                }
+                    target = goalTarget;
             }
         }
 
@@ -141,7 +140,7 @@ public class EnemyPhysicsController : MonoBehaviour
             return;
 
         // --------------------------------------------------------------
-        // PREDICTIVE TARGET POSITION
+        //  PREDICTIVE MOVEMENT
         // --------------------------------------------------------------
         Vector3 targetVelocityEstimate = Vector3.zero;
         if (target.TryGetComponent<Rigidbody>(out var targetRb))
@@ -153,7 +152,7 @@ public class EnemyPhysicsController : MonoBehaviour
         Vector3 seekDir = toTarget.normalized;
 
         // --------------------------------------------------------------
-        // EDGE DETECTION
+        //  EDGE DETECTION
         // --------------------------------------------------------------
         float speed = rb.linearVelocity.magnitude;
         float speedRatio = Mathf.Clamp01(speed / maxSpeed);
@@ -204,7 +203,7 @@ public class EnemyPhysicsController : MonoBehaviour
         }
 
         // --------------------------------------------------------------
-        // OBSTACLE AVOIDANCE
+        //  OBSTACLE AVOIDANCE
         // --------------------------------------------------------------
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, obstacleCheckDistance, obstacleMask))
         {
@@ -213,18 +212,20 @@ public class EnemyPhysicsController : MonoBehaviour
         }
 
         // --------------------------------------------------------------
-        // DIRECTION STEERING
+        //  STEERING
         // --------------------------------------------------------------
         float turnRate = avoidingEdge ? safeTurnForce * 0.4f : safeTurnForce;
 
         desiredDirection = Vector3.Lerp(desiredDirection, seekDir, Time.fixedDeltaTime * turnRate);
         desiredDirection.y = 0f;
+
         if (desiredDirection.sqrMagnitude < 0.001f)
             desiredDirection = transform.forward;
+
         desiredDirection.Normalize();
 
         // --------------------------------------------------------------
-        // ARCADE MOVEMENT (MATCH PLAYER)
+        //  ARCADE MOVEMENT
         // --------------------------------------------------------------
         Vector3 currentVel = rb.linearVelocity;
         Vector3 horizVel = new Vector3(currentVel.x, 0f, currentVel.z);
@@ -235,7 +236,6 @@ public class EnemyPhysicsController : MonoBehaviour
         if (avoidingEdge)
             targetSpeed *= 0.4f;
 
-        // Brake when close to target
         if (distance < closeBrakeDistance)
         {
             float slowFactor = Mathf.Clamp01(distance / closeBrakeDistance);
@@ -246,7 +246,7 @@ public class EnemyPhysicsController : MonoBehaviour
         Vector3 deltaVel = desiredVel - horizVel;
 
         float dot = 1f;
-        if (currentSpeed > 0.01f && desiredDirection.sqrMagnitude > 0.0001f)
+        if (currentSpeed > 0.01f)
             dot = Vector3.Dot(horizVel.normalized, desiredDirection);
 
         bool reversing = dot < 0f;
@@ -265,9 +265,12 @@ public class EnemyPhysicsController : MonoBehaviour
 
         rb.AddForce(new Vector3(deltaVel.x, 0f, deltaVel.z), ForceMode.VelocityChange);
 
-        // Clamp horizontal speed
+        // --------------------------------------------------------------
+        //  SPEED CLAMP
+        // --------------------------------------------------------------
         currentVel = rb.linearVelocity;
         horizVel = new Vector3(currentVel.x, 0f, currentVel.z);
+
         if (horizVel.magnitude > maxSpeed)
         {
             horizVel = horizVel.normalized * maxSpeed;
@@ -275,7 +278,7 @@ public class EnemyPhysicsController : MonoBehaviour
         }
 
         // --------------------------------------------------------------
-        // ROLLING VISUAL (MATCH PLAYER)
+        //  VISUAL ROLLING
         // --------------------------------------------------------------
         if (visualModel != null)
         {
@@ -294,7 +297,7 @@ public class EnemyPhysicsController : MonoBehaviour
         }
 
         // --------------------------------------------------------------
-        // VERTICAL CLEANUP
+        //  VERTICAL CLEANUP
         // --------------------------------------------------------------
         Vector3 v = rb.linearVelocity;
         if (v.y > 0.05f)

@@ -1,0 +1,6 @@
+using UnityEngine;
+
+public interface IKnockbackReceiver
+{
+    void ApplyKnockback(Vector3 force, float staggerTime);
+}
