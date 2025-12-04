@@ -65,7 +65,7 @@ public class EnemyPhysicsController : MonoBehaviour
     //  PRIVATE STATE
     // --------------------------------------------------------------
     private Rigidbody rb;
-    private KnockbackHandler knockback; // NEW
+    private KnockbackHandler knockback;
     private Vector3 desiredDirection = Vector3.forward;
     private bool avoidingEdge = false;
     private bool _groundDetected = true;
@@ -75,7 +75,7 @@ public class EnemyPhysicsController : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        knockback = GetComponent<KnockbackHandler>(); // NEW
+        knockback = GetComponent<KnockbackHandler>();
 
         rb.useGravity = true;
         rb.mass = mass;
@@ -110,12 +110,23 @@ public class EnemyPhysicsController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // --------------------------------------------------------------
-        //  KNOCKBACK / STAGGER OVERRIDE
-        // --------------------------------------------------------------
-        if (knockback != null && knockback.IsStaggered)
-            return; // Movement OFF during knockback
+        // Check if AI can move
+        bool canMove = knockback == null || !knockback.IsStaggered;
 
+        if (canMove)
+        {
+            ProcessAIMovement();
+        }
+
+        // 🔥 CRITICAL: Visual rolling always runs (even during stagger)
+        UpdateVisualRoll();
+    }
+
+    // --------------------------------------------------------------
+    //  AI MOVEMENT PROCESSING
+    // --------------------------------------------------------------
+    private void ProcessAIMovement()
+    {
         // --------------------------------------------------------------
         //  FLAG → TARGETING LOGIC
         // --------------------------------------------------------------
@@ -154,53 +165,7 @@ public class EnemyPhysicsController : MonoBehaviour
         // --------------------------------------------------------------
         //  EDGE DETECTION
         // --------------------------------------------------------------
-        float speed = rb.linearVelocity.magnitude;
-        float speedRatio = Mathf.Clamp01(speed / maxSpeed);
-
-        float lookDistance = Mathf.Lerp(edgeCheckDistance, edgeCheckDistance * 3f, speedRatio);
-        Vector3 headOffset = Vector3.up * (radius + 1f);
-        Vector3 origin = transform.position + headOffset;
-
-        Vector3 moveDir = rb.linearVelocity.sqrMagnitude > 0.01f
-            ? rb.linearVelocity.normalized
-            : transform.forward;
-
-        float tilt = -0.25f;
-        Vector3 forwardDown = (moveDir + Vector3.up * tilt).normalized;
-        Vector3 leftDown = (Quaternion.Euler(0, -25f, 0) * moveDir + Vector3.up * tilt).normalized;
-        Vector3 rightDown = (Quaternion.Euler(0, 25f, 0) * moveDir + Vector3.up * tilt).normalized;
-
-        bool centerHit = Physics.Raycast(origin, forwardDown, out _, lookDistance, groundMask);
-        bool leftHit = Physics.Raycast(origin, leftDown, out _, lookDistance, groundMask);
-        bool rightHit = Physics.Raycast(origin, rightDown, out _, lookDistance, groundMask);
-
-        _groundDetected = centerHit || leftHit || rightHit;
-
-        if (!_groundDetected)
-        {
-            if (!avoidingEdge)
-            {
-                avoidingEdge = true;
-                edgeTimer = edgeRecoveryDelay;
-            }
-
-            float brake = Mathf.Lerp(edgeBrakeForce, edgeBrakeForce * 2f, speedRatio);
-            rb.AddForce(-rb.linearVelocity * brake * Time.fixedDeltaTime, ForceMode.Acceleration);
-
-            Vector3 avoidDir = Vector3.Lerp(-moveDir, lastSafeDirection, 0.6f);
-            desiredDirection = Vector3.Lerp(desiredDirection, avoidDir, 0.8f);
-        }
-        else
-        {
-            if (avoidingEdge)
-            {
-                edgeTimer -= Time.fixedDeltaTime;
-                if (edgeTimer <= 0f)
-                    avoidingEdge = false;
-            }
-
-            lastSafeDirection = moveDir;
-        }
+        ProcessEdgeDetection();
 
         // --------------------------------------------------------------
         //  OBSTACLE AVOIDANCE
@@ -278,31 +243,86 @@ public class EnemyPhysicsController : MonoBehaviour
         }
 
         // --------------------------------------------------------------
-        //  VISUAL ROLLING
-        // --------------------------------------------------------------
-        if (visualModel != null)
-        {
-            Vector3 rollVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-            float rollSpeed = rollVel.magnitude;
-
-            if (rollSpeed > 0.05f && visualRadius > 0.001f)
-            {
-                Vector3 rollAxis = Vector3.Cross(Vector3.up, rollVel.normalized);
-
-                float angularRate = rollSpeed / visualRadius;
-                float rotationAmount = angularRate * Mathf.Rad2Deg * Time.fixedDeltaTime;
-
-                visualModel.Rotate(rollAxis, rotationAmount, Space.World);
-            }
-        }
-
-        // --------------------------------------------------------------
         //  VERTICAL CLEANUP
         // --------------------------------------------------------------
         Vector3 v = rb.linearVelocity;
         if (v.y > 0.05f)
             v.y = Mathf.Lerp(v.y, 0f, 0.5f);
         rb.linearVelocity = v;
+    }
+
+    // --------------------------------------------------------------
+    //  EDGE DETECTION
+    // --------------------------------------------------------------
+    private void ProcessEdgeDetection()
+    {
+        float speed = rb.linearVelocity.magnitude;
+        float speedRatio = Mathf.Clamp01(speed / maxSpeed);
+
+        float lookDistance = Mathf.Lerp(edgeCheckDistance, edgeCheckDistance * 3f, speedRatio);
+        Vector3 headOffset = Vector3.up * (radius + 1f);
+        Vector3 origin = transform.position + headOffset;
+
+        Vector3 moveDir = rb.linearVelocity.sqrMagnitude > 0.01f
+            ? rb.linearVelocity.normalized
+            : transform.forward;
+
+        float tilt = -0.25f;
+        Vector3 forwardDown = (moveDir + Vector3.up * tilt).normalized;
+        Vector3 leftDown = (Quaternion.Euler(0, -25f, 0) * moveDir + Vector3.up * tilt).normalized;
+        Vector3 rightDown = (Quaternion.Euler(0, 25f, 0) * moveDir + Vector3.up * tilt).normalized;
+
+        bool centerHit = Physics.Raycast(origin, forwardDown, out _, lookDistance, groundMask);
+        bool leftHit = Physics.Raycast(origin, leftDown, out _, lookDistance, groundMask);
+        bool rightHit = Physics.Raycast(origin, rightDown, out _, lookDistance, groundMask);
+
+        _groundDetected = centerHit || leftHit || rightHit;
+
+        if (!_groundDetected)
+        {
+            if (!avoidingEdge)
+            {
+                avoidingEdge = true;
+                edgeTimer = edgeRecoveryDelay;
+            }
+
+            float brake = Mathf.Lerp(edgeBrakeForce, edgeBrakeForce * 2f, speedRatio);
+            rb.AddForce(-rb.linearVelocity * brake * Time.fixedDeltaTime, ForceMode.Acceleration);
+
+            Vector3 avoidDir = Vector3.Lerp(-moveDir, lastSafeDirection, 0.6f);
+            desiredDirection = Vector3.Lerp(desiredDirection, avoidDir, 0.8f);
+        }
+        else
+        {
+            if (avoidingEdge)
+            {
+                edgeTimer -= Time.fixedDeltaTime;
+                if (edgeTimer <= 0f)
+                    avoidingEdge = false;
+            }
+
+            lastSafeDirection = moveDir;
+        }
+    }
+
+    // --------------------------------------------------------------
+    //  VISUAL ROLL - Always runs regardless of stagger state
+    // --------------------------------------------------------------
+    private void UpdateVisualRoll()
+    {
+        if (visualModel == null)
+            return;
+
+        Vector3 rollVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float rollSpeed = rollVel.magnitude;
+
+        if (rollSpeed > 0.05f && visualRadius > 0.001f)
+        {
+            Vector3 rollAxis = Vector3.Cross(Vector3.up, rollVel.normalized);
+            float angularRate = rollSpeed / visualRadius;
+            float rotationAmount = angularRate * Mathf.Rad2Deg * Time.fixedDeltaTime;
+            visualModel.Rotate(rollAxis, rotationAmount, Space.World);
+        }
     }
 
     private void OnDrawGizmosSelected()

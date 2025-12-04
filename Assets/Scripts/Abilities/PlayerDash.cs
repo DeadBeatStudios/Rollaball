@@ -1,7 +1,5 @@
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerDash : MonoBehaviour
@@ -9,14 +7,11 @@ public class PlayerDash : MonoBehaviour
     [Header("Dash Settings")]
     [Tooltip("Horizontal Dash Speed.")]
     public float dashSpeed = 24f;
-
-    [Tooltip("How long the dash lasts(seconds).")]
+    [Tooltip("How long the dash lasts (seconds).")]
     public float dashDuration = 0.18f;
-
-    [Tooltip("Cooldown between dashes(seconds).")]
+    [Tooltip("Cooldown between dashes (seconds).")]
     public float dashCooldown = 0.6f;
-
-    [Tooltip("Minimum horizontal speed before we consider using current velocity as dash direction")]
+    [Tooltip("Minimum horizontal speed before we consider using current velocity as dash direction.")]
     public float minVelocityForDirection = 0.2f;
 
     [Header("References")]
@@ -25,11 +20,14 @@ public class PlayerDash : MonoBehaviour
 
     private Rigidbody rb;
     private KnockbackHandler knockback;
-
     private bool isDashing = false;
     private float dashTimer = 0f;
     private float cooldownTimer = 0f;
     private Vector3 dashDirection = Vector3.zero;
+
+    // Public state access for other systems
+    public bool IsDashing => isDashing;
+    public float CooldownRemaining => cooldownTimer;
 
     private void Awake()
     {
@@ -42,7 +40,7 @@ public class PlayerDash : MonoBehaviour
 
     private void Update()
     {
-        if(cooldownTimer > 0f)
+        if (cooldownTimer > 0f)
             cooldownTimer -= Time.deltaTime;
     }
 
@@ -52,19 +50,20 @@ public class PlayerDash : MonoBehaviour
             return;
 
         dashTimer -= Time.fixedDeltaTime;
+
         if (dashTimer <= 0f)
         {
             EndDash();
             return;
         }
-            //Maintain a strong horizontal dash velocity; keep current vertival component
-            Vector3 currentVel = rb.linearVelocity;
-            Vector3 horiz = dashDirection * dashSpeed;
+
+        // Maintain strong horizontal dash velocity; keep current vertical component
+        Vector3 currentVel = rb.linearVelocity;
+        Vector3 horiz = dashDirection * dashSpeed;
         rb.linearVelocity = new Vector3(horiz.x, currentVel.y, horiz.z);
-       
     }
 
-    // INPUT (hool this to an Input Action bound to Left Click)
+    // INPUT (hook this to an Input Action bound to Left Click or Shift)
     public void OnDash(InputAction.CallbackContext context)
     {
         if (!context.performed)
@@ -84,7 +83,7 @@ public class PlayerDash : MonoBehaviour
         if (knockback != null && knockback.IsStaggered)
             return;
 
-        //Decide dash direction:
+        // Decide dash direction:
         // 1) If we're already moving, dash along current horizontal velocity
         Vector3 currentVel = rb.linearVelocity;
         Vector3 horizontalVel = new Vector3(currentVel.x, 0f, currentVel.z);
@@ -95,6 +94,7 @@ public class PlayerDash : MonoBehaviour
         }
         else
         {
+            // 2) Otherwise, dash toward camera forward direction
             Vector3 forward = Vector3.forward;
 
             if (playerController != null && playerController.cameraTransform != null)
@@ -121,7 +121,7 @@ public class PlayerDash : MonoBehaviour
         dashTimer = dashDuration;
         cooldownTimer = dashCooldown;
 
-        //Lock normal movement while dashing
+        // Lock normal movement while dashing
         if (playerController != null)
             playerController.SetExternalMovementLock(true);
     }

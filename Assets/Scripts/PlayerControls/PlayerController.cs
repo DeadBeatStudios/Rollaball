@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour
     public float visualRadius = 0.5f;
 
     private Rigidbody rb;
-    private KnockbackHandler knockback;   // NEW
+    private KnockbackHandler knockback;
     private Vector2 moveInput;
     private bool jumpRequested;
 
@@ -56,10 +56,19 @@ public class PlayerController : MonoBehaviour
     private float jumpCooldownTimer = 0f;
     private float timeSinceJump = Mathf.Infinity;
 
+    // --------------------------------------------------------------
+    //  EXTERNAL MOVEMENT LOCK
+    // --------------------------------------------------------------
+    private bool externalMovementLocked = false;
+    public void SetExternalMovementLock(bool locked)
+    {
+        externalMovementLocked = locked;
+    }
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        knockback = GetComponent<KnockbackHandler>(); // NEW
+        knockback = GetComponent<KnockbackHandler>();
 
         rb.useGravity = true;
         rb.isKinematic = false;
@@ -73,11 +82,6 @@ public class PlayerController : MonoBehaviour
         if (lockCursorOnStart)
             LockCursor(true);
     }
-
-    //External Movement Lock (used by dash, future abilities, etc.)
-    private bool externalMovementLocked = false;
-    public void SetExternalMovementLock(bool locked)
-        { externalMovementLocked = locked; }    
 
     private void LockCursor(bool locked)
     {
@@ -134,27 +138,35 @@ public class PlayerController : MonoBehaviour
     // --------------------------------------------------------------
     private void FixedUpdate()
     {
-        // ------------------------------------------------------
-        //  KNOCKBACK / STAGGER OVERRIDE  (NEW)
-        // ------------------------------------------------------
-        if ((knockback != null && knockback.IsStaggered) || externalMovementLocked)
-            return;
-
-        // ------------------------------------------------------
-        //  EXISTING MOVEMENT LOGIC
-        // ------------------------------------------------------
         timeSinceJump += Time.fixedDeltaTime;
         if (jumpCooldownTimer > 0f)
             jumpCooldownTimer -= Time.fixedDeltaTime;
 
         UpdateGroundState();
 
-        if (cameraTransform == null)
+        // Movement logic - skip if locked or staggered
+        bool canMove = !externalMovementLocked && (knockback == null || !knockback.IsStaggered);
+
+        if (canMove && cameraTransform != null)
         {
+            ProcessMovement();
             HandleJump();
-            return;
+        }
+        else if (canMove)
+        {
+            // No camera but can move - just handle jump
+            HandleJump();
         }
 
+        // 🔥 CRITICAL: Visual rolling always runs (even during dash/stagger)
+        UpdateVisualRoll();
+    }
+
+    // --------------------------------------------------------------
+    //  MOVEMENT PROCESSING
+    // --------------------------------------------------------------
+    private void ProcessMovement()
+    {
         Vector3 forward = cameraTransform.forward;
         Vector3 right = cameraTransform.right;
 
@@ -213,6 +225,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        // Clamp to max speed
         currentVel = rb.linearVelocity;
         horizontalVel = new Vector3(currentVel.x, 0f, currentVel.z);
 
@@ -221,24 +234,31 @@ public class PlayerController : MonoBehaviour
             horizontalVel = horizontalVel.normalized * maxSpeed;
             rb.linearVelocity = new Vector3(horizontalVel.x, currentVel.y, horizontalVel.z);
         }
-
-        if (visualModel != null)
-        {
-            Vector3 horizVelForRoll = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-            float speed = horizVelForRoll.magnitude;
-
-            if (speed > 0.05f && visualRadius > 0.001f)
-            {
-                Vector3 rollAxis = Vector3.Cross(Vector3.up, horizVelForRoll.normalized);
-                float angularRate = speed / visualRadius;
-                float rotationAmount = angularRate * Mathf.Rad2Deg * Time.fixedDeltaTime;
-                visualModel.Rotate(rollAxis, rotationAmount, Space.World);
-            }
-        }
-
-        HandleJump();
     }
 
+    // --------------------------------------------------------------
+    //  VISUAL ROLL - Always runs regardless of movement lock
+    // --------------------------------------------------------------
+    private void UpdateVisualRoll()
+    {
+        if (visualModel == null)
+            return;
+
+        Vector3 horizVelForRoll = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float speed = horizVelForRoll.magnitude;
+
+        if (speed > 0.05f && visualRadius > 0.001f)
+        {
+            Vector3 rollAxis = Vector3.Cross(Vector3.up, horizVelForRoll.normalized);
+            float angularRate = speed / visualRadius;
+            float rotationAmount = angularRate * Mathf.Rad2Deg * Time.fixedDeltaTime;
+            visualModel.Rotate(rollAxis, rotationAmount, Space.World);
+        }
+    }
+
+    // --------------------------------------------------------------
+    //  JUMP HANDLING
+    // --------------------------------------------------------------
     private void HandleJump()
     {
         if (jumpRequested && isGrounded && jumpCooldownTimer <= 0f)
