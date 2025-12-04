@@ -74,6 +74,11 @@ public class PlayerController : MonoBehaviour
             LockCursor(true);
     }
 
+    //External Movement Lock (used by dash, future abilities, etc.)
+    private bool externalMovementLocked = false;
+    public void SetExternalMovementLock(bool locked)
+        { externalMovementLocked = locked; }    
+
     private void LockCursor(bool locked)
     {
         Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
@@ -132,7 +137,7 @@ public class PlayerController : MonoBehaviour
         // ------------------------------------------------------
         //  KNOCKBACK / STAGGER OVERRIDE  (NEW)
         // ------------------------------------------------------
-        if (knockback != null && knockback.IsStaggered)
+        if ((knockback != null && knockback.IsStaggered) || externalMovementLocked)
             return;
 
         // ------------------------------------------------------
