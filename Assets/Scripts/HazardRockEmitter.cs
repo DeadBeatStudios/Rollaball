@@ -14,11 +14,10 @@ public class HazardRockEmitter : MonoBehaviour
 
     private void Awake()
     {
-        // Load correct prefab from Resources folder
-        hazardRockPrefab = Resources.Load<GameObject>("VolcanoRock_Hazard");
+        hazardRockPrefab = Resources.Load<GameObject>("Hazard_Rock_Fractured");
 
         if (hazardRockPrefab == null)
-            Debug.LogError("❌ HazardRockEmitter: Could not find VolcanoRock_Hazard prefab in Resources folder!");
+            Debug.LogError("❌ HazardRockEmitter: Could not find Hazard_Rock_Fractured prefab in Resources folder!");
     }
 
     private void Update()
