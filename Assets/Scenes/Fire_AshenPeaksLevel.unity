@@ -3596,7 +3596,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2588151230656300822, guid: 83474cdf2529ae142a1026a691d3fe5c, type: 3}
       propertyPath: spawnInterval
-      value: 0.1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2588151230656300822, guid: 83474cdf2529ae142a1026a691d3fe5c, type: 3}
       propertyPath: rockScaleRange.x
@@ -3612,7 +3612,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3969391621299223537, guid: 83474cdf2529ae142a1026a691d3fe5c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 91.96
+      value: 155.4
       objectReference: {fileID: 0}
     - target: {fileID: 3969391621299223537, guid: 83474cdf2529ae142a1026a691d3fe5c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3651,6 +3651,75 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 83474cdf2529ae142a1026a691d3fe5c, type: 3}
+--- !u!1001 &2479093293563291417
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5530961115187779089, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: maxLifetime
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530961115187779089, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: impactEffectPrefab
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530961115187779089, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: debrisHazardDuration
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8540073296288957108, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_Name
+      value: HazardRock
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -97.66782
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 258.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 4.9807205
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065675436199647246, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
 --- !u!1001 &2688145329454843061
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4240,3 +4309,4 @@ SceneRoots:
   - {fileID: 284981769}
   - {fileID: 241889751}
   - {fileID: 250157885}
+  - {fileID: 2479093293563291417}
