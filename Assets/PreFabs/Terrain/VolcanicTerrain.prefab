@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 2777255670193970891}
   - component: {fileID: 3113348911439764525}
   - component: {fileID: 583163622385973366}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: VolcanicTerrain
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
