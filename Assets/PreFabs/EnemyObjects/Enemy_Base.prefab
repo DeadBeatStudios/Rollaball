@@ -108,6 +108,9 @@ GameObject:
   - component: {fileID: 4843871582936143101}
   - component: {fileID: 406064176594011501}
   - component: {fileID: 3868083588986446772}
+  - component: {fileID: 7270952636097980000}
+  - component: {fileID: -5960120842246165499}
+  - component: {fileID: 5240735963078683225}
   m_Layer: 0
   m_Name: Enemy_Base
   m_TagString: Enemy
@@ -247,10 +250,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f485fcd4f11db74aa64882b9a60dc96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPhysicsController
-  target: {fileID: 0}
-  flag: {fileID: 0}
-  goalTarget: {fileID: 0}
-  maxSpeed: 25
+  maxSpeed: 50
   groundAcceleration: 50
   groundDeceleration: 70
   reverseBoostMultiplier: 1.15
@@ -265,13 +265,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   obstacleCheckDistance: 5
-  obstacleAvoidStrength: 40
   edgeCheckDistance: 20
   edgeBrakeForce: 20
   safeTurnForce: 25
   edgeRecoveryDelay: 1.5
-  predictionTime: 0.01
-  closeBrakeDistance: 3
   visualModel: {fileID: 8711023098106510381}
   visualRadius: 0.5
 --- !u!114 &-1892484579140901611
@@ -350,3 +347,69 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KnockbackHandler
   defaultStaggerTime: 0.5
+--- !u!114 &7270952636097980000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5267770077472934122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3838e0117b69a5d468ed3739f36efc8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDash
+  dashSpeed: 100
+  dashDuration: 0.18
+  dashCooldown: 0.6
+  minVelocityForDirection: 0.2
+  knockback: {fileID: 3868083588986446772}
+--- !u!114 &-5960120842246165499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5267770077472934122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7ba1b58f28c844eb555a5df3137694, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundBash
+  bashCooldown: 1.5
+  upwardLiftForce: 8
+  slamDownForce: 20
+  shockwaveForce: 60
+  shockwaveRadius: 8
+  liftDelay: 0.1
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  bashAffectsLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &5240735963078683225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5267770077472934122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c047b7904a0cfb4a9bc0b1a2f89961b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAIController
+  physicsController: {fileID: 8609381514511259401}
+  dash: {fileID: 7270952636097980000}
+  groundBash: {fileID: -5960120842246165499}
+  flag: {fileID: 0}
+  goalTarget: {fileID: 0}
+  playerTarget: {fileID: 0}
+  role: 0
+  guardPoint: {fileID: 0}
+  resetPoint: {fileID: 0}
+  flagPriorityRadius: 15
+  playerDetectRadius: 18
+  homeWanderRadius: 12
+  homePosition: {x: 0, y: 0, z: 0}

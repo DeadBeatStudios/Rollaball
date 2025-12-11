@@ -18,10 +18,32 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float spawnLift = 0.3f;
 
     // ============================================================
-    //  MANUAL BOX SPAWN AREA
+    //  AI ROLE ASSIGNMENT
+    // ============================================================
+    [Header("AI Role Assignment")]
+
+    [Tooltip("List of allowed enemy roles. A random one will be chosen for each spawn.")]
+    [SerializeField]
+    private EnemyAIController.AIRole[] allowedRoles =
+    {
+        EnemyAIController.AIRole.BasicChaser,
+        EnemyAIController.AIRole.Defender,
+        EnemyAIController.AIRole.FlagChaser
+    };
+
+    [Tooltip("Guard points used ONLY for Defender role.")]
+    [SerializeField] private Transform[] guardPoints;
+
+    [Tooltip("Reset points for enemy recovery logic.")]
+    [SerializeField] private Transform[] resetPoints;
+
+    [Tooltip("If true, roles are assigned randomly from AllowedRoles.")]
+    [SerializeField] private bool randomizeRoles = true;
+
+    // ============================================================
+    //  MANUAL SPAWN AREA
     // ============================================================
     [Header("Manual Spawn Box (Center + Size)")]
-
     [Tooltip("Optional: Assign a dedicated center transform. If left empty, the spawner's transform is used.")]
     [SerializeField] private Transform spawnCenter;
 
@@ -52,6 +74,7 @@ public class EnemySpawner : MonoBehaviour
 
     private readonly List<GameObject> activeEnemies = new List<GameObject>();
     private readonly List<Vector3> originalSpawnPositions = new List<Vector3>();
+
 
     private void Start()
     {
@@ -84,6 +107,9 @@ public class EnemySpawner : MonoBehaviour
         GameObject enemy = Instantiate(enemyPrefab, finalPos, Quaternion.identity);
         activeEnemies.Add(enemy);
 
+        // NEW: Assign AI role + guard / reset points + color coding
+        ApplyRoleAssignment(enemy);
+
         if (showDebug)
             Debug.Log($"EnemySpawner: Spawned enemy at {finalPos}");
     }
@@ -103,18 +129,13 @@ public class EnemySpawner : MonoBehaviour
             float y;
 
             if (randomizeY)
-            {
                 y = Random.Range(-boxSize.y * 0.5f, boxSize.y * 0.5f);
-            }
             else
-            {
-                // Temp Y before snapping
                 y = 5f;
-            }
 
             Vector3 candidate = center.position + new Vector3(x, y, z);
 
-            // Slope validation if using terrain and slope limit
+            // Slope validation
             if (maxSpawnSlope < 90f && IsSlopeTooSteep(candidate))
             {
                 if (showDebug)
@@ -193,6 +214,9 @@ public class EnemySpawner : MonoBehaviour
 
         GameObject newEnemy = Instantiate(enemyPrefab, finalPos, Quaternion.identity);
 
+        // NEW: Role assignment on respawn
+        ApplyRoleAssignment(newEnemy);
+
         if (index >= 0 && index <= activeEnemies.Count)
             activeEnemies.Insert(index, newEnemy);
         else
@@ -204,7 +228,6 @@ public class EnemySpawner : MonoBehaviour
 
     public void RespawnAllEnemiesDEBUG()
     {
-        // Destroy all current enemies
         foreach (var e in activeEnemies)
         {
             if (e != null)
@@ -214,7 +237,6 @@ public class EnemySpawner : MonoBehaviour
         activeEnemies.Clear();
         originalSpawnPositions.Clear();
 
-        // Respawn initial set using current spawn box
         for (int i = 0; i < spawnCount; i++)
         {
             Vector3 spawnPos = GetBoxSpawnPoint();
@@ -226,6 +248,56 @@ public class EnemySpawner : MonoBehaviour
             Debug.Log("EnemySpawner DEBUG: Respawned all enemies.");
     }
 
+    // ============================================================
+    //  AI ROLE LOGIC (NEW SECTION)
+    // ============================================================
+    private void ApplyRoleAssignment(GameObject enemy)
+    {
+        EnemyAIController ai = enemy.GetComponent<EnemyAIController>();
+        if (ai == null)
+            return;
+
+        // Assign a random role if enabled
+        if (randomizeRoles && allowedRoles.Length > 0)
+        {
+            ai.role = allowedRoles[Random.Range(0, allowedRoles.Length)];
+        }
+
+        // DEFENDER → assign guard point
+        if (ai.role == EnemyAIController.AIRole.Defender && guardPoints.Length > 0)
+        {
+            ai.guardPoint = guardPoints[Random.Range(0, guardPoints.Length)];
+        }
+
+        // Assign reset point for all enemies
+        if (resetPoints.Length > 0)
+        {
+            ai.resetPoint = resetPoints[Random.Range(0, resetPoints.Length)];
+        }
+
+        // COLOR CODE BY ROLE (Debug only)
+        MeshRenderer renderer = enemy.GetComponentInChildren<MeshRenderer>();
+        if (renderer != null)
+        {
+            switch (ai.role)
+            {
+                case EnemyAIController.AIRole.BasicChaser:
+                    renderer.material.color = Color.blue;
+                    break;
+
+                case EnemyAIController.AIRole.Defender:
+                    renderer.material.color = Color.red;
+                    break;
+
+                case EnemyAIController.AIRole.FlagChaser:
+                    renderer.material.color = Color.green;
+                    break;
+            }
+        }
+
+        if (showDebug)
+            Debug.Log($"EnemySpawner: {enemy.name} assigned role → {ai.role}");
+    }
 
     // ============================================================
     //  GIZMOS

@@ -4,16 +4,6 @@
 public class EnemyPhysicsController : MonoBehaviour
 {
     // --------------------------------------------------------------
-    //  TARGETING
-    // --------------------------------------------------------------
-    [Header("Targeting")]
-    public Transform target;
-    public FlagPickup flag;
-
-    [Header("Flag Scoring")]
-    public Transform goalTarget;
-
-    // --------------------------------------------------------------
     //  MOVEMENT (Arcade)
     // --------------------------------------------------------------
     [Header("Movement")]
@@ -42,17 +32,12 @@ public class EnemyPhysicsController : MonoBehaviour
 
     [Header("Obstacle Avoidance")]
     public float obstacleCheckDistance = 5f;
-    public float obstacleAvoidStrength = 35f;
 
     [Header("Edge Detection")]
     public float edgeCheckDistance = 3.5f;
     public float edgeBrakeForce = 8f;
     public float safeTurnForce = 25f;
     public float edgeRecoveryDelay = 1.5f;
-
-    [Header("AI Tuning")]
-    public float predictionTime = 0.35f;
-    public float closeBrakeDistance = 2.5f;
 
     // --------------------------------------------------------------
     //  VISUAL ROLLING
@@ -72,6 +57,24 @@ public class EnemyPhysicsController : MonoBehaviour
     private Vector3 lastSafeDirection = Vector3.forward;
     private float edgeTimer = 0f;
 
+    // --------------------------------------------------------------
+    //  AI OVERRIDE SYSTEM
+    // --------------------------------------------------------------
+    private bool hasAIMove = false;
+    private Vector3 aiMoveDirection = Vector3.zero;
+
+    public void SetAIMMoveDirection(Vector3 dir)
+    {
+        aiMoveDirection = dir;
+        hasAIMove = true;
+    }
+
+    public void ClearAIMMove()
+    {
+        hasAIMove = false;
+        aiMoveDirection = Vector3.zero;
+    }
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -83,42 +86,15 @@ public class EnemyPhysicsController : MonoBehaviour
         rb.angularDamping = angularDamping;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-
-        // AUTO-FIND FLAG
-        if (flag == null)
-        {
-            flag = FindAnyObjectByType<FlagPickup>();
-            if (flag != null)
-                Debug.Log($"{name}: Found FlagPickup automatically");
-        }
-
-        // AUTO-FIND GOAL TARGET
-        if (goalTarget == null)
-        {
-            var goal = FindAnyObjectByType<GoalTrigger>();
-            if (goal != null)
-            {
-                goalTarget = goal.transform;
-                Debug.Log($"{name}: Auto-assigned GoalTarget → {goalTarget.name}");
-            }
-            else
-            {
-                Debug.LogWarning($"{name}: No GoalTrigger found in scene!");
-            }
-        }
     }
 
     private void FixedUpdate()
     {
-        // Check if AI can move
         bool canMove = knockback == null || !knockback.IsStaggered;
 
         if (canMove)
-        {
             ProcessAIMovement();
-        }
 
-        // 🔥 CRITICAL: Visual rolling always runs (even during stagger)
         UpdateVisualRoll();
     }
 
@@ -127,70 +103,18 @@ public class EnemyPhysicsController : MonoBehaviour
     // --------------------------------------------------------------
     private void ProcessAIMovement()
     {
-        // --------------------------------------------------------------
-        //  FLAG → TARGETING LOGIC
-        // --------------------------------------------------------------
-        if (flag != null)
+        // AIIntent overrides all directional logic
+        if (hasAIMove)
         {
-            if (!flag.IsHeld)
-            {
-                target = flag.transform;
-            }
-            else
-            {
-                Transform holder = flag.CurrentHolder;
+            Vector3 dir = aiMoveDirection;
+            dir.y = 0f;
 
-                if (holder != null && holder != transform)
-                    target = holder;
-                else
-                    target = goalTarget;
-            }
-        }
-
-        if (!target)
-            return;
-
-        // --------------------------------------------------------------
-        //  PREDICTIVE MOVEMENT
-        // --------------------------------------------------------------
-        Vector3 targetVelocityEstimate = Vector3.zero;
-        if (target.TryGetComponent<Rigidbody>(out var targetRb))
-            targetVelocityEstimate = targetRb.linearVelocity;
-
-        Vector3 predictedPos = target.position + targetVelocityEstimate * predictionTime;
-        Vector3 toTarget = predictedPos - transform.position;
-        float distance = toTarget.magnitude;
-        Vector3 seekDir = toTarget.normalized;
-
-        // --------------------------------------------------------------
-        //  EDGE DETECTION
-        // --------------------------------------------------------------
-        ProcessEdgeDetection();
-
-        // --------------------------------------------------------------
-        //  OBSTACLE AVOIDANCE
-        // --------------------------------------------------------------
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, obstacleCheckDistance, obstacleMask))
-        {
-            Vector3 avoidDir = Vector3.Reflect(seekDir, hit.normal);
-            seekDir = Vector3.Lerp(seekDir, avoidDir, 0.9f);
+            if (dir.sqrMagnitude > 0.001f)
+                desiredDirection = dir.normalized;
         }
 
         // --------------------------------------------------------------
-        //  STEERING
-        // --------------------------------------------------------------
-        float turnRate = avoidingEdge ? safeTurnForce * 0.4f : safeTurnForce;
-
-        desiredDirection = Vector3.Lerp(desiredDirection, seekDir, Time.fixedDeltaTime * turnRate);
-        desiredDirection.y = 0f;
-
-        if (desiredDirection.sqrMagnitude < 0.001f)
-            desiredDirection = transform.forward;
-
-        desiredDirection.Normalize();
-
-        // --------------------------------------------------------------
-        //  ARCADE MOVEMENT
+        //  ARCADE FORCE MOVEMENT
         // --------------------------------------------------------------
         Vector3 currentVel = rb.linearVelocity;
         Vector3 horizVel = new Vector3(currentVel.x, 0f, currentVel.z);
@@ -200,12 +124,6 @@ public class EnemyPhysicsController : MonoBehaviour
 
         if (avoidingEdge)
             targetSpeed *= 0.4f;
-
-        if (distance < closeBrakeDistance)
-        {
-            float slowFactor = Mathf.Clamp01(distance / closeBrakeDistance);
-            targetSpeed *= slowFactor;
-        }
 
         Vector3 desiredVel = desiredDirection * targetSpeed;
         Vector3 deltaVel = desiredVel - horizVel;
@@ -220,9 +138,6 @@ public class EnemyPhysicsController : MonoBehaviour
         if (reversing)
             accel *= reverseBoostMultiplier;
 
-        if (targetSpeed < 0.1f)
-            accel = groundDeceleration;
-
         float maxDelta = accel * Time.fixedDeltaTime;
 
         if (deltaVel.magnitude > maxDelta)
@@ -231,7 +146,7 @@ public class EnemyPhysicsController : MonoBehaviour
         rb.AddForce(new Vector3(deltaVel.x, 0f, deltaVel.z), ForceMode.VelocityChange);
 
         // --------------------------------------------------------------
-        //  SPEED CLAMP
+        //  SPEED LIMIT
         // --------------------------------------------------------------
         currentVel = rb.linearVelocity;
         horizVel = new Vector3(currentVel.x, 0f, currentVel.z);
@@ -243,6 +158,11 @@ public class EnemyPhysicsController : MonoBehaviour
         }
 
         // --------------------------------------------------------------
+        //  EDGE DETECTION
+        // --------------------------------------------------------------
+        ProcessEdgeDetection();
+
+        // --------------------------------------------------------------
         //  VERTICAL CLEANUP
         // --------------------------------------------------------------
         Vector3 v = rb.linearVelocity;
@@ -252,7 +172,7 @@ public class EnemyPhysicsController : MonoBehaviour
     }
 
     // --------------------------------------------------------------
-    //  EDGE DETECTION
+    //  EDGE DETECTION SYSTEM
     // --------------------------------------------------------------
     private void ProcessEdgeDetection()
     {
@@ -272,9 +192,9 @@ public class EnemyPhysicsController : MonoBehaviour
         Vector3 leftDown = (Quaternion.Euler(0, -25f, 0) * moveDir + Vector3.up * tilt).normalized;
         Vector3 rightDown = (Quaternion.Euler(0, 25f, 0) * moveDir + Vector3.up * tilt).normalized;
 
-        bool centerHit = Physics.Raycast(origin, forwardDown, out _, lookDistance, groundMask);
-        bool leftHit = Physics.Raycast(origin, leftDown, out _, lookDistance, groundMask);
-        bool rightHit = Physics.Raycast(origin, rightDown, out _, lookDistance, groundMask);
+        bool centerHit = Physics.Raycast(origin, forwardDown, lookDistance, groundMask);
+        bool leftHit = Physics.Raycast(origin, leftDown, lookDistance, groundMask);
+        bool rightHit = Physics.Raycast(origin, rightDown, lookDistance, groundMask);
 
         _groundDetected = centerHit || leftHit || rightHit;
 
@@ -306,7 +226,7 @@ public class EnemyPhysicsController : MonoBehaviour
     }
 
     // --------------------------------------------------------------
-    //  VISUAL ROLL - Always runs regardless of stagger state
+    //  VISUAL ROLLING
     // --------------------------------------------------------------
     private void UpdateVisualRoll()
     {
