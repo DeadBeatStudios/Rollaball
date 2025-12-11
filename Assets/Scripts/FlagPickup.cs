@@ -27,7 +27,7 @@ public class FlagPickup : MonoBehaviour
     [Header("Debug")]
     public bool showDebugLogs = false;
 
-    // State
+    // Internal State
     private Transform holder;
     private bool isHeld = false;
     private Quaternion initialWorldRotation;
@@ -116,8 +116,6 @@ public class FlagPickup : MonoBehaviour
         }
 
         Vector3 basePos = dropPos ?? (prevHolder != null ? prevHolder.position : transform.position);
-
-        // Drop exactly at the position given (you can add ground snap if desired)
         Vector3 finalPos = basePos + Vector3.up * respawnHeightOffset;
 
         transform.position = finalPos;
@@ -148,8 +146,8 @@ public class FlagPickup : MonoBehaviour
         }
 
         index = Mathf.Clamp(index, 0, respawnSpawners.Length - 1);
-
         Transform sp = respawnSpawners[index];
+
         if (sp == null)
         {
             Debug.LogError($"FlagPickup: Spawner at index {index} is null.");
@@ -198,4 +196,41 @@ public class FlagPickup : MonoBehaviour
 
     public Transform CurrentHolder => holder;
     public bool IsHeld => isHeld;
+
+    // -------------------------------------------------
+    // FORCE RESET FLAG (NEW)
+    // -------------------------------------------------
+
+    /// <summary>
+    /// Forces the flag to reset immediately:
+    /// - Detaches holder
+    /// - Re-enables collider
+    /// - Clears physics
+    /// - Respawns at a random spawner
+    /// </summary>
+    public void ForceResetFlag()
+    {
+        // Reset held state
+        isHeld = false;
+        holder = null;
+
+        // Restore collider
+        if (TryGetComponent(out Collider col))
+            col.enabled = true;
+
+        // Reset physics
+        if (TryGetComponent(out Rigidbody rb))
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+
+        // Respawn the flag safely
+        RespawnAtRandomSpawner();
+
+        if (showDebugLogs)
+            Debug.Log("FlagPickup: FORCE RESET");
+    }
 }

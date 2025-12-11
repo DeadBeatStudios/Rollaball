@@ -421,6 +421,69 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SpawnBasicChaser"",
+                    ""type"": ""Button"",
+                    ""id"": ""f02b14d1-150c-4de5-a097-f5188d7c2fb6"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SpawnDefender"",
+                    ""type"": ""Button"",
+                    ""id"": ""1314dd93-8029-4f00-95c9-faba2ef9b290"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SpawnFlagChaser"",
+                    ""type"": ""Button"",
+                    ""id"": ""91989a49-d0e6-42e4-b17e-e8aa7d5353a2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResetAllEnemies"",
+                    ""type"": ""Button"",
+                    ""id"": ""8c64973b-37e5-47c4-8927-23846bb1eb6e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResetFlag"",
+                    ""type"": ""Button"",
+                    ""id"": ""8001d9f8-cfdf-4047-ad70-3641df2a4d9b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""TeleportPlayertoCenter"",
+                    ""type"": ""Button"",
+                    ""id"": ""98999a9d-5cf6-4f92-bdad-ee50bd47b116"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleAI"",
+                    ""type"": ""Button"",
+                    ""id"": ""bbedf84d-b95d-4dd0-9b67-d270c8227460"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -500,6 +563,83 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""ForceFlagCapture"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1d3f7f79-018d-4f53-9723-4e0a74acd800"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SpawnBasicChaser"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e1d690bb-f976-45b2-b98c-9bb09f9cedef"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SpawnDefender"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""76f9082f-5e5f-45ea-a089-d022606902aa"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SpawnFlagChaser"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6458e328-fee9-4285-a344-1c21f7177c1d"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResetAllEnemies"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""05e491e1-b37c-44ff-935e-1a192c7497c8"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResetFlag"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""538cfb39-3de2-43c0-9239-1a53f716eb95"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TeleportPlayertoCenter"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5281ab00-ae4c-4de2-8adf-fdd5444e7b02"",
+                    ""path"": ""<Keyboard>/o"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleAI"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -525,6 +665,13 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Debug_RespawnEnemies = m_Debug.FindAction("RespawnEnemies", throwIfNotFound: true);
         m_Debug_ForceGameOver = m_Debug.FindAction("ForceGameOver", throwIfNotFound: true);
         m_Debug_ForceFlagCapture = m_Debug.FindAction("ForceFlagCapture", throwIfNotFound: true);
+        m_Debug_SpawnBasicChaser = m_Debug.FindAction("SpawnBasicChaser", throwIfNotFound: true);
+        m_Debug_SpawnDefender = m_Debug.FindAction("SpawnDefender", throwIfNotFound: true);
+        m_Debug_SpawnFlagChaser = m_Debug.FindAction("SpawnFlagChaser", throwIfNotFound: true);
+        m_Debug_ResetAllEnemies = m_Debug.FindAction("ResetAllEnemies", throwIfNotFound: true);
+        m_Debug_ResetFlag = m_Debug.FindAction("ResetFlag", throwIfNotFound: true);
+        m_Debug_TeleportPlayertoCenter = m_Debug.FindAction("TeleportPlayertoCenter", throwIfNotFound: true);
+        m_Debug_ToggleAI = m_Debug.FindAction("ToggleAI", throwIfNotFound: true);
     }
 
     ~@PlayerControls()
@@ -786,6 +933,13 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Debug_RespawnEnemies;
     private readonly InputAction m_Debug_ForceGameOver;
     private readonly InputAction m_Debug_ForceFlagCapture;
+    private readonly InputAction m_Debug_SpawnBasicChaser;
+    private readonly InputAction m_Debug_SpawnDefender;
+    private readonly InputAction m_Debug_SpawnFlagChaser;
+    private readonly InputAction m_Debug_ResetAllEnemies;
+    private readonly InputAction m_Debug_ResetFlag;
+    private readonly InputAction m_Debug_TeleportPlayertoCenter;
+    private readonly InputAction m_Debug_ToggleAI;
     /// <summary>
     /// Provides access to input actions defined in input action map "Debug".
     /// </summary>
@@ -825,6 +979,34 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Debug/ForceFlagCapture".
         /// </summary>
         public InputAction @ForceFlagCapture => m_Wrapper.m_Debug_ForceFlagCapture;
+        /// <summary>
+        /// Provides access to the underlying input action "Debug/SpawnBasicChaser".
+        /// </summary>
+        public InputAction @SpawnBasicChaser => m_Wrapper.m_Debug_SpawnBasicChaser;
+        /// <summary>
+        /// Provides access to the underlying input action "Debug/SpawnDefender".
+        /// </summary>
+        public InputAction @SpawnDefender => m_Wrapper.m_Debug_SpawnDefender;
+        /// <summary>
+        /// Provides access to the underlying input action "Debug/SpawnFlagChaser".
+        /// </summary>
+        public InputAction @SpawnFlagChaser => m_Wrapper.m_Debug_SpawnFlagChaser;
+        /// <summary>
+        /// Provides access to the underlying input action "Debug/ResetAllEnemies".
+        /// </summary>
+        public InputAction @ResetAllEnemies => m_Wrapper.m_Debug_ResetAllEnemies;
+        /// <summary>
+        /// Provides access to the underlying input action "Debug/ResetFlag".
+        /// </summary>
+        public InputAction @ResetFlag => m_Wrapper.m_Debug_ResetFlag;
+        /// <summary>
+        /// Provides access to the underlying input action "Debug/TeleportPlayertoCenter".
+        /// </summary>
+        public InputAction @TeleportPlayertoCenter => m_Wrapper.m_Debug_TeleportPlayertoCenter;
+        /// <summary>
+        /// Provides access to the underlying input action "Debug/ToggleAI".
+        /// </summary>
+        public InputAction @ToggleAI => m_Wrapper.m_Debug_ToggleAI;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -872,6 +1054,27 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @ForceFlagCapture.started += instance.OnForceFlagCapture;
             @ForceFlagCapture.performed += instance.OnForceFlagCapture;
             @ForceFlagCapture.canceled += instance.OnForceFlagCapture;
+            @SpawnBasicChaser.started += instance.OnSpawnBasicChaser;
+            @SpawnBasicChaser.performed += instance.OnSpawnBasicChaser;
+            @SpawnBasicChaser.canceled += instance.OnSpawnBasicChaser;
+            @SpawnDefender.started += instance.OnSpawnDefender;
+            @SpawnDefender.performed += instance.OnSpawnDefender;
+            @SpawnDefender.canceled += instance.OnSpawnDefender;
+            @SpawnFlagChaser.started += instance.OnSpawnFlagChaser;
+            @SpawnFlagChaser.performed += instance.OnSpawnFlagChaser;
+            @SpawnFlagChaser.canceled += instance.OnSpawnFlagChaser;
+            @ResetAllEnemies.started += instance.OnResetAllEnemies;
+            @ResetAllEnemies.performed += instance.OnResetAllEnemies;
+            @ResetAllEnemies.canceled += instance.OnResetAllEnemies;
+            @ResetFlag.started += instance.OnResetFlag;
+            @ResetFlag.performed += instance.OnResetFlag;
+            @ResetFlag.canceled += instance.OnResetFlag;
+            @TeleportPlayertoCenter.started += instance.OnTeleportPlayertoCenter;
+            @TeleportPlayertoCenter.performed += instance.OnTeleportPlayertoCenter;
+            @TeleportPlayertoCenter.canceled += instance.OnTeleportPlayertoCenter;
+            @ToggleAI.started += instance.OnToggleAI;
+            @ToggleAI.performed += instance.OnToggleAI;
+            @ToggleAI.canceled += instance.OnToggleAI;
         }
 
         /// <summary>
@@ -904,6 +1107,27 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @ForceFlagCapture.started -= instance.OnForceFlagCapture;
             @ForceFlagCapture.performed -= instance.OnForceFlagCapture;
             @ForceFlagCapture.canceled -= instance.OnForceFlagCapture;
+            @SpawnBasicChaser.started -= instance.OnSpawnBasicChaser;
+            @SpawnBasicChaser.performed -= instance.OnSpawnBasicChaser;
+            @SpawnBasicChaser.canceled -= instance.OnSpawnBasicChaser;
+            @SpawnDefender.started -= instance.OnSpawnDefender;
+            @SpawnDefender.performed -= instance.OnSpawnDefender;
+            @SpawnDefender.canceled -= instance.OnSpawnDefender;
+            @SpawnFlagChaser.started -= instance.OnSpawnFlagChaser;
+            @SpawnFlagChaser.performed -= instance.OnSpawnFlagChaser;
+            @SpawnFlagChaser.canceled -= instance.OnSpawnFlagChaser;
+            @ResetAllEnemies.started -= instance.OnResetAllEnemies;
+            @ResetAllEnemies.performed -= instance.OnResetAllEnemies;
+            @ResetAllEnemies.canceled -= instance.OnResetAllEnemies;
+            @ResetFlag.started -= instance.OnResetFlag;
+            @ResetFlag.performed -= instance.OnResetFlag;
+            @ResetFlag.canceled -= instance.OnResetFlag;
+            @TeleportPlayertoCenter.started -= instance.OnTeleportPlayertoCenter;
+            @TeleportPlayertoCenter.performed -= instance.OnTeleportPlayertoCenter;
+            @TeleportPlayertoCenter.canceled -= instance.OnTeleportPlayertoCenter;
+            @ToggleAI.started -= instance.OnToggleAI;
+            @ToggleAI.performed -= instance.OnToggleAI;
+            @ToggleAI.canceled -= instance.OnToggleAI;
         }
 
         /// <summary>
@@ -1057,5 +1281,54 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnForceFlagCapture(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SpawnBasicChaser" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSpawnBasicChaser(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SpawnDefender" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSpawnDefender(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SpawnFlagChaser" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSpawnFlagChaser(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ResetAllEnemies" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnResetAllEnemies(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ResetFlag" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnResetFlag(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "TeleportPlayertoCenter" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnTeleportPlayertoCenter(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleAI" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleAI(InputAction.CallbackContext context);
     }
 }

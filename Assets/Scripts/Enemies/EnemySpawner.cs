@@ -9,6 +9,7 @@ public class EnemySpawner : MonoBehaviour
     // ============================================================
     [Header("Enemy Settings")]
     [SerializeField] private GameObject enemyPrefab;
+    public GameObject EnemyPrefab => enemyPrefab;
     [SerializeField] private int spawnCount = 4;
 
     [Tooltip("If true, enemies will respawn after dying.")]
