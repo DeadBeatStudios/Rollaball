@@ -409,7 +409,7 @@ MonoBehaviour:
   role: 0
   guardPoint: {fileID: 0}
   resetPoint: {fileID: 0}
-  flagPriorityRadius: 15
+  flagPriorityRadius: 50
   playerDetectRadius: 18
   homeWanderRadius: 12
   homePosition: {x: 0, y: 0, z: 0}
