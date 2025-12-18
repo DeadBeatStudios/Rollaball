@@ -181,6 +181,9 @@ public class EnemySpawner : MonoBehaviour
     // ============================================================
     public void HandleEnemyDeath(GameObject enemy)
     {
+        // 🔑 NEW: force flag release FIRST
+        HandleFlagReleaseIfHeld(enemy);
+
         if (!respawnOnDeath)
         {
             Destroy(enemy);
@@ -195,9 +198,9 @@ public class EnemySpawner : MonoBehaviour
             Destroy(enemy);
 
             Vector3 respawnPoint =
-                index < originalSpawnPositions.Count ?
-                originalSpawnPositions[index] :
-                GetBoxSpawnPoint();
+                index < originalSpawnPositions.Count
+                    ? originalSpawnPositions[index]
+                    : GetBoxSpawnPoint();
 
             StartCoroutine(RespawnEnemy(respawnPoint, index));
         }
@@ -298,6 +301,21 @@ public class EnemySpawner : MonoBehaviour
 
         if (showDebug)
             Debug.Log($"EnemySpawner: {enemy.name} assigned role → {ai.role}");
+    }
+
+    private void HandleFlagReleaseIfHeld(GameObject enemy)
+    {
+        FlagPickup flag = FindAnyObjectByType<FlagPickup>();
+        if (flag == null)
+            return;
+
+        if (flag.IsHeldBy(enemy.transform))
+        {
+            flag.ForceResetFlag();
+
+            if (showDebug)
+                Debug.Log($"EnemySpawner: Flag force-reset because {enemy.name} died.");
+        }
     }
 
     // ============================================================
