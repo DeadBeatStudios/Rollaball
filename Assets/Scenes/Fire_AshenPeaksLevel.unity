@@ -3018,6 +3018,14 @@ PrefabInstance:
       propertyPath: m_ActionEvents.Array.data[14].m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 663566443254942635, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: zoomSpeed
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 663566443254942635, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: maxDistance
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 961351831974327327, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
       propertyPath: targetLayers.m_Bits
       value: 128
@@ -4934,20 +4942,8 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 5530961115187779089, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
-      propertyPath: maxLifetime
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 5530961115187779089, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
       propertyPath: upwardsModifier
       value: 0.09
-      objectReference: {fileID: 0}
-    - target: {fileID: 5530961115187779089, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
-      propertyPath: impactEffectPrefab
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5530961115187779089, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
-      propertyPath: debrisHazardDuration
-      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 8540073296288957108, guid: ab2943441d4c9444e8e53e7a300b2409, type: 3}
       propertyPath: m_Name
