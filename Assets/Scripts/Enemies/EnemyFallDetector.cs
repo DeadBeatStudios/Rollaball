@@ -4,10 +4,6 @@ public class EnemyFallDetector : MonoBehaviour
 {
     [SerializeField] private float fallThresholdY = -10f;
 
-    [Header("Spawner Reference")]
-    [Tooltip("Assign the EnemySpawner in the scene here.")]
-    [SerializeField] private EnemySpawner spawner;
-
     private bool hasTriggered = false;
 
     [Header("Death Effects")]
@@ -17,60 +13,41 @@ public class EnemyFallDetector : MonoBehaviour
     {
         if (!hasTriggered && transform.position.y < fallThresholdY)
         {
-            hasTriggered = true;
-
-            // 🔥 spawn explosion effect first
-            if (explosionSpawner != null)
-            {
-                explosionSpawner.SpawnChunkExplosion();
-            }
-
-            // delay disable
-            StartCoroutine(DisableAndNotify());
+            HandleDeath();
         }
     }
 
     public void ForceKillDEBUG()
     {
         if (hasTriggered) return;
-
-        hasTriggered = true;
-
-        if (explosionSpawner != null)
-            explosionSpawner.SpawnChunkExplosion();
-
-        StartCoroutine(DisableAndNotify());
+        HandleDeath();
     }
 
     public void ForceKill()
     {
         if (hasTriggered) return;
+        HandleDeath();
+    }
+
+    // --------------------------------------------------------------
+    //  DEATH HANDLING
+    // --------------------------------------------------------------
+    private void HandleDeath()
+    {
         hasTriggered = true;
 
-        // Spawn explosion
+        // Visuals first
         if (explosionSpawner != null)
             explosionSpawner.SpawnChunkExplosion();
 
-        // Mirror fall-death behavior
-        StartCoroutine(DisableAndNotify());
-    }
+        // Report death (authoritative)
+        DeathEvents.ReportDeath(
+            gameObject,
+            DeathEvents.DeathCause.FellOffMap,
+            null
+        );
 
-    private System.Collections.IEnumerator DisableAndNotify()
-    {
-        yield return null; // wait 1 frame
-
-        // Disable enemy
+        // Disable enemy (no spawner calls here)
         gameObject.SetActive(false);
-
-        // Tell the spawner
-        if (spawner != null)
-        {
-            spawner.HandleEnemyDeath(gameObject);
-            Debug.Log($"{name} fell off map. Respawning...");
-        }
-        else
-        {
-            Debug.LogWarning("EnemyFallDetector: No EnemySpawner assigned!");
-        }
     }
 }
