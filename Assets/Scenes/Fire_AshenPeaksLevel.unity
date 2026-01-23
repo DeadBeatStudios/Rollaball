@@ -4404,15 +4404,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7350671093486658216, guid: 0b6caf704ade35f4b924a89268d867ea, type: 3}
       propertyPath: m_LocalScale.x
-      value: 91.494965
+      value: 7.02
       objectReference: {fileID: 0}
     - target: {fileID: 7350671093486658216, guid: 0b6caf704ade35f4b924a89268d867ea, type: 3}
       propertyPath: m_LocalScale.y
-      value: 91.494965
+      value: 7.02
       objectReference: {fileID: 0}
     - target: {fileID: 7350671093486658216, guid: 0b6caf704ade35f4b924a89268d867ea, type: 3}
       propertyPath: m_LocalScale.z
-      value: 91.494965
+      value: 7.02
       objectReference: {fileID: 0}
     - target: {fileID: 7350671093486658216, guid: 0b6caf704ade35f4b924a89268d867ea, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5423,7 +5423,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: spawnCount
-      value: 6
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: respawnOnDeath
@@ -5932,6 +5932,10 @@ PrefabInstance:
     - target: {fileID: 4963558739514518211, guid: b2bcefebcc46fed4daec063bf6ccf7a8, type: 3}
       propertyPath: m_Name
       value: FlagGoal
+      objectReference: {fileID: 0}
+    - target: {fileID: 4963558739514518211, guid: b2bcefebcc46fed4daec063bf6ccf7a8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6959657493575035927, guid: b2bcefebcc46fed4daec063bf6ccf7a8, type: 3}
       propertyPath: m_LocalScale.x
