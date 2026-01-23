@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4623130590320307658}
   - component: {fileID: 8798223283305117951}
   - component: {fileID: 725932038493490466}
+  - component: {fileID: -4035255616080662554}
   m_Layer: 0
   m_Name: LavaBall
   m_TagString: Untagged
@@ -29,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -101.1, y: 101.7, z: -60.6}
-  m_LocalScale: {x: 6.4913, y: 6.4913, z: 6.4913}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -111,3 +112,23 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-4035255616080662554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 853142336951504831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae24acd39a571744fa36a2e8bde5ed64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LavaBall
+  speed: 4
+  arriveThreshold: 0.15
+  trailSpawnInterval: 0.15
+  floorLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  floorCheckDistance: 1.2
+  lingerTime: 4
