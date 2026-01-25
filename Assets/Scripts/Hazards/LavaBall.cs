@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 public class LavaBall : MonoBehaviour
@@ -6,9 +5,6 @@ public class LavaBall : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float speed = 4f;
     [SerializeField] private float arriveThreshold = 0.15f;
-
-    [Header("Trail")]
-    [SerializeField] private float trailSpawnInterval = 0.15f;
 
     [Header("Collision")]
     [SerializeField] private LayerMask floorLayer;
@@ -19,16 +15,11 @@ public class LavaBall : MonoBehaviour
 
     private Vector3 targetPosition;
     private bool isMoving;
-    private float trailTimer;
 
-    // ============================
-    // INIT
-    // ============================
     public void Initialize(Vector3 target)
     {
         targetPosition = target;
         isMoving = true;
-        trailTimer = 0f;
     }
 
     private void Update()
@@ -36,13 +27,9 @@ public class LavaBall : MonoBehaviour
         if (!isMoving) return;
 
         Move();
-        SpawnTrail();
         CheckFloor();
     }
 
-    // ============================
-    // MOVEMENT
-    // ============================
     private void Move()
     {
         transform.position = Vector3.MoveTowards(
@@ -57,27 +44,6 @@ public class LavaBall : MonoBehaviour
         }
     }
 
-    // ============================
-    // TRAIL
-    // ============================
-    private void SpawnTrail()
-    {
-        trailTimer += Time.deltaTime;
-
-        if (trailTimer >= trailSpawnInterval)
-        {
-            GameObject trail = Instantiate(gameObject, transform.position, Quaternion.identity);
-
-            Destroy(trail.GetComponent<LavaBall>());
-            Destroy(trail, lingerTime);
-
-            trailTimer = 0f;
-        }
-    }
-
-    // ============================
-    // FLOOR CHECK
-    // ============================
     private void CheckFloor()
     {
         if (Physics.Raycast(transform.position, Vector3.down,
@@ -87,14 +53,11 @@ public class LavaBall : MonoBehaviour
         }
     }
 
-    // ============================
-    // IMPACT
-    // ============================
     private void HitFloor()
     {
         isMoving = false;
 
-        // Optional later:
+        // Tell particles / dissolve here if needed
         // GetComponent<LavaDissolve>()?.StartDissolve();
 
         Destroy(gameObject, lingerTime);

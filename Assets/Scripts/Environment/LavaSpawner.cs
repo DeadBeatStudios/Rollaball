@@ -33,4 +33,9 @@ public class LavaSpawner : MonoBehaviour
             lavaBall.Initialize(target.position);
         }
     }
+
+    private void Start()
+    {
+        Emit();
+    }
 }
