@@ -6,18 +6,26 @@ public class PlayerRespawn : MonoBehaviour
     [Header("Respawn Settings")]
     [Tooltip("Assign one or more spawn points here")]
     public Transform[] spawnPoints;
+
+    [Tooltip("Y position below which the player dies")]
     public float fallThreshold = -10f;
+
     public float respawnDelay = 1.5f;
 
     [Header("Death Effects")]
-    [Tooltip("Spawns chunk explosion & swaps player model")]
     [SerializeField] private ChunkExplosionSpawner explosionSpawner;
 
     private Rigidbody rb;
     private bool isRespawning = false;
 
-    // NEW — allows Flag to detect Holder death reliably
-    public bool IsDead { get; private set; } = false;
+    /// <summary>
+    /// Public death state so other systems (Flag, AI, etc.) can react
+    /// </summary>
+    public bool IsDead { get; private set; }
+
+    // --------------------------------------------------------------
+    //  SETUP
+    // --------------------------------------------------------------
 
     private void Awake()
     {
@@ -31,36 +39,72 @@ public class PlayerRespawn : MonoBehaviour
         }
     }
 
+    // --------------------------------------------------------------
+    //  FALL DEATH (LOCAL CHECK ONLY)
+    // --------------------------------------------------------------
+
     private void Update()
     {
-        if (!isRespawning && transform.position.y < fallThreshold)
+        if (!IsDead && transform.position.y < fallThreshold)
         {
-            HandleDeath(FlagPickup.FlagDropCause.FellOffMap);
+            Kill(DeathEvents.DeathCause.FellOffMap);
         }
     }
 
-    public void HandleDeath(FlagPickup.FlagDropCause cause = FlagPickup.FlagDropCause.Unknown, Transform killer = null)
-    {
-        if (isRespawning) return;
+    // --------------------------------------------------------------
+    //  PUBLIC DEATH API (AUTHORITATIVE)
+    // --------------------------------------------------------------
 
-        IsDead = true;   // <-- CRITICAL FIX
+    /// <summary>
+    /// Canonical death entry point.
+    /// ALL systems should route player death through this.
+    /// </summary>
+    public void Kill(
+        DeathEvents.DeathCause cause,
+        GameObject instigator = null)
+    {
+        if (IsDead || isRespawning)
+            return;
+
+        IsDead = true;
 
         if (explosionSpawner != null)
             explosionSpawner.SpawnChunkExplosion();
 
-        StartCoroutine(RespawnSequence(cause, killer));
+        StartCoroutine(RespawnSequence(cause, instigator));
     }
 
-    private IEnumerator RespawnSequence(FlagPickup.FlagDropCause cause, Transform killer)
+    /// <summary>
+    /// Backward-compatible entry (used by older systems).
+    /// Internally routed to Kill().
+    /// </summary>
+    public void HandleDeath(
+        FlagPickup.FlagDropCause cause = FlagPickup.FlagDropCause.Unknown,
+        Transform killer = null)
+    {
+        Kill(
+            ConvertFlagCause(cause),
+            killer != null ? killer.gameObject : null
+        );
+    }
+
+    // --------------------------------------------------------------
+    //  RESPAWN FLOW
+    // --------------------------------------------------------------
+
+    private IEnumerator RespawnSequence(
+        DeathEvents.DeathCause cause,
+        GameObject instigator)
     {
         isRespawning = true;
 
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        Debug.Log($"{gameObject.name} has died (cause: {cause}).");
+        Debug.Log($"{name} died (cause: {cause})");
 
         yield return new WaitForSeconds(respawnDelay);
+
         Respawn();
     }
 
@@ -73,9 +117,7 @@ public class PlayerRespawn : MonoBehaviour
         Vector3 safePosition = spawn.position + Vector3.up * 0.5f;
 
         if (Physics.Raycast(safePosition, Vector3.down, out RaycastHit hit, 2f))
-        {
             safePosition = hit.point + Vector3.up * 0.5f;
-        }
 
         transform.position = safePosition;
         transform.rotation = spawn.rotation;
@@ -83,10 +125,31 @@ public class PlayerRespawn : MonoBehaviour
         if (explosionSpawner != null)
             explosionSpawner.RestorePlayerModel();
 
-        IsDead = false;   // <-- Reset after respawn
-
-        Debug.Log($"{gameObject.name} respawned at {spawn.position}.");
+        IsDead = false;
         isRespawning = false;
+
+        Debug.Log($"{name} respawned at {spawn.position}");
     }
 
+    // --------------------------------------------------------------
+    //  CAUSE TRANSLATION
+    // --------------------------------------------------------------
+
+    private DeathEvents.DeathCause ConvertFlagCause(FlagPickup.FlagDropCause cause)
+    {
+        switch (cause)
+        {
+            case FlagPickup.FlagDropCause.FellOffMap:
+                return DeathEvents.DeathCause.FellOffMap;
+
+            case FlagPickup.FlagDropCause.KilledByEnemy:
+                return DeathEvents.DeathCause.EnemyAttack;
+
+            case FlagPickup.FlagDropCause.SelfDestruct:
+                return DeathEvents.DeathCause.SelfDestruct;
+
+            default:
+                return DeathEvents.DeathCause.Unknown;
+        }
+    }
 }
