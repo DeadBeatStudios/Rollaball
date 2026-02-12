@@ -1,31 +1,56 @@
 using UnityEngine;
-using static DeathEvents;
 
 [RequireComponent(typeof(Collider))]
 public class LavaKillTrigger : MonoBehaviour
 {
+    [Header("Filter")]
+    [Tooltip("Only objects with these tags will be killed.")]
+    [SerializeField] private string[] killTags = { "Player", "Enemy" };
+
     private void Reset()
     {
-        // Ensure trigger collider
         Collider col = GetComponent<Collider>();
         col.isTrigger = true;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // Ignore triggers
-        if (other.isTrigger)
+        if (other == null || other.isTrigger)
             return;
 
-        // We only care about root objects (player / enemy)
-        Transform root = other.attachedRigidbody != null
-            ? other.attachedRigidbody.transform
-            : other.transform;
+        Transform victimRoot = GetVictimRoot(other);
+        if (victimRoot == null)
+            return;
 
-        // Report instant death
+        if (!HasKillTag(victimRoot))
+            return;
+
         DeathEvents.ReportDeath(
-            root.gameObject,
-            DeathCause.Lava
+            victimRoot.gameObject,
+            DeathEvents.DeathCause.Lava,
+            gameObject
         );
+    }
+
+    private Transform GetVictimRoot(Collider other)
+    {
+        if (other.attachedRigidbody != null)
+            return other.attachedRigidbody.transform.root;
+
+        return other.transform.root;
+    }
+
+    private bool HasKillTag(Transform victimRoot)
+    {
+        if (killTags == null || killTags.Length == 0)
+            return true; // if you clear the list, lava kills anything (not recommended)
+
+        for (int i = 0; i < killTags.Length; i++)
+        {
+            if (victimRoot.CompareTag(killTags[i]))
+                return true;
+        }
+
+        return false;
     }
 }

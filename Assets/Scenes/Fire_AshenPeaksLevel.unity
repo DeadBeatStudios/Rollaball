@@ -504,45 +504,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 51a57af76b6188a4f8d2c873e8d89ed4, type: 3}
---- !u!1 &209615586 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
+--- !u!4 &209615594 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
   m_PrefabInstance: {fileID: 1342596161}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &209615590
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 209615586}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50b8c7f28ab017540b092c18039828cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LavaKillTrigger
---- !u!64 &209615591
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 209615586}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 1
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -462981019419857548, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
 --- !u!4 &223318391 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2812433840924478358, guid: 3e55aefb420e84b47b2242ddd59e9c99, type: 3}
@@ -3469,6 +3435,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1067994578 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8170640357536561425, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+  m_PrefabInstance: {fileID: 721787117020674101}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1073200963
 GameObject:
   m_ObjectHideFlags: 0
@@ -3837,6 +3808,76 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cf77ba6b1e04c5244b11bccd195ba07a, type: 3}
+--- !u!1 &1328511231
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1328511232}
+  - component: {fileID: 1328511234}
+  - component: {fileID: 1328511233}
+  m_Layer: 8
+  m_Name: LavaCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1328511232
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1328511231}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.029, y: 0, z: 0.001}
+  m_LocalScale: {x: 0.82, y: 0.9411, z: 0.9411}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1067994578}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1328511233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1328511231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50b8c7f28ab017540b092c18039828cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LavaKillTrigger
+  killTags:
+  - Player
+  - Enemy
+--- !u!64 &1328511234
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1328511231}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 1
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -145633697596556263, guid: 5fbe4323d253110459bad95ee6482984, type: 3}
 --- !u!1 &1334727772
 GameObject:
   m_ObjectHideFlags: 0
@@ -3949,23 +3990,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.71126884
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.70292014
+      value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -89.324
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
@@ -3997,14 +4038,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 209615591}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 209615590}
+      addedObject: {fileID: 1770862412}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d063d1e01f393f64cb4213701f88b1dc, type: 3}
 --- !u!4 &1371958135 stripped
 Transform:
@@ -4136,6 +4174,26 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 51a57af76b6188a4f8d2c873e8d89ed4, type: 3}
+--- !u!1 &1587963820 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1643530594811163047, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+  m_PrefabInstance: {fileID: 721787117020674101}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1587963825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1587963820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50b8c7f28ab017540b092c18039828cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LavaKillTrigger
+  killTags:
+  - Player
+  - Enemy
 --- !u!1001 &1624033435
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4380,6 +4438,75 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 51a57af76b6188a4f8d2c873e8d89ed4, type: 3}
+--- !u!1 &1770862411
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1770862412}
+  - component: {fileID: 1770862414}
+  - component: {fileID: 1770862413}
+  m_Layer: 8
+  m_Name: LavaPlaneCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1770862412
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1770862411}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 26.2, y: -0.2, z: -16.1}
+  m_LocalScale: {x: 200, y: 200, z: 2}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 209615594}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1770862413
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1770862411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50b8c7f28ab017540b092c18039828cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LavaKillTrigger
+  killTags:
+  - Player
+  - Enemy
+--- !u!65 &1770862414
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1770862411}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 1
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1775131714
 GameObject:
   m_ObjectHideFlags: 0
@@ -5192,6 +5319,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 187387516965178876, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+      propertyPath: m_Convex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 187387516965178876, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1643530594811163047, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 1867206978481927480, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -5215,6 +5354,14 @@ PrefabInstance:
     - target: {fileID: 4974295876025728353, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
       propertyPath: m_Name
       value: Volcano
+      objectReference: {fileID: 0}
+    - target: {fileID: 5058862162837194873, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+      propertyPath: m_Convex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5058862162837194873, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5639614019263555547, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
       propertyPath: m_LocalScale.x
@@ -5268,13 +5415,24 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 6698700759822345101, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 187387516965178876, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5639614019263555547, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
       insertIndex: -1
       addedObject: {fileID: 228084155}
-    m_AddedComponents: []
+    - targetCorrespondingSourceObject: {fileID: 8170640357536561425, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1328511232}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1643530594811163047, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1587963825}
   m_SourcePrefab: {fileID: 100100000, guid: 8732c071aa153ce4baca17127e6d3a33, type: 3}
 --- !u!114 &798663377592208955
 MonoBehaviour:
@@ -5288,6 +5446,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50b8c7f28ab017540b092c18039828cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LavaKillTrigger
+  killTags:
+  - Player
+  - Enemy
 --- !u!114 &990956045789939180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5300,6 +5461,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50b8c7f28ab017540b092c18039828cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LavaKillTrigger
+  killTags:
+  - Player
+  - Enemy
 --- !u!1001 &1220781694791815903
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5475,7 +5639,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: spawnCount
-      value: 0
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: respawnOnDeath
@@ -5880,7 +6044,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4963558739514518211, guid: b2bcefebcc46fed4daec063bf6ccf7a8, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6959657493575035927, guid: b2bcefebcc46fed4daec063bf6ccf7a8, type: 3}
       propertyPath: m_LocalScale.x
