@@ -19,7 +19,7 @@ public class PlayerRespawn : MonoBehaviour
     private bool isRespawning = false;
 
     /// <summary>
-    /// Public death state so other systems (Flag, AI, etc.) can react
+    /// Public death state so other systems (AI, Flag listeners, etc.) can react.
     /// </summary>
     public bool IsDead { get; private set; }
 
@@ -56,8 +56,8 @@ public class PlayerRespawn : MonoBehaviour
     // --------------------------------------------------------------
 
     /// <summary>
-    /// Canonical death entry point.
-    /// ALL systems should route player death through this.
+    /// Canonical death entry point (local).
+    /// Prefer using DeathEvents.ReportDeath(...) from external systems.
     /// </summary>
     public void Kill(
         DeathEvents.DeathCause cause,
@@ -72,20 +72,6 @@ public class PlayerRespawn : MonoBehaviour
             explosionSpawner.SpawnChunkExplosion();
 
         StartCoroutine(RespawnSequence(cause, instigator));
-    }
-
-    /// <summary>
-    /// Backward-compatible entry (used by older systems).
-    /// Internally routed to Kill().
-    /// </summary>
-    public void HandleDeath(
-        FlagPickup.FlagDropCause cause = FlagPickup.FlagDropCause.Unknown,
-        Transform killer = null)
-    {
-        Kill(
-            ConvertFlagCause(cause),
-            killer != null ? killer.gameObject : null
-        );
     }
 
     // --------------------------------------------------------------
@@ -129,27 +115,5 @@ public class PlayerRespawn : MonoBehaviour
         isRespawning = false;
 
         Debug.Log($"{name} respawned at {spawn.position}");
-    }
-
-    // --------------------------------------------------------------
-    //  CAUSE TRANSLATION
-    // --------------------------------------------------------------
-
-    private DeathEvents.DeathCause ConvertFlagCause(FlagPickup.FlagDropCause cause)
-    {
-        switch (cause)
-        {
-            case FlagPickup.FlagDropCause.FellOffMap:
-                return DeathEvents.DeathCause.FellOffMap;
-
-            case FlagPickup.FlagDropCause.KilledByEnemy:
-                return DeathEvents.DeathCause.EnemyAttack;
-
-            case FlagPickup.FlagDropCause.SelfDestruct:
-                return DeathEvents.DeathCause.SelfDestruct;
-
-            default:
-                return DeathEvents.DeathCause.Unknown;
-        }
     }
 }

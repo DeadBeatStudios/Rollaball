@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1052740789853975288}
   - component: {fileID: -3498438272190909761}
   - component: {fileID: 6660115427873180034}
+  - component: {fileID: -4028627843087266641}
   m_Layer: 3
   m_Name: FlagPickUp
   m_TagString: Untagged
@@ -114,6 +115,19 @@ MonoBehaviour:
   - {fileID: 0}
   respawnHeightOffset: 1.44
   showDebugLogs: 1
+--- !u!114 &-4028627843087266641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2493461861565345273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3da94656b5d133b439b3debfc92d43bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FlagDeathListener
+  flag: {fileID: 0}
 --- !u!1001 &8544789191407323967
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -335,6 +349,10 @@ PrefabInstance:
     - target: {fileID: 3610291426905645690, guid: cc6780b60c8ac854d80f085bacf99ae7, type: 3}
       propertyPath: ShapeModule.radius.value
       value: 2.47
+      objectReference: {fileID: 0}
+    - target: {fileID: 3610291426905645690, guid: cc6780b60c8ac854d80f085bacf99ae7, type: 3}
+      propertyPath: ShapeModule.radiusThickness
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3610291427603083777, guid: cc6780b60c8ac854d80f085bacf99ae7, type: 3}
       propertyPath: m_Name

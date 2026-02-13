@@ -24,17 +24,16 @@ public class HazardRockDebris : MonoBehaviour
     {
         if (!isHazardous) return;
 
-        if (collision.collider.CompareTag("Player"))
+        Collider other = collision.collider;
+        if (other == null) return;
+
+        if (other.CompareTag("Player") || other.CompareTag("Enemy"))
         {
-            PlayerRespawn pr = collision.collider.GetComponent<PlayerRespawn>();
-            if (pr != null)
-                pr.HandleDeath(FlagPickup.FlagDropCause.SelfDestruct);
-        }
-        else if (collision.collider.CompareTag("Enemy"))
-        {
-            EnemyFallDetector efd = collision.collider.GetComponent<EnemyFallDetector>();
-            if (efd != null)
-                efd.ForceKillDEBUG();
+            // Reporter-only: no respawn/spawner/flag logic here.
+            DeathEvents.ReportDeath(other.gameObject, DeathEvents.DeathCause.Hazard, gameObject);
+
+            // Optional: prevent multi-kills from the same debris piece
+            isHazardous = false;
         }
     }
 }

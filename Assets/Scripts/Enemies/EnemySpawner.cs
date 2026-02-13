@@ -60,33 +60,6 @@ public class EnemySpawner : MonoBehaviour
     private readonly List<Vector3> originalSpawnPositions = new();
 
     // ============================================================
-    //  EVENT SUBSCRIPTION
-    // ============================================================
-    private void OnEnable()
-    {
-        DeathEvents.OnDeath += OnDeathReported;
-    }
-
-    private void OnDisable()
-    {
-        DeathEvents.OnDeath -= OnDeathReported;
-    }
-
-    private void OnDeathReported(
-        GameObject victim,
-        DeathEvents.DeathCause cause,
-        GameObject instigator)
-    {
-        if (victim == null)
-            return;
-
-        if (!activeEnemies.Contains(victim))
-            return;
-
-        HandleEnemyDeath(victim);
-    }
-
-    // ============================================================
     //  STARTUP
     // ============================================================
     private void Start()
@@ -172,19 +145,28 @@ public class EnemySpawner : MonoBehaviour
     }
 
     // ============================================================
-    //  RESPAWN LOGIC
+    //  RESPAWN LOGIC (CALLED BY EnemyDeathListener)
     // ============================================================
     public void HandleEnemyDeath(GameObject enemy)
     {
-        HandleFlagReleaseIfHeld(enemy);
+        // Decoupled: EnemySpawner does NOT touch Flag logic.
+        // Carrier death is handled by FlagDeathListener via DeathEvents.
+
+        if (enemy == null)
+            return;
+
+        int index = activeEnemies.IndexOf(enemy);
 
         if (!respawnOnDeath)
         {
+            if (index >= 0)
+                activeEnemies.RemoveAt(index);
+            else
+                activeEnemies.Remove(enemy);
+
             Destroy(enemy);
             return;
         }
-
-        int index = activeEnemies.IndexOf(enemy);
 
         if (index >= 0)
         {
@@ -200,6 +182,8 @@ public class EnemySpawner : MonoBehaviour
         }
         else
         {
+            // Failsafe if enemy wasn't tracked correctly
+            activeEnemies.Remove(enemy);
             Destroy(enemy);
         }
     }
@@ -220,24 +204,6 @@ public class EnemySpawner : MonoBehaviour
 
         if (showDebug)
             Debug.Log($"EnemySpawner: Respawned enemy at {finalPos}");
-    }
-
-    // ============================================================
-    //  FLAG SAFETY
-    // ============================================================
-    private void HandleFlagReleaseIfHeld(GameObject enemy)
-    {
-        FlagPickup flag = FindAnyObjectByType<FlagPickup>();
-        if (flag == null)
-            return;
-
-        if (flag.IsHeldBy(enemy.transform))
-        {
-            flag.ForceResetFlag();
-
-            if (showDebug)
-                Debug.Log($"EnemySpawner: Flag reset because {enemy.name} died.");
-        }
     }
 
     // ============================================================
