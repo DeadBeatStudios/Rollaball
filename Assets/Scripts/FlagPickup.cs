@@ -1,9 +1,5 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// Simplified Flag system using predefined Respawn Zones (FlagSpawners).
-/// Removes all random arena spawning, terrain logic, floating visuals, etc.
-/// </summary>
 public class FlagPickup : MonoBehaviour
 {
     public enum FlagDropCause

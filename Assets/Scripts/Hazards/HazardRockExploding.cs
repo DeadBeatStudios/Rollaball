@@ -20,6 +20,9 @@ public class HazardRockExploding : MonoBehaviour
     [Header("Lifetime")]
     [SerializeField] private float maxLifetime = 10f;
 
+    [Header("Death Reporting")]
+    [SerializeField] private DeathEvents.DeathCause deathCause = DeathEvents.DeathCause.Hazard;
+
     private GameObject impactEffectPrefab;
     private bool hasExploded = false;
 
@@ -28,6 +31,7 @@ public class HazardRockExploding : MonoBehaviour
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
+            // If this errors, replace with rb.velocity.
             rb.linearVelocity = Vector3.down * initialDownwardSpeed;
         }
 
@@ -43,25 +47,18 @@ public class HazardRockExploding : MonoBehaviour
         if (hasExploded) return;
         hasExploded = true;
 
-        HandleImpactDamage(collision.collider);
+        HandleImpactDeathReport(collision.collider);
 
         Vector3 impactPoint = collision.contacts[0].point;
         Explode(impactPoint);
     }
 
-    private void HandleImpactDamage(Collider other)
+    private void HandleImpactDeathReport(Collider other)
     {
-        if (other.CompareTag("Player"))
+        // Hazard is a pure REPORTER now. No respawn, no spawner, no flag logic.
+        if (other.CompareTag("Player") || other.CompareTag("Enemy"))
         {
-            PlayerRespawn pr = other.GetComponent<PlayerRespawn>();
-            if (pr != null)
-                pr.HandleDeath(FlagPickup.FlagDropCause.SelfDestruct);
-        }
-        else if (other.CompareTag("Enemy"))
-        {
-            EnemyFallDetector efd = other.GetComponent<EnemyFallDetector>();
-            if (efd != null)
-                efd.ForceKillDEBUG();
+            DeathEvents.ReportDeath(other.gameObject, deathCause, gameObject);
         }
     }
 
