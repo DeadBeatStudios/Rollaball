@@ -96,17 +96,23 @@ public class PlayerRespawn : MonoBehaviour
 
     private void Respawn()
     {
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-
+        // Choose spawn
         Transform spawn = spawnPoints[Random.Range(0, spawnPoints.Length)];
         Vector3 safePosition = spawn.position + Vector3.up * 0.5f;
 
         if (Physics.Raycast(safePosition, Vector3.down, out RaycastHit hit, 2f))
             safePosition = hit.point + Vector3.up * 0.5f;
 
-        transform.position = safePosition;
-        transform.rotation = spawn.rotation;
+        // HARD reset physics
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        // Teleport via Rigidbody (prevents snap-back from physics/controller state)
+        rb.position = safePosition;
+        rb.rotation = spawn.rotation;
+
+        // Ensure Unity syncs the transform immediately
+        Physics.SyncTransforms();
 
         if (explosionSpawner != null)
             explosionSpawner.RestorePlayerModel();
