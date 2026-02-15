@@ -10,6 +10,7 @@ public class EnemySpawner : MonoBehaviour
     [Header("Enemy Settings")]
     [SerializeField] private GameObject enemyPrefab;
     public GameObject EnemyPrefab => enemyPrefab;
+
     [SerializeField] private int spawnCount = 4;
 
     [Tooltip("If true, enemies will respawn after dying.")]
@@ -17,6 +18,24 @@ public class EnemySpawner : MonoBehaviour
 
     [SerializeField] private float respawnDelay = 3f;
     [SerializeField] private float spawnLift = 0.3f;
+
+    // ============================================================
+    //  STABLE IDENTITY (NEW)
+    // ============================================================
+    [Header("Stable Enemy Identity")]
+    [Tooltip("Base ID for enemies. Slot index is added to this (ex: 2000 + slotIndex).")]
+    [SerializeField] private int enemyIdBase = 2000;
+
+    [Tooltip("Name pool used once at match start to assign stable names per slot.")]
+    [SerializeField]
+    private List<string> enemyNamePool = new List<string>
+    {
+        "Adrian", "Ethan", "Benjamin", "Corey", "Dennis",
+        "Connie", "Miranda", "Zoe", "Christy", "Mike"
+    };
+
+    // slot -> stable name
+    private string[] slotNames;
 
     // ============================================================
     //  AI ROLE ASSIGNMENT
@@ -64,6 +83,9 @@ public class EnemySpawner : MonoBehaviour
     // ============================================================
     private void Start()
     {
+        // Prepare stable names for each slot (once per match).
+        BuildStableSlotNames();
+
         StartCoroutine(DelayedSpawn());
     }
 
@@ -82,20 +104,82 @@ public class EnemySpawner : MonoBehaviour
         {
             Vector3 spawnPos = GetBoxSpawnPoint();
             originalSpawnPositions.Add(spawnPos);
-            SpawnEnemyAt(spawnPos);
+            SpawnEnemyAt(spawnPos, i);
         }
     }
 
-    private void SpawnEnemyAt(Vector3 position)
+    private void SpawnEnemyAt(Vector3 position, int slotIndex)
     {
         Vector3 finalPos = SnapToGroundIfNeeded(position) + Vector3.up * spawnLift;
         GameObject enemy = Instantiate(enemyPrefab, finalPos, Quaternion.identity);
+
+        // Track in slot order
         activeEnemies.Add(enemy);
+
+        // Apply stable identity BEFORE enemy Start() runs
+        ApplyStableIdentity(enemy, slotIndex);
 
         ApplyRoleAssignment(enemy);
 
         if (showDebug)
-            Debug.Log($"EnemySpawner: Spawned enemy at {finalPos}");
+            Debug.Log($"EnemySpawner: Spawned {enemy.name} at {finalPos}");
+    }
+
+    // ============================================================
+    //  STABLE IDENTITY HELPERS
+    // ============================================================
+    private void BuildStableSlotNames()
+    {
+        if (spawnCount <= 0)
+            spawnCount = 1;
+
+        slotNames = new string[spawnCount];
+
+        // Copy pool so we can pick without duplicates until exhausted
+        List<string> pool = new List<string>(enemyNamePool);
+
+        for (int i = 0; i < spawnCount; i++)
+        {
+            string chosen;
+
+            if (pool.Count > 0)
+            {
+                int pick = Random.Range(0, pool.Count);
+                chosen = pool[pick];
+                pool.RemoveAt(pick);
+            }
+            else
+            {
+                // Pool exhausted: reuse base names with a suffix
+                string baseName = enemyNamePool.Count > 0 ? enemyNamePool[Random.Range(0, enemyNamePool.Count)] : "Enemy";
+                chosen = $"{baseName}_{i + 1}";
+            }
+
+            slotNames[i] = chosen;
+        }
+    }
+
+    private void ApplyStableIdentity(GameObject enemy, int slotIndex)
+    {
+        if (enemy == null) return;
+
+        int stableId = enemyIdBase + Mathf.Max(0, slotIndex);
+        string stableName = (slotNames != null && slotIndex >= 0 && slotIndex < slotNames.Length)
+            ? slotNames[slotIndex]
+            : $"Enemy_{slotIndex + 1:00}";
+
+        // Rename object (debug clarity)
+        enemy.name = stableName;
+
+        // Push identity into PlayerScore so GameManager keys are stable
+        if (enemy.TryGetComponent<PlayerScore>(out var score))
+        {
+            score.SetIdentity(stableId, stableName);
+        }
+        else if (showDebug)
+        {
+            Debug.LogWarning($"EnemySpawner: {enemy.name} has no PlayerScore component. Stable ID/name not applied.");
+        }
     }
 
     // ============================================================
@@ -149,9 +233,6 @@ public class EnemySpawner : MonoBehaviour
     // ============================================================
     public void HandleEnemyDeath(GameObject enemy)
     {
-        // Decoupled: EnemySpawner does NOT touch Flag logic.
-        // Carrier death is handled by FlagDeathListener via DeathEvents.
-
         if (enemy == null)
             return;
 
@@ -182,28 +263,31 @@ public class EnemySpawner : MonoBehaviour
         }
         else
         {
-            // Failsafe if enemy wasn't tracked correctly
+            // Failsafe
             activeEnemies.Remove(enemy);
             Destroy(enemy);
         }
     }
 
-    private IEnumerator RespawnEnemy(Vector3 spawnPos, int index)
+    private IEnumerator RespawnEnemy(Vector3 spawnPos, int slotIndex)
     {
         yield return new WaitForSeconds(respawnDelay);
 
         Vector3 finalPos = SnapToGroundIfNeeded(spawnPos) + Vector3.up * spawnLift;
         GameObject enemy = Instantiate(enemyPrefab, finalPos, Quaternion.identity);
 
+        // Apply stable identity BEFORE Start() on the clone runs
+        ApplyStableIdentity(enemy, slotIndex);
+
         ApplyRoleAssignment(enemy);
 
-        if (index >= 0 && index <= activeEnemies.Count)
-            activeEnemies.Insert(index, enemy);
+        if (slotIndex >= 0 && slotIndex <= activeEnemies.Count)
+            activeEnemies.Insert(slotIndex, enemy);
         else
             activeEnemies.Add(enemy);
 
         if (showDebug)
-            Debug.Log($"EnemySpawner: Respawned enemy at {finalPos}");
+            Debug.Log($"EnemySpawner: Respawned {enemy.name} at {finalPos}");
     }
 
     // ============================================================
