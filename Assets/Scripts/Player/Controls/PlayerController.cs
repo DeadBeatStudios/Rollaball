@@ -30,6 +30,12 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
     private bool jumpRequested;
 
+    // ✅ NEW: Expose move input for other systems (Dash, AI assist, etc.)
+    public Vector2 MoveInput => moveInput;
+
+    // (Optional but handy later)
+    public bool IsGrounded => isGrounded;
+
     // --------------------------------------------------------------
     //  CURSOR
     // --------------------------------------------------------------
