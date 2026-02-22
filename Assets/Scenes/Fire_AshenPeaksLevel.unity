@@ -1864,9 +1864,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9356e64de1a01e446be8959398eaf21b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerGroundBash
-  bashCooldown: 1.5
+  bashCooldown: 1
   upwardLiftForce: 20
-  slamDownForce: 20
+  slamDownSpeed: 50
   shockwaveForce: 60.7
   shockwaveRadius: 8
   liftDelay: 0.1
@@ -1876,6 +1876,8 @@ MonoBehaviour:
   bashAffectsLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  playerController: {fileID: 0}
+  knockback: {fileID: 0}
 --- !u!114 &682841831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5495,15 +5497,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2281318783096261484, guid: 12c61ba6f7f9bce45b7af0777f904106, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 594.4
+      value: -439
       objectReference: {fileID: 0}
     - target: {fileID: 2281318783096261484, guid: 12c61ba6f7f9bce45b7af0777f904106, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 42.6
+      value: 221
       objectReference: {fileID: 0}
     - target: {fileID: 2281318783096261484, guid: 12c61ba6f7f9bce45b7af0777f904106, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 228.8
+      value: -304.5
       objectReference: {fileID: 0}
     - target: {fileID: 2281318783096261484, guid: 12c61ba6f7f9bce45b7af0777f904106, type: 3}
       propertyPath: m_LocalRotation.w
