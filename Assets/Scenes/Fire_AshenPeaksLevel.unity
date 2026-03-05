@@ -1867,7 +1867,7 @@ MonoBehaviour:
   bashCooldown: 1
   upwardLiftForce: 20
   slamDownSpeed: 50
-  shockwaveForce: 60.7
+  shockwaveForce: 100
   shockwaveRadius: 8
   liftDelay: 0.1
   groundLayer:
@@ -5321,8 +5321,16 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
+      propertyPath: boxSize.x
+      value: 261.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
+      propertyPath: boxSize.z
+      value: 238.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: spawnCount
-      value: 0
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: respawnOnDeath

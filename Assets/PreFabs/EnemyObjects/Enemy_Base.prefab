@@ -379,7 +379,7 @@ MonoBehaviour:
   bashCooldown: 1.5
   upwardLiftForce: 8
   slamDownForce: 20
-  shockwaveForce: 60
+  shockwaveForce: 100
   shockwaveRadius: 8
   liftDelay: 0.1
   groundLayer:
