@@ -66,7 +66,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f99c2f606e487bd4ba7c619b09a10f39, type: 2}
+  - {fileID: 2100000, guid: 4a2abd4f67aefc24b9c6cca2d197adc7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -111,6 +111,7 @@ GameObject:
   - component: {fileID: 7270952636097980000}
   - component: {fileID: -5960120842246165499}
   - component: {fileID: 5240735963078683225}
+  - component: {fileID: -901465998453274066}
   m_Layer: 0
   m_Name: Enemy_Base
   m_TagString: Enemy
@@ -167,7 +168,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f99c2f606e487bd4ba7c619b09a10f39, type: 2}
+  - {fileID: 2100000, guid: 4a2abd4f67aefc24b9c6cca2d197adc7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -284,7 +285,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFallDetector
   fallThresholdY: -10
-  spawner: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
   explosionSpawner: {fileID: 2574202967793689050}
 --- !u!114 &2574202967793689050
 MonoBehaviour:
@@ -300,7 +300,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ChunkExplosionSpawner
   playerModelRoot: {fileID: 107728053623164529}
   explosionChunkPrefab: {fileID: 1476351624188654985, guid: 3f5eb13b89f8a3d44b62cf5aac82e019, type: 3}
-  playerMaterial: {fileID: 2100000, guid: f99c2f606e487bd4ba7c619b09a10f39, type: 2}
+  playerMaterial: {fileID: 2100000, guid: 4a2abd4f67aefc24b9c6cca2d197adc7, type: 2}
 --- !u!114 &4843871582936143101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -379,7 +379,7 @@ MonoBehaviour:
   bashCooldown: 1.5
   upwardLiftForce: 8
   slamDownForce: 20
-  shockwaveForce: 60
+  shockwaveForce: 100
   shockwaveRadius: 8
   liftDelay: 0.1
   groundLayer:
@@ -413,3 +413,18 @@ MonoBehaviour:
   playerDetectRadius: 18
   homeWanderRadius: 12
   homePosition: {x: 0, y: 0, z: 0}
+--- !u!114 &-901465998453274066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5267770077472934122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7875ca3676cf02843b3e38ac25946680, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathListener
+  spawner: {fileID: 0}
+  explosionSpawner: {fileID: 0}
+  debugLogs: 0

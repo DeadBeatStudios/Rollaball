@@ -25,24 +25,14 @@ public class HazardRock : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        // ----- PLAYER HIT -----
-        if (collision.collider.CompareTag("Player"))
-        {
-            PlayerRespawn pr = collision.collider.GetComponent<PlayerRespawn>();
-            if (pr != null)
-                pr.HandleDeath(FlagPickup.FlagDropCause.SelfDestruct);
+        Collider other = collision.collider;
+        if (other == null) return;
 
-            Destroy(gameObject);
-            return;
-        }
-
-        // ----- ENEMY HIT -----
-        if (collision.collider.CompareTag("Enemy"))
+        // ----- PLAYER OR ENEMY HIT -----
+        if (other.CompareTag("Player") || other.CompareTag("Enemy"))
         {
-            // Enemy just dies — no rolling needed
-            EnemyFallDetector efd = collision.collider.GetComponent<EnemyFallDetector>();
-            if (efd != null)
-                efd.ForceKillDEBUG();
+            // Reporter-only: no respawn/spawner/flag logic here.
+            DeathEvents.ReportDeath(other.gameObject, DeathEvents.DeathCause.Hazard, gameObject);
 
             Destroy(gameObject);
             return;

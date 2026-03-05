@@ -12,12 +12,12 @@ public class GameManager : MonoBehaviour
     [Tooltip("Assign your UIManager in Inspector.")]
     public UIManager uiManager;
 
-    // Player scores stored using InstanceID → Score
-    private Dictionary<int, int> scores = new Dictionary<int, int>();
-    private Dictionary<int, string> playerNames = new Dictionary<int, string>();  // 💡 New: Store names
+    // Player scores stored using ID → Score
+    private readonly Dictionary<int, int> scores = new Dictionary<int, int>();
+    private readonly Dictionary<int, string> playerNames = new Dictionary<int, string>();
 
     public IReadOnlyDictionary<int, int> Scores => scores;
-    public IReadOnlyDictionary<int, string> PlayerNames => playerNames;  // 💡 New: Expose names
+    public IReadOnlyDictionary<int, string> PlayerNames => playerNames;
 
     private void Awake()
     {
@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
@@ -40,11 +41,27 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets/updates player name  // 💡 New method
+    /// Unregisters a player/enemy by ID (useful when despawning or resetting a match).
+    /// </summary>
+    public void UnregisterPlayer(int id)
+    {
+        scores.Remove(id);
+        playerNames.Remove(id);
+
+        if (uiManager != null)
+            uiManager.RefreshScoreboard(scores, playerNames);
+    }
+
+    /// <summary>
+    /// Sets/updates player name.
     /// </summary>
     public void SetPlayerName(int id, string name)
     {
         playerNames[id] = name;
+
+        // Optional: refresh when name changes so UI updates immediately
+        if (uiManager != null)
+            uiManager.RefreshScoreboard(scores, playerNames);
     }
 
     /// <summary>
@@ -56,11 +73,11 @@ public class GameManager : MonoBehaviour
             scores[id] = 0;
 
         scores[id] += value;
+
         Debug.Log($"🏆 Player {playerNames.GetValueOrDefault(id, id.ToString())} scored! New score = {scores[id]}");
 
-        // Update UI if available - pass names too
         if (uiManager != null)
-            uiManager.RefreshScoreboard(scores, playerNames);  // 💡 Modified: Pass names
+            uiManager.RefreshScoreboard(scores, playerNames);
     }
 
     /// <summary>
@@ -69,5 +86,17 @@ public class GameManager : MonoBehaviour
     public int GetScore(int id)
     {
         return scores.TryGetValue(id, out int score) ? score : 0;
+    }
+
+    /// <summary>
+    /// Clears all registered players/enemies and scores (useful on match restart / returning to menu).
+    /// </summary>
+    public void ClearAll()
+    {
+        scores.Clear();
+        playerNames.Clear();
+
+        if (uiManager != null)
+            uiManager.RefreshScoreboard(scores, playerNames);
     }
 }

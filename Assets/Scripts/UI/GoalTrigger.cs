@@ -55,7 +55,9 @@ public class GoalTrigger : MonoBehaviour
         isProcessingScore = true;
 
         scorer.AddPoints(pointsPerScore);
-        flag.DropAndRespawn(FlagPickup.FlagDropCause.SelfDestruct);
+
+        // Decoupled: scoring tells the Flag to reset via its public API (no FlagDropCause usage).
+        flag.ForceResetFlag();
 
         Debug.Log($"🏁 {scorerName} scored! +{pointsPerScore}");
 

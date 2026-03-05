@@ -1,9 +1,5 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// Simplified Flag system using predefined Respawn Zones (FlagSpawners).
-/// Removes all random arena spawning, terrain logic, floating visuals, etc.
-/// </summary>
 public class FlagPickup : MonoBehaviour
 {
     public enum FlagDropCause
@@ -59,15 +55,7 @@ public class FlagPickup : MonoBehaviour
         if (!isHeld || holder == null)
             return;
 
-        // If holder dies → respawn at spawner
-        PlayerRespawn pr = holder.GetComponentInParent<PlayerRespawn>();
-        if (pr != null && pr.IsDead)
-        {
-            RespawnAtRandomSpawner();
-            return;
-        }
-
-        // Follow holder
+        // Follow holder only (death handling is event-driven via FlagDeathListener)
         transform.position = holder.position + Vector3.up * attachHeightOffset;
         transform.rotation = initialWorldRotation;
     }
@@ -128,7 +116,7 @@ public class FlagPickup : MonoBehaviour
     /// <summary>
     /// Used by scoring and instant respawn events.
     /// </summary>
-    public void DropAndRespawn(FlagDropCause cause = FlagDropCause.Unknown)
+    public void DropAndRespawn()
     {
         RespawnAtRandomSpawner();
     }
@@ -197,8 +185,20 @@ public class FlagPickup : MonoBehaviour
     public Transform CurrentHolder => holder;
     public bool IsHeld => isHeld;
 
+    /// <summary>
+    /// Called by FlagDeathListener when the carrier dies.
+    /// Keeps FlagPickup decoupled from PlayerRespawn / Enemy systems.
+    /// </summary>
+    public void OnCarrierDied(DeathEvents.DeathCause cause, GameObject instigator = null)
+    {
+        RespawnAtRandomSpawner();
+
+        if (showDebugLogs)
+            Debug.Log($"FlagPickup: Carrier died, flag respawned. Cause={cause}");
+    }
+
     // -------------------------------------------------
-    // FORCE RESET FLAG (NEW)
+    // FORCE RESET FLAG
     // -------------------------------------------------
 
     /// <summary>

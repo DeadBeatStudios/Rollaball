@@ -9,20 +9,20 @@ public class PlayerScore : MonoBehaviour
     [SerializeField] private string playerName = "";
     [SerializeField] private bool isEnemy = false;
 
-    // 💡 Static = shared across ALL PlayerScore instances
+    // Name pool (used by spawner now — kept here only if you want)
     private static List<string> availableNames = new List<string>();
     private static List<string> usedNames = new List<string>();
     private static Dictionary<string, int> nameCounts = new Dictionary<string, int>();
 
     private void Awake()
     {
-        playerID = GetInstanceID();
+        // Only default to InstanceID if NOT an enemy (player identity can remain per object).
+        if (!IsEnemy())
+            playerID = GetInstanceID();
 
-        // 💡 Initialize name pool (only once, first enemy does this)
+        // Initialize pool once (safe to leave)
         if (availableNames.Count == 0)
-        {
             ResetNamePool();
-        }
     }
 
     private static void ResetNamePool()
@@ -38,9 +38,12 @@ public class PlayerScore : MonoBehaviour
 
     private void Start()
     {
-        if (isEnemy || gameObject.name.ToLower().Contains("enemy"))
+        if (IsEnemy())
         {
-            GenerateSmartEnemyName();
+            // Enemy name/ID should be assigned by EnemySpawner (stable across respawns).
+            // If not assigned, fall back to current GameObject name to avoid blanks.
+            if (string.IsNullOrEmpty(playerName))
+                playerName = gameObject.name;
         }
         else if (gameObject.CompareTag("Player"))
         {
@@ -59,47 +62,28 @@ public class PlayerScore : MonoBehaviour
         GameManager.Instance.SetPlayerName(playerID, playerName);
     }
 
-    private void GenerateSmartEnemyName()
+    private bool IsEnemy()
+        => isEnemy || gameObject.name.ToLower().Contains("enemy");
+
+    // Called by spawner to set stable identity for enemies
+    public void SetIdentity(int id, string name)
     {
-        string baseName;
+        playerID = id;
+        playerName = name;
 
-        // 🔥 CRITICAL: If we still have unused names, pick one
-        if (availableNames.Count > 0)
+        if (GameManager.Instance != null)
         {
-            // Pick random unused name
-            int index = Random.Range(0, availableNames.Count);
-            baseName = availableNames[index];
-
-            // Move it from available to used
-            availableNames.RemoveAt(index);
-            usedNames.Add(baseName);
-
-            // First use - no number needed!
-            playerName = baseName;
-        }
-        else
-        {
-            // All names used - pick from used names and add number
-            baseName = usedNames[Random.Range(0, usedNames.Count)];
-
-            // Track how many times this name has been reused
-            if (!nameCounts.ContainsKey(baseName))
-                nameCounts[baseName] = 1;
-
-            nameCounts[baseName]++;
-
-            // Add number for duplicates
-            playerName = $"{baseName}_{nameCounts[baseName]}";
+            GameManager.Instance.RegisterPlayer(playerID);
+            GameManager.Instance.SetPlayerName(playerID, playerName);
         }
     }
 
-    // 💡 Call this when returning to menu or resetting game
+    // Optional: if returning to menu
     public static void ResetEnemyNames()
     {
         ResetNamePool();
     }
 
-    // Rest of your existing code...
     public void AddPoints(int points)
     {
         GameManager.Instance.AddPoints(playerID, points);
@@ -109,11 +93,11 @@ public class PlayerScore : MonoBehaviour
     {
         playerName = newName;
         if (GameManager.Instance != null)
-        {
             GameManager.Instance.SetPlayerName(playerID, playerName);
-        }
     }
 
     public int ID => playerID;
     public string PlayerName => playerName;
+
+    // (Old GenerateSmartEnemyName kept out intentionally — enemy naming is now spawner-driven)
 }
