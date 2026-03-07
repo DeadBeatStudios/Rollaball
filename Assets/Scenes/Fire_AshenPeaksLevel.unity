@@ -2223,6 +2223,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27f4ae88bf6d79a4a952a49ef74c405a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDeathListener
+--- !u!114 &682841877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 682841803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0589dcc0ef03ae44d93d2f6dcdb2de79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAppearanceController
+  visualRenderer: {fileID: 0}
+  colorPropertyName: _Color
 --- !u!114 &703749181 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6660115427873180034, guid: 51e27a41c5ee08e419f719d343d70b45, type: 3}
@@ -3485,6 +3499,10 @@ PrefabInstance:
       propertyPath: 'spawnPoints.Array.data[7]'
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6609354860806493046, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: fa542ab47cc7bb3418c35926f8cab963, type: 2}
     - target: {fileID: 8798383171569236041, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
       propertyPath: m_Volume
       value: 0.086
@@ -3532,6 +3550,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5919138668250432695, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 682841866}
+    - targetCorrespondingSourceObject: {fileID: 5919138668250432695, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 682841877}
   m_SourcePrefab: {fileID: 100100000, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
 --- !u!1 &1059722878
 GameObject:

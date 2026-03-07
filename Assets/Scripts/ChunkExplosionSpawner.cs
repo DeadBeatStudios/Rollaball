@@ -8,8 +8,9 @@ public class ChunkExplosionSpawner : MonoBehaviour
     [Tooltip("Auto-loaded from Resources/DeathFX.")]
     [SerializeField] private GameObject explosionChunkPrefab;
 
-    [Tooltip("Player material applied to the chunks.")]
-    [SerializeField] private Material playerMaterial;
+    [Header("Appearance Source")]
+    [Tooltip("Reads the live applied player appearance color from this controller.")]
+    [SerializeField] private PlayerAppearanceController appearanceController;
 
     private void Awake()
     {
@@ -21,6 +22,20 @@ public class ChunkExplosionSpawner : MonoBehaviour
             if (explosionChunkPrefab == null)
             {
                 Debug.LogError("❌ Cannot load Explosion_ChunkSet from Resources/DeathFX/");
+            }
+        }
+
+        // Try to auto-find appearance controller if not manually assigned
+        if (appearanceController == null)
+        {
+            appearanceController = GetComponent<PlayerAppearanceController>();
+
+            if (appearanceController == null)
+            {
+                Debug.LogWarning(
+                    $"⚠️ {name}: ChunkExplosionSpawner could not find PlayerAppearanceController. " +
+                    "Chunks will use their default material colors."
+                );
             }
         }
     }
@@ -45,18 +60,34 @@ public class ChunkExplosionSpawner : MonoBehaviour
             transform.rotation
         );
 
-        // Apply player material to all renderers
-        if (playerMaterial != null)
-        {
-            MeshRenderer[] renderers = explosionInstance.GetComponentsInChildren<MeshRenderer>(true);
-            foreach (var r in renderers)
-                r.material = playerMaterial;
-        }
+        ApplyAppearanceToChunks(explosionInstance);
 
-        // Trigger explosion physics
         ChunkDeathExplosion explosion = explosionInstance.GetComponent<ChunkDeathExplosion>();
         if (explosion != null)
             explosion.TriggerExplosion(spawnPos);
+    }
+
+    private void ApplyAppearanceToChunks(GameObject explosionInstance)
+    {
+        if (appearanceController == null)
+            return;
+
+        Color chunkColor = appearanceController.AppliedColor;
+
+        Renderer[] renderers = explosionInstance.GetComponentsInChildren<Renderer>(true);
+
+        foreach (Renderer r in renderers)
+        {
+            Material[] materials = r.materials;
+
+            for (int i = 0; i < materials.Length; i++)
+            {
+                if (materials[i] == null)
+                    continue;
+
+                materials[i].color = chunkColor;
+            }
+        }
     }
 
     public void RestorePlayerModel()
