@@ -2235,8 +2235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0589dcc0ef03ae44d93d2f6dcdb2de79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAppearanceController
-  visualRenderer: {fileID: 0}
-  colorPropertyName: _Color
+  visualRenderer: {fileID: 2079010905}
 --- !u!114 &703749181 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6660115427873180034, guid: 51e27a41c5ee08e419f719d343d70b45, type: 3}
@@ -3502,7 +3501,7 @@ PrefabInstance:
     - target: {fileID: 6609354860806493046, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: fa542ab47cc7bb3418c35926f8cab963, type: 2}
+      objectReference: {fileID: 2100000, guid: d14bbebaaab5dcb4abaf85814d66a9ad, type: 2}
     - target: {fileID: 8798383171569236041, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
       propertyPath: m_Volume
       value: 0.086
@@ -5155,6 +5154,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 587d0f380b2cf214dad410c269371fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
+--- !u!23 &2079010905 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6609354860806493046, guid: ffeffebfa0bad6746935ccec83264eaa, type: 3}
+  m_PrefabInstance: {fileID: 1009183856}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2110509522 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 66a9e81fe2a2de043ab36ad1094d8131, type: 3}
@@ -5767,7 +5771,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3325316066422418300, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: boxSize.x
@@ -5779,7 +5783,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: spawnCount
-      value: 5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6782956787813166577, guid: 8ba99056cbf24ff4b935dc24a63c6f73, type: 3}
       propertyPath: respawnOnDeath
