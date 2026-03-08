@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 42ddd38747cbf3b44ba78befe362c7ab
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Examples/Animations/Example Ball C Animation.anim
+  uploadId: 293443

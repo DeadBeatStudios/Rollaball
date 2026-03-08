@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4807b2bec4c6454438f8480eb5e4d8a4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Examples/Animations/Ball A.controller
+  uploadId: 293443

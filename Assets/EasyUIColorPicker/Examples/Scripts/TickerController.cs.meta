@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c239245b798693f41afa8dcb7b71a753
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Examples/Scripts/TickerController.cs
+  uploadId: 293443

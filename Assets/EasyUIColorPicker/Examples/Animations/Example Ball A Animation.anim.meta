@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 78f02e788a5a7524c8574c50b6658be1
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Examples/Animations/Example Ball A Animation.anim
+  uploadId: 293443

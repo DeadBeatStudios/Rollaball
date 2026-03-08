@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 9db8eef1a8406b24995e8809e0fc615c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Scripts/Editor/EasyUIColorPickerControllerEditor.cs
+  uploadId: 293443

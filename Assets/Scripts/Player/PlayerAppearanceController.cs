@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerAppearanceController : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class PlayerAppearanceController : MonoBehaviour
     private Color appliedColor = Color.white;
 
     public Color AppliedColor => appliedColor;
+
+    // Future FX systems can subscribe to this
+    public event Action<Color> OnAppearanceColorChanged;
 
     private void Awake()
     {
@@ -42,9 +46,12 @@ public class PlayerAppearanceController : MonoBehaviour
 
         foreach (Material mat in runtimeMaterials)
         {
-            if (mat == null) continue;
+            if (mat == null)
+                continue;
 
             mat.color = appliedColor;
         }
+
+        OnAppearanceColorChanged?.Invoke(appliedColor);
     }
 }

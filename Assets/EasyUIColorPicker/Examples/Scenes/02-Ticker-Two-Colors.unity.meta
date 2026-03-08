@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0c5e871178a2f354381e82a478fa870a
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Examples/Scenes/02-Ticker-Two-Colors.unity
+  uploadId: 293443

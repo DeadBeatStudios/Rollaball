@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f622d437aeb179444bad3962dea7b0fc
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Examples/Scenes/03-Three-Objects-Three-Colors-Always-Visible.unity
+  uploadId: 293443

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 57a62685176a22542adf1aa4d2aff554
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Examples/Materials/Example Ball Material A.mat
+  uploadId: 293443

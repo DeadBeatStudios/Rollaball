@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: dc057e0ad0ca5014db81cbb576274142
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Documentation/Easy UI Color Picker User Guide_V1.2.pdf
+  uploadId: 293443

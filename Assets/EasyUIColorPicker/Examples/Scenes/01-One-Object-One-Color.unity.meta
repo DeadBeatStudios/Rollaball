@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4d45728b31f8eb7418e6998e52904e3f
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130252
+  packageName: Easy UI Color Picker
+  packageVersion: 1.2
+  assetPath: Assets/EasyUIColorPicker/Examples/Scenes/01-One-Object-One-Color.unity
+  uploadId: 293443
