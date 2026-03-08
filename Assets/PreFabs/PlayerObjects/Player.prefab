@@ -90,7 +90,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b3c03229c89f0334c8bc00a5e6167238, type: 2}
+  - {fileID: 2100000, guid: d14bbebaaab5dcb4abaf85814d66a9ad, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -112,6 +112,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &9181343248694137024
 MeshFilter:
@@ -151,8 +152,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4739879668573362528}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15212339, y: 0.000000003352048, z: -5.159295e-10, w: 0.98836154}
-  m_LocalPosition: {x: 0.014, y: 3.0170581, z: -9.58657}
+  m_LocalRotation: {x: 0.15212335, y: -0.000000018204485, z: 0.0000000028019371, w: 0.98836154}
+  m_LocalPosition: {x: 0.014, y: 2.6248322, z: -8.34259}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -247,7 +248,7 @@ MonoBehaviour:
   VerticalAxis:
     Value: 17.5
     Center: 17.5
-    Range: {x: 0, y: 45}
+    Range: {x: 0, y: 89}
     Wrap: 0
     Recentering:
       Enabled: 0
@@ -374,9 +375,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a758c5ee6abcc46a24deec7debeed9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraZoom
-  zoomSpeed: 2
+  zoomSpeed: 2.5
   minDistance: 2
-  maxDistance: 10
+  maxDistance: 100
   zoomAction: {fileID: -8196752069027386094, guid: b938891beead7c64784cd779c67a409a, type: 3}
 --- !u!1 &5919138668250432695
 GameObject:
@@ -398,6 +399,12 @@ GameObject:
   - component: {fileID: -1007630495355823590}
   - component: {fileID: 8798383171569236041}
   - component: {fileID: 6060765819980663278}
+  - component: {fileID: 6137283007196272200}
+  - component: {fileID: 3676566318912535879}
+  - component: {fileID: 4825693704702843674}
+  - component: {fileID: 5364597501343999309}
+  - component: {fileID: 3350881334034683920}
+  - component: {fileID: 1348918298972465628}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -415,8 +422,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.03999996, y: 0.5, z: 8.38}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.15, y: 1.15, z: 1.15}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7039589519338965652}
   - {fileID: 4772604205498877609}
@@ -663,6 +670,70 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: dd3aaa49-6255-4f5a-bc6e-a93b6d2cc284
     m_ActionName: 'Debug/ForceFlagCapture[/Keyboard/f7]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3676566318912535879}
+        m_TargetAssemblyTypeName: PlayerGroundBash, Assembly-CSharp
+        m_MethodName: OnBash
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 3d51d558-e161-4603-abc1-b9a8fef9650a
+    m_ActionName: 'Player/GroundBash[/Keyboard/leftShift]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 31398017-f9ac-42c2-91a5-a8963174757c
+    m_ActionName: 'Player/Pause[/Keyboard/escape]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5364597501343999309}
+        m_TargetAssemblyTypeName: PlayerDash, Assembly-CSharp
+        m_MethodName: OnDash
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 670c16d0-fe31-4831-a014-4c3a8ae9f630
+    m_ActionName: 'Player/Dash[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f02b14d1-150c-4de5-a097-f5188d7c2fb6
+    m_ActionName: 'Debug/SpawnBasicChaser[/Keyboard/1]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1314dd93-8029-4f00-95c9-faba2ef9b290
+    m_ActionName: 'Debug/SpawnDefender[/Keyboard/2]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 91989a49-d0e6-42e4-b17e-e8aa7d5353a2
+    m_ActionName: 'Debug/SpawnFlagChaser[/Keyboard/3]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8c64973b-37e5-47c4-8927-23846bb1eb6e
+    m_ActionName: 'Debug/ResetAllEnemies[/Keyboard/r]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8001d9f8-cfdf-4047-ad70-3641df2a4d9b
+    m_ActionName: 'Debug/ResetFlag[/Keyboard/f]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 98999a9d-5cf6-4f92-bdad-ee50bd47b116
+    m_ActionName: 'Debug/TeleportPlayertoCenter[/Keyboard/p]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: bbedf84d-b95d-4dd0-9b67-d270c8227460
+    m_ActionName: 'Debug/ToggleAI[/Keyboard/o]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -680,13 +751,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae3c068f7fdb4c143afdce3fc9db23c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  moveForce: 60
-  maxSpeed: 25
+  maxSpeed: 50
   jumpForce: 15
   cameraTransform: {fileID: 9195951345357137867}
+  groundAcceleration: 60
+  groundDeceleration: 80
+  reverseBoostMultiplier: 1.3
+  airAcceleration: 25
+  airDeceleration: 5
   visualModel: {fileID: 4772604205498877609}
-  rollSpeed: 0
-  airControlMultiplier: 0.5
+  visualRadius: 0.5
   lockCursorOnStart: 1
   groundCheckDistance: 0.1
   groundLayer:
@@ -708,12 +782,7 @@ MonoBehaviour:
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  fallThreshold: -1
+  fallThreshold: -0.61
   respawnDelay: 0.5
   explosionSpawner: {fileID: 8495593634423343559}
 --- !u!114 &3787373116209747972
@@ -730,6 +799,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerScore
   playerID: 0
   playerName: Tester
+  isEnemy: 0
 --- !u!114 &8495593634423343559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -744,7 +814,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ChunkExplosionSpawner
   playerModelRoot: {fileID: 1723710977890445451}
   explosionChunkPrefab: {fileID: 0}
-  playerMaterial: {fileID: 2100000, guid: b3c03229c89f0334c8bc00a5e6167238, type: 2}
+  appearanceController: {fileID: 0}
 --- !u!114 &961351831974327327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -788,7 +858,6 @@ MonoBehaviour:
   minSpeedDifference: 0.15
   maxKnockback: 22
   ignoreVertical: 1
-  dropThreshold: 8
 --- !u!82 &8798383171569236041
 AudioSource:
   m_ObjectHideFlags: 0
@@ -802,7 +871,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 56acd8a7a1d5bcc47ac48ba2a1ca0895, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.433
+  m_Volume: 0.086
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -900,5 +969,183 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RollingSound
   rollingAudio: {fileID: 8798383171569236041}
   speedThreshold: 0.5
-  maxSpeedForVolume: 12
+  maxSpeedForVolume: 60
   enabledSceneName: Fire_AshenPeaksLevel
+--- !u!82 &6137283007196272200
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5919138668250432695}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 56acd8a7a1d5bcc47ac48ba2a1ca0895, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0.433
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1.0584488
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &3676566318912535879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5919138668250432695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9356e64de1a01e446be8959398eaf21b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerGroundBash
+  bashCooldown: 1
+  upwardLiftForce: 20
+  slamDownSpeed: 50
+  shockwaveForce: 100
+  shockwaveRadius: 8
+  liftDelay: 0.1
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  bashAffectsLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  playerController: {fileID: 0}
+  knockback: {fileID: 0}
+--- !u!114 &4825693704702843674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5919138668250432695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e75b2e343c72cc64c8ac13ff7f67afb8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KnockbackHandler
+  defaultStaggerTime: 0.5
+--- !u!114 &5364597501343999309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5919138668250432695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea85ffafd5aa34b40ab38c592c662348, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
+  dashSpeed: 100
+  dashDuration: 0.18
+  dashCooldown: 0.6
+  inputDeadzone: 0.15
+  playerController: {fileID: 5588758321713824423}
+--- !u!114 &3350881334034683920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5919138668250432695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27f4ae88bf6d79a4a952a49ef74c405a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDeathListener
+--- !u!114 &1348918298972465628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5919138668250432695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0589dcc0ef03ae44d93d2f6dcdb2de79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAppearanceController
+  visualRenderer: {fileID: 6609354860806493046}
