@@ -4,20 +4,15 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerPreviewController : MonoBehaviour
 {
-    // --------------------------------------------------------------
-    //  MOVEMENT SETTINGS
-    // --------------------------------------------------------------
     [Header("Movement Settings")]
-    public float maxSpeed = 14f;
+    public float moveSpeed = 10f;
     public float jumpForce = 7f;
-    public Transform cameraTransform;
 
-    [Header("Arcade Tuning")]
+    [Header("Ground Movement")]
     public float groundAcceleration = 60f;
     public float groundDeceleration = 80f;
-    public float reverseBoostMultiplier = 1.3f;
 
-    [Header("Air Control")]
+    [Header("Air Movement")]
     public float airAcceleration = 25f;
     public float airDeceleration = 5f;
 
@@ -25,49 +20,29 @@ public class PlayerPreviewController : MonoBehaviour
     public Transform visualModel;
     public float visualRadius = 0.5f;
 
-    private Rigidbody rb;
-    private KnockbackHandler knockback;
-    private Vector2 moveInput;
-    private bool jumpRequested;
-
-    // ✅ NEW: Expose move input for other systems (Dash, AI assist, etc.)
-    public Vector2 MoveInput => moveInput;
-
-    // (Optional but handy later)
-    public bool IsGrounded => isGrounded;
-
-    // --------------------------------------------------------------
-    //  GROUND CHECK
-    // --------------------------------------------------------------
     [Header("Ground Check")]
     public float groundCheckDistance = 0.2f;
     public LayerMask groundLayer;
 
+    [Header("Jump Timing")]
+    public float jumpCooldownSeconds = 1f;
+
+    private Rigidbody rb;
+    private Vector2 moveInput;
+    private bool jumpRequested;
+
     private bool isGrounded;
     private int groundedFrames = 0;
     private int ungroundedFrames = 0;
-
-    // --------------------------------------------------------------
-    //  JUMP TIMING
-    // --------------------------------------------------------------
-    [Header("Jump Timing")]
-    public float jumpCooldownSeconds = 1f;
     private float jumpCooldownTimer = 0f;
     private float timeSinceJump = Mathf.Infinity;
 
-    // --------------------------------------------------------------
-    //  EXTERNAL MOVEMENT LOCK
-    // --------------------------------------------------------------
-    private bool externalMovementLocked = false;
-    public void SetExternalMovementLock(bool locked)
-    {
-        externalMovementLocked = locked;
-    }
+    public Vector2 MoveInput => moveInput;
+    public bool IsGrounded => isGrounded;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        knockback = GetComponent<KnockbackHandler>();
 
         rb.useGravity = true;
         rb.isKinematic = false;
@@ -76,9 +51,6 @@ public class PlayerPreviewController : MonoBehaviour
         rb.constraints = RigidbodyConstraints.None;
     }
 
-    // --------------------------------------------------------------
-    //  GROUND CHECK WITH SMOOTHING
-    // --------------------------------------------------------------
     private bool CheckRawGrounded()
     {
         if (timeSinceJump < 0.15f)
@@ -119,50 +91,24 @@ public class PlayerPreviewController : MonoBehaviour
         isGrounded = groundedFrames >= 2;
     }
 
-    // --------------------------------------------------------------
-    //  FIXED UPDATE — MAIN PHYSICS LOOP
-    // --------------------------------------------------------------
     private void FixedUpdate()
     {
         timeSinceJump += Time.fixedDeltaTime;
+
         if (jumpCooldownTimer > 0f)
             jumpCooldownTimer -= Time.fixedDeltaTime;
 
         UpdateGroundState();
-
-        // Movement logic - skip if locked or staggered
-        bool canMove = !externalMovementLocked && (knockback == null || !knockback.IsStaggered);
-
-        if (canMove && cameraTransform != null)
-        {
-            ProcessMovement();
-            HandleJump();
-        }
-        else if (canMove)
-        {
-            // No camera but can move - just handle jump
-            HandleJump();
-        }
-
-        // 🔥 CRITICAL: Visual rolling always runs (even during dash/stagger)
+        ProcessMovement();
+        HandleJump();
         UpdateVisualRoll();
     }
 
-    // --------------------------------------------------------------
-    //  MOVEMENT PROCESSING
-    // --------------------------------------------------------------
     private void ProcessMovement()
     {
-        Vector3 forward = cameraTransform.forward;
-        Vector3 right = cameraTransform.right;
+        // World-space movement for static preview scene
+        Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
 
-        forward.y = 0f;
-        right.y = 0f;
-
-        forward.Normalize();
-        right.Normalize();
-
-        Vector3 moveDirection = (forward * moveInput.y + right * moveInput.x);
         if (moveDirection.sqrMagnitude > 1f)
             moveDirection.Normalize();
 
@@ -173,21 +119,10 @@ public class PlayerPreviewController : MonoBehaviour
         if (moveDirection.sqrMagnitude > 0.0001f)
         {
             Vector3 desiredDir = moveDirection.normalized;
-            float targetSpeed = maxSpeed;
-
-            Vector3 targetVel = desiredDir * targetSpeed;
+            Vector3 targetVel = desiredDir * moveSpeed;
             Vector3 deltaVel = targetVel - horizontalVel;
 
-            float dot = 0f;
-            if (currentSpeed > 0.01f)
-                dot = Vector3.Dot(horizontalVel.normalized, desiredDir);
-
-            bool reversing = dot < 0f;
-
             float accel = isGrounded ? groundAcceleration : airAcceleration;
-            if (reversing && isGrounded)
-                accel *= reverseBoostMultiplier;
-
             float maxDelta = accel * Time.fixedDeltaTime;
 
             if (deltaVel.magnitude > maxDelta)
@@ -196,35 +131,43 @@ public class PlayerPreviewController : MonoBehaviour
             Vector3 velocityChange = new Vector3(deltaVel.x, 0f, deltaVel.z);
             rb.AddForce(velocityChange, ForceMode.VelocityChange);
         }
-        else
+        else if (currentSpeed > 0.01f)
         {
-            if (currentSpeed > 0.01f)
-            {
-                float decel = isGrounded ? groundDeceleration : airDeceleration;
-                float maxDelta = decel * Time.fixedDeltaTime;
+            float decel = isGrounded ? groundDeceleration : airDeceleration;
+            float maxDelta = decel * Time.fixedDeltaTime;
 
-                float reduceBy = Mathf.Min(maxDelta, currentSpeed);
-                Vector3 deltaVel = -horizontalVel.normalized * reduceBy;
+            float reduceBy = Mathf.Min(maxDelta, currentSpeed);
+            Vector3 deltaVel = -horizontalVel.normalized * reduceBy;
 
-                Vector3 velocityChange = new Vector3(deltaVel.x, 0f, deltaVel.z);
-                rb.AddForce(velocityChange, ForceMode.VelocityChange);
-            }
+            Vector3 velocityChange = new Vector3(deltaVel.x, 0f, deltaVel.z);
+            rb.AddForce(velocityChange, ForceMode.VelocityChange);
         }
 
-        // Clamp to max speed
+        // Clamp horizontal speed
         currentVel = rb.linearVelocity;
         horizontalVel = new Vector3(currentVel.x, 0f, currentVel.z);
 
-        if (horizontalVel.magnitude > maxSpeed)
+        if (horizontalVel.magnitude > moveSpeed)
         {
-            horizontalVel = horizontalVel.normalized * maxSpeed;
+            horizontalVel = horizontalVel.normalized * moveSpeed;
             rb.linearVelocity = new Vector3(horizontalVel.x, currentVel.y, horizontalVel.z);
         }
     }
 
-    // --------------------------------------------------------------
-    //  VISUAL ROLL - Always runs regardless of movement lock
-    // --------------------------------------------------------------
+    private void HandleJump()
+    {
+        if (jumpRequested && isGrounded && jumpCooldownTimer <= 0f)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            jumpCooldownTimer = jumpCooldownSeconds;
+            timeSinceJump = 0f;
+            groundedFrames = 0;
+            isGrounded = false;
+        }
+
+        jumpRequested = false;
+    }
+
     private void UpdateVisualRoll()
     {
         if (visualModel == null)
@@ -242,28 +185,10 @@ public class PlayerPreviewController : MonoBehaviour
         }
     }
 
-    // --------------------------------------------------------------
-    //  JUMP HANDLING
-    // --------------------------------------------------------------
-    private void HandleJump()
+    public void OnMove(InputAction.CallbackContext ctx)
     {
-        if (jumpRequested && isGrounded && jumpCooldownTimer <= 0f)
-        {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            jumpCooldownTimer = jumpCooldownSeconds;
-            timeSinceJump = 0f;
-            groundedFrames = 0;
-            isGrounded = false;
-        }
-
-        jumpRequested = false;
-    }
-
-    // --------------------------------------------------------------
-    //  INPUT SYSTEM
-    // --------------------------------------------------------------
-    public void OnMove(InputAction.CallbackContext ctx) =>
         moveInput = ctx.ReadValue<Vector2>();
+    }
 
     public void OnJump(InputAction.CallbackContext ctx)
     {

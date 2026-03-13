@@ -11,7 +11,7 @@ public class PlayerAppearanceController : MonoBehaviour
 
     public Color AppliedColor => appliedColor;
 
-    // Future FX systems can subscribe to this
+    // 🔹 New: Future systems (trail, glow, etc.) can listen for color changes
     public event Action<Color> OnAppearanceColorChanged;
 
     private void Awake()
@@ -52,6 +52,7 @@ public class PlayerAppearanceController : MonoBehaviour
             mat.color = appliedColor;
         }
 
+        // 🔹 Notify any future systems that color changed
         OnAppearanceColorChanged?.Invoke(appliedColor);
     }
 }
